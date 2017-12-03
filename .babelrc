@@ -1,0 +1,14 @@
+{
+  "plugins": [
+    "extract-hoc/babel",
+    "react-hot-loader/babel",
+    "transform-object-rest-spread",
+    "babel-plugin-transform-class-properties"
+  ],
+  "presets": [
+    ["env", {
+      "modules": false
+    }],
+    "react"
+  ]
+}
