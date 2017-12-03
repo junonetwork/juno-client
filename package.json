@@ -51,6 +51,7 @@
     "webpack-dev-server": "^2.9.4"
   },
   "dependencies": {
+    "falcor": "^1.0.3",
     "history": "^4.7.2",
     "prop-types": "^15.6.0",
     "ramda": "^0.23.0",

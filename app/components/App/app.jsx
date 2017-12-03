@@ -1,8 +1,9 @@
 import React       from 'react';
+import Table       from '../../containers/TableContainer';
 
 
 export default () => (
   <div>
-    <h1>REACT REDUX BOILER</h1>
+    <Table />
   </div>
 );
