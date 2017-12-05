@@ -7,6 +7,7 @@ export const getColumnFromAddress = (address) => /^[a-z]+/.exec(address)[0];
 export const createEmpty = (address, sheetId) => ({
   type: 'empty',
   sheetId,
+  address,
   column: getColumnFromAddress(address),
   row: getRowFromAddress(address),
 });
