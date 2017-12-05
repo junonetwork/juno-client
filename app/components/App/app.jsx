@@ -4,6 +4,6 @@ import Table       from '../../containers/TableContainer';
 
 export default () => (
   <div>
-    <Table />
+    <Table sheetId="1" />
   </div>
 );

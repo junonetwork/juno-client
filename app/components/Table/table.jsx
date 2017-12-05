@@ -3,11 +3,12 @@ import {}                      from 'prop-types';
 import                              './style.scss';
 
 
-const Table = ({ graphFragment }) => (
+const Table = ({ graphFragment, sheetMatrix }) => (
   <div
     className="table"
   >
-    {JSON.stringify(graphFragment, null, 2)}
+    <pre>{JSON.stringify(graphFragment, null, 2)}</pre>
+    <pre>{JSON.stringify(sheetMatrix, null, 2)}</pre>
   </div>
 );
 
