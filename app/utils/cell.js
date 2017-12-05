@@ -233,10 +233,6 @@ export const materializeObject = (cell, graphFragment, sheetMatrix) => {
     boxValue = boxValue['skos:prefLabel'];
   }
 
-  if (cell.row === 1 && cell.column === 2 && graphFragment) {
-    console.log('materialize', path([...relativePath, '$__path'], graphFragment));
-  }
-
   return {
     ...cell,
     cellLength: cellLength === undefined ? 1 : cellLength,

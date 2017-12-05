@@ -2,27 +2,48 @@
 /* eslint-disable global-require */
 import React                  from 'react';
 import { render }             from 'react-dom';
-import { AppContainer }       from 'react-hot-loader';
-import Root                   from './root';
+import { Provider }           from 'react-redux';
+import {
+  batchActions,
+}                             from 'redux-batched-actions';
+import store                  from './redux/store';
+import App                    from './components/App';
+import {
+  addSheet,
+}                             from './redux/modules/sheets';
+import {
+  addSearchCollectionTable,
+}                             from './redux/modules/tables';
+import {
+  generateTableId,
+}                             from './utils/table';
 import                             './style.scss';
+
 
 if (process.env.NODE_ENV === 'development') {
   window.R = require('ramda');
 }
 
 
-const loadApplication = (Component) => {
-  render((
-    <AppContainer warnings={false}>
-      <Component />
-    </AppContainer>
-  ), document.getElementById('app'));
-};
+// store.subscribe(() => console.log('store emit'));
+
+store.dispatch(
+  batchActions([
+    addSheet('1', 30, 30),
+    addSearchCollectionTable(
+      '1',
+      generateTableId('1', '0-0'),
+      '0-0',
+      'Person',
+      ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling'],
+      [0, 2, 3, 0, 2, 3]
+    ),
+  ])
+);
 
 
-loadApplication(Root);
-
-
-if (module.hot) {
-  module.hot.accept('./root', () => loadApplication(Root));
-}
+render((
+  <Provider store={store}>
+    <App />
+  </Provider>
+), document.getElementById('app'));

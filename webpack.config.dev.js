@@ -15,7 +15,8 @@ module.exports = {
   entry: {
     app: [
       'babel-polyfill',
-      'react-hot-loader/patch',
+      `webpack-dev-server/client?http://${HOST}:${PORT}`,
+      'webpack/hot/only-dev-server',
       './app/index.jsx',
     ],
   },
