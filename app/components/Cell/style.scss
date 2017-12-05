@@ -1,3 +1,133 @@
-.cell {
+@import '../../styles/palette';
+$cell-height: 26px;
 
+
+.cell {
+  position: relative;
+  height: $cell-height;
+  border: 1px solid $table-border;
+  cursor: default;
+  vertical-align: bottom;
+  user-select: none;
+
+  // state
+  &:focus {
+    outline: none;
+  }
+  &.teaser:hover,
+  &.empty:hover,
+  &:hover {
+    box-shadow: 0px 0px 0px 1px $table-teaser inset;
+  }
+  &.teaser {
+    box-shadow: 0px 0px 0px 1px transparentize($table-teaser, .2) inset;
+  }
+  &.active.focus,
+  &.empty.focus,
+  &:focus { // NOTE - being in :focus state and not also either in .active.focus or .empty.focus is a bug
+    box-shadow: 0px 0px 0px 1px $table-active inset;
+  }
+  &.active {
+    box-shadow: 0px 0px 0px 1px transparentize($table-active, .4) inset;
+  }
+  &.active.enhanced {
+    outline: 1px solid $table-active;
+  }
+  &:active {
+    box-shadow: 0px 0px 0px 1px $table-click inset;
+  }
+  &.enhanced {
+    // outline: 1px solid $b_cyan;
+    box-shadow: 0px 0px 0px 2px $b_cyan inset;
+  }
+  // &.enhanced-mirrored {
+  //   // outline: 1px solid transparentize($b_cyan, .6);
+  //   box-shadow: 0px 0px 0px 2px transparentize($b_cyan, .6) inset;
+  // }
+  &.copied:before {
+    content: ' ';
+    position: absolute;
+    top: -1px;
+    bottom: 0;
+    left: -1px;
+    right: 0;
+    border: 1px dashed $b_blue;
+  }
+  &.copied.active:before {
+    border-color: lighten($b_blue, 10);
+  }
+
+  div:focus, span:focus {
+    outline: none;
+  }
+
+  // type
+  &.search-collection,
+  &.object-collection {
+    font-weight: 600;
+    text-align: right;
+    background-color: lighten($bg, 12);
+  }
+  &.index {
+    font-weight: 200;
+    text-align: right;
+    color: $white;
+  }
+  &.predicate {
+    font-weight: 400;
+    background-color: lighten($bg, 8);
+  }
+  &.object {
+    font-weight: 200;
+  }
+
+  // enhance button
+  button {
+    background: none;
+    border: none;
+    position: absolute;
+    top: 0;
+    right: 4px;
+    padding: 0;
+    color: $b_white;
+    cursor: pointer;
+  }
+  button:hover {
+    color: white;
+  }
+  button:focus {
+    outline: none;
+  }
+
+  // body
+  .cell-body {
+    padding: 0px 18px 3px 8px;
+  }
+  // .cell-body {
+  //   min-width: 40px;
+  //   height: 100%;
+  //   // TODO
+  //   overflow: hidden;
+  //   text-overflow: ellipsis;
+  //   white-space: nowrap;
+  // }
+  // &.enhanced .cell-body {
+  //   max-width: none;
+  // }
+
+  // edit-value
+  .edit-value {
+    font-family: $monospace;
+    background: none;
+    border: 0;
+    // border-bottom: 1px solid $table-active;
+    color: lighten($text-color, 10);
+    height: 14px;
+    width: 100%;
+  }
+  .edit-value:focus {
+    outline: none;
+  }
 }
+
+

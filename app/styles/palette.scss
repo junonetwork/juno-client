@@ -1,0 +1,28 @@
+$monospace: 'mplus-1mn', 'Courier New', 'Courier', monospace;
+
+$black: #282A2E;
+$b_black: #373B41;
+$red: #A54242;
+$b_red: #CC6766;
+$green: #8C9440;
+$b_green: #B5BD68;
+$yellow: #DE935E;
+$b_yellow: #F0C674;
+$blue: #5F819D;
+$b_blue: #81A2BE;
+$magenta: #85678F;
+$b_magenta: #B294BB;
+$cyan: #5E8D87;
+$b_cyan: #8ABEB7;
+$white: #707880;
+$b_white: #E5E8E6; // #C5C8C6;
+
+$text-color: $b_white;
+$bg: $black;
+$table-border: $b_black;
+$table-focus: $b_magenta;
+$table-teaser: $blue;
+$table-active: $b_blue;
+$table-click: $b_yellow;
+$table-enhanced-bg: $cyan;
+$table-gutter: lighten($table-border, 25);

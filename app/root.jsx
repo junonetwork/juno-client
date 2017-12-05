@@ -7,7 +7,7 @@ import {
 }                             from './redux/modules/sheets';
 
 
-store.dispatch(addSheet('1', 'ac', 20));
+store.dispatch(addSheet('1', 'aq', 30));
 
 
 export default () => (

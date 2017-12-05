@@ -1,5 +1,101 @@
 @import 'styles/reset';
+@import 'styles/palette';
+@import 'styles/fonts';
+
+
+* {
+  box-sizing: border-box;
+}
+*:focus {
+  outline: 1px solid darken($blue, 15);
+  // box-shadow: 0 0 0 1px lighten($table-border, 10);
+  // border-color: lighten($table-border, 15);
+}
 
 body {
-  font-family: sans-serif;
+  font-family: $monospace;
+  font-size: 11px;
+  line-height: 1rem;
+  box-sizing: border-box;
+  background-color: $bg;
+  color: $text-color;
+}
+
+main {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+
+/*
+ * App Stylesheet
+ */
+button {
+  border: none;
+  margin: 0 4px;
+  background: $cyan;
+  color: white;
+  cursor: pointer;
+}
+
+.scroll-styled {
+  overflow:auto;
+  }
+  .scroll-styled::-webkit-scrollbar {
+    width:8px;
+    height:8px;
+    border-left:0;
+    background:rgba(255,255,255,0.1);
+    border-radius:0;
+  }
+  .scroll-styled::-webkit-scrollbar:hover {
+    background:rgba(255,255,255,0.15);
+  }
+  .scroll-styled::-webkit-scrollbar-track {
+    background:none;
+  }
+  .scroll-styled::-webkit-scrollbar-thumb {
+    background:rgba(255,255,255,0.1);
+    border-radius:0;
+  }
+
+.spinner {
+  width: 12px;
+  height: 12px;
+  background-color: $white;
+  margin: 0 auto;
+  border-radius: 100%;
+  -webkit-animation: blink 1.2s infinite cubic-bezier(0.4, 0.0, 0.2, 1);
+  animation: blink 1.2s infinite cubic-bezier(0.4, 0.0, 0.2, 1);
+  -webkit-animation: blink 1.2s infinite linear;
+  animation: blink 1.2s infinite linear;
+  &.large {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+@-webkit-keyframes blink {
+  from {
+    -webkit-transform: scale(0)
+  }
+  to {
+    -webkit-transform: scale(1.0);
+    opacity: 0;
+  }
+}
+
+@keyframes blink {
+  from {
+    -webkit-transform: scale(0);
+    transform: scale(0);
+  }
+  to {
+    -webkit-transform: scale(1.0);
+    transform: scale(1.0);
+    opacity: 0;
+  }
 }
