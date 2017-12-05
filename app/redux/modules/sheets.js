@@ -4,6 +4,8 @@ import {
 }                           from 'ramda';
 import {
   add,
+  from,
+  to,
 }                           from 'base26';
 import {
   formatAddress,
@@ -32,9 +34,9 @@ export const getSheetMaxRow = (state, sheetId) => state.sheets[sheetId].maxRow;
 export const createEmptySheet = (state, sheetId) =>
   range(1, getSheetMaxRow(state, sheetId) + 1)
     .map((row) =>
-      range(97, getSheetMaxColumn(state, sheetId).charCodeAt() + 1)
-        .map((columnCharCode) =>
-          createEmpty(formatAddress(String.fromCharCode(columnCharCode), row), sheetId)
+      range(1, from(getSheetMaxColumn(state, sheetId)) + 1)
+        .map((numericColumn) =>
+          createEmpty(formatAddress(to(numericColumn), row), sheetId)
         )
     );
 
