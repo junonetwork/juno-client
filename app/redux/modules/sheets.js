@@ -61,7 +61,7 @@ export const INCREASE_SHEET_MAX_ROW = 'INCREASE_SHEET_MAX_ROW';
 /**
  * action creators
  */
-export const addSheet = (sheetId, maxColumn, maxRow, tables) =>
+export const addSheet = (sheetId, maxColumn, maxRow, tables = []) =>
   ({ type: ADD_SHEET, sheetId, maxColumn, maxRow, tables });
 export const removeSheet = (sheetId) =>
   ({ type: REMOVE_SHEET, sheetId });

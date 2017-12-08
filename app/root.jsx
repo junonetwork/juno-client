@@ -5,10 +5,25 @@ import App                    from './components/App';
 import {
   addSheet,
 }                             from './redux/modules/sheets';
+import {
+  addSearchCollectionTable,
+}                             from './redux/modules/tables';
+import {
+  generateTableId,
+}                             from './utils/table';
 
 
-store.dispatch(addSheet('1', 'aq', 30));
-
+store.dispatch(addSheet('1', 'aa', 20));
+store.dispatch(
+  addSearchCollectionTable(
+    '1',
+    generateTableId('1', 'a1'),
+    'a1',
+    'schema:Person',
+    ['skos:prefLabel'],
+    [0]
+  )
+);
 
 export default () => (
   <Provider store={store}>
