@@ -5,6 +5,9 @@ import {
   applyMiddleware,
   compose,
 }                             from 'redux';
+import {
+  enableBatching,
+}                             from 'redux-batched-actions';
 // import {
 //   createEpicMiddleware,
 // }                             from 'redux-observable';
@@ -16,7 +19,7 @@ const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 
 export default createStore(
-  reducer,
+  enableBatching(reducer),
   composeEnhancers(
     applyMiddleware(
       // createEpicMiddleware(epic)
