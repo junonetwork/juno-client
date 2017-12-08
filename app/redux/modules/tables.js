@@ -1,10 +1,12 @@
 import {
+  nthArg,
   compose,
   equals,
   prop,
   filter,
   omit,
 }                                    from 'ramda';
+import createCachedSelector          from 're-reselect';
 import {
   add,
 }                                    from 'base26';
@@ -43,63 +45,70 @@ export const getTableIds = (state, sheetId) =>
  * @param {String} sheetId
  * @param {String} tableId
  */
-export const getTableCells = (state, sheetId, tableId) => {
-  const {
-    collectionType, collectionAddress,
-    predicates, indices,
-    collectionURI, parentObjectSheetId, parentObjectAddress,
-  } = getTable(state, tableId);
+export const getTableCells = createCachedSelector(
+  nthArg(1),
+  nthArg(2),
+  (state, _, tableId) => getTable(state, tableId),
+  (sheetId, tableId, table) => {
+    const {
+      collectionType, collectionAddress,
+      predicates, indices,
+      collectionURI, parentObjectSheetId, parentObjectAddress,
+    } = table;
 
-  const column = getColumnFromAddress(collectionAddress);
-  const row = getRowFromAddress(collectionAddress);
+    const column = getColumnFromAddress(collectionAddress);
+    const row = getRowFromAddress(collectionAddress);
 
-  return [-1, ...expandIndicesKeySet(indices)].reduce((cells, index, rowIdx) => {
-    if (index === -1) {
-      const collection = collectionType === 'searchCollection' ?
-        createSearchCollection(collectionAddress, sheetId, tableId, collectionURI) :
-        createObjectCollection(
-          collectionAddress, sheetId, tableId, parentObjectSheetId, parentObjectAddress
-        );
+    return [-1, ...expandIndicesKeySet(indices)].reduce((cells, index, rowIdx) => {
+      if (index === -1) {
+        const collection = collectionType === 'searchCollection' ?
+          createSearchCollection(collectionAddress, sheetId, tableId, collectionURI) :
+          createObjectCollection(
+            collectionAddress, sheetId, tableId, parentObjectSheetId, parentObjectAddress
+          );
 
-      // TODO - this could be made more performant by mutating the collection,
-      // rather than creating new object literal w/ each pass
+        // TODO - this could be made more performant by mutating the collection,
+        // rather than creating new object literal w/ each pass
+        return {
+          ...cells,
+          [collectionAddress]: collection,
+          ...predicates.reduce((predicateCells, predicateURI, columnIdx) => {
+            const predicateAddress = formatAddress(add(column, columnIdx + 1), row);
+
+            // TODO - this could be made more performant by mutating the collection,
+            // rather than creating new object literal w/ each pass
+            return {
+              ...predicateCells,
+              [predicateAddress]: createPredicate(predicateAddress, sheetId, tableId, predicateURI),
+            };
+          }, {}),
+        };
+      }
+
+      const indexAddress = formatAddress(column, row + rowIdx);
       return {
         ...cells,
-        [collectionAddress]: collection,
-        ...predicates.reduce((predicateCells, predicateURI, columnIdx) => {
-          const predicateAddress = formatAddress(add(column, columnIdx + 1), row);
+        [indexAddress]: createIndex(indexAddress, sheetId, tableId, collectionAddress, index),
+        ...predicates.reduce((predicateCells, _, columnIdx) => {
+          const objectAddress = formatAddress(add(column, columnIdx + 1), row + rowIdx);
 
           // TODO - this could be made more performant by mutating the collection,
           // rather than creating new object literal w/ each pass
           return {
             ...predicateCells,
-            [predicateAddress]: createPredicate(predicateAddress, sheetId, tableId, predicateURI),
+            [objectAddress]: createObject(
+              objectAddress, sheetId, tableId, collectionAddress,
+              formatAddress(column, row + rowIdx),
+              formatAddress(add(column, columnIdx + 1), row)
+            ),
           };
         }, {}),
       };
-    }
-
-    const indexAddress = formatAddress(column, row + rowIdx);
-    return {
-      ...cells,
-      [indexAddress]: createIndex(indexAddress, sheetId, tableId, collectionAddress, index),
-      ...predicates.reduce((predicateCells, _, columnIdx) => {
-        const objectAddress = formatAddress(add(column, columnIdx + 1), row + rowIdx);
-
-        // TODO - this could be made more performant by mutating the collection,
-        // rather than creating new object literal w/ each pass
-        return {
-          ...predicateCells,
-          [objectAddress]: createObject(
-            objectAddress, sheetId, tableId, collectionAddress,
-            formatAddress(column, row + rowIdx),
-            formatAddress(add(column, columnIdx + 1), row)
-          ),
-        };
-      }, {}),
-    };
-  }, {});
-};
+    }, {});
+  }
+)(
+  (_, sheetId, tableId) => `s${sheetId}-t${tableId}`
+);
 
 
 /**
