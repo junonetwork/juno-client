@@ -28,8 +28,8 @@ store.dispatch(
       generateTableId('1', 'a1'),
       'a1',
       'schema:Person',
-      ['skos:prefLabel'],
-      [0]
+      ['skos:prefLabel', 'schema:birthPlace'],
+      [0, 2, 3]
     ),
   ])
 );

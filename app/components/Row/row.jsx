@@ -9,7 +9,7 @@ const Row = ({ row }) => (
   >
     {row.map(({ address, column, row: rowNumber, sheetId, type }) => (
       <Cell
-        key={address}
+        key={`${column}${row}`}
         address={address}
         column={column}
         row={rowNumber}

@@ -8,6 +8,10 @@ import {
   to,
 }                           from 'base26';
 import {
+  getTableIds,
+  getTableCells,
+}                           from './tables';
+import {
   formatAddress,
   createEmpty,
 }                           from '../../utils/cell';
@@ -44,9 +48,32 @@ export const createEmptySheet = (state, sheetId) =>
  * @param {Object} state
  * @param {String} sheetId
  */
-export const getSheetMatrix = (state, sheetId) => (
-  createEmptySheet(state, sheetId)
+export const getSheetCells = (state, sheetId) => (
+  getTableIds(state, sheetId)
+    .reduce(
+      (cells, tableId) => Object.assign(cells, getTableCells(state, sheetId, tableId)),
+      {}
+    )
 );
+
+
+/**
+ * @param {Object} state
+ * @param {String} sheetId
+ */
+export const getSheetMatrix = (state, sheetId) => {
+  const cells = getSheetCells(state, sheetId);
+  console.log('x', cells);
+
+  return createEmptySheet(state, sheetId)
+    .map((row) => (
+      // TODO - don't map over a row whose cells are all empty [don't appear in cells]
+      row.map((emptyCell) => {
+        const address = formatAddress(emptyCell.column, emptyCell.row);
+        return cells[address] ? cells[address] : emptyCell;
+      })
+    ));
+};
 
 
 /**

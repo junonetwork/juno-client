@@ -7,7 +7,8 @@ const Cell = ({ column, row, type }) => (
   <td
     className="cell"
   >
-    {column} {row}
+    {/* {column}{row} */}
+    {type}
   </td>
 );
 
