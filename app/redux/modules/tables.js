@@ -59,52 +59,41 @@ export const getTableCells = createCachedSelector(
     const column = getColumnFromAddress(collectionAddress);
     const row = getRowFromAddress(collectionAddress);
 
-    return [-1, ...expandIndicesKeySet(indices)].reduce((cells, index, rowIdx) => {
-      if (index === -1) {
-        const collection = collectionType === 'searchCollection' ?
-          createSearchCollection(collectionAddress, sheetId, tableId, collectionURI) :
-          createObjectCollection(
-            collectionAddress, sheetId, tableId, parentObjectSheetId, parentObjectAddress
-          );
+    const collection = collectionType === 'searchCollection' ?
+      createSearchCollection(collectionAddress, sheetId, tableId, collectionURI) :
+      createObjectCollection(
+        collectionAddress, sheetId, tableId, parentObjectSheetId, parentObjectAddress
+      );
 
-        // TODO - this could be made more performant by mutating the collection,
-        // rather than creating new object literal w/ each pass
-        return {
-          ...cells,
-          [collectionAddress]: collection,
-          ...predicates.reduce((predicateCells, predicateURI, columnIdx) => {
-            const predicateAddress = formatAddress(add(column, columnIdx + 1), row);
+    return expandIndicesKeySet(indices).reduce((cells, index, rowIdx) => {
+      // remaining rows [[index, object, object, ...], ...]
+      const indexAddress = formatAddress(column, row + rowIdx + 1);
 
-            // TODO - this could be made more performant by mutating the collection,
-            // rather than creating new object literal w/ each pass
-            return {
-              ...predicateCells,
-              [predicateAddress]: createPredicate(predicateAddress, sheetId, tableId, predicateURI),
-            };
-          }, {}),
-        };
-      }
-
-      const indexAddress = formatAddress(column, row + rowIdx);
-      return {
-        ...cells,
+      return Object.assign(cells, {
         [indexAddress]: createIndex(indexAddress, sheetId, tableId, collectionAddress, index),
-        ...predicates.reduce((predicateCells, _, columnIdx) => {
-          const objectAddress = formatAddress(add(column, columnIdx + 1), row + rowIdx);
+        ...predicates.reduce((objectCells, _, columnIdx) => {
+          const objectAddress = formatAddress(add(column, columnIdx + 1), row + rowIdx + 1);
 
-          // TODO - this could be made more performant by mutating the collection,
-          // rather than creating new object literal w/ each pass
-          return {
-            ...predicateCells,
+          return Object.assign(objectCells, {
             [objectAddress]: createObject(
               objectAddress, sheetId, tableId, collectionAddress,
-              formatAddress(column, row + rowIdx),
+              formatAddress(column, row + rowIdx + 1),
               formatAddress(add(column, columnIdx + 1), row)
             ),
-          };
+          });
         }, {}),
-      };
-    }, {});
+      });
+    }, {
+      // top row [collection, predicate, predicate, ...]
+      [collectionAddress]: collection,
+      ...predicates.reduce((predicateCells, predicateURI, columnIdx) => {
+        const predicateAddress = formatAddress(add(column, columnIdx + 1), row);
+
+        return Object.assign(predicateCells, {
+          [predicateAddress]: createPredicate(predicateAddress, sheetId, tableId, predicateURI),
+        });
+      }, {}),
+    });
   }
 )(
   (_, sheetId, tableId) => `s${sheetId}-t${tableId}`
