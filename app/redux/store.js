@@ -5,6 +5,7 @@ import {
   applyMiddleware,
   compose,
 }                             from 'redux';
+import thunk                  from 'redux-thunk';
 import {
   enableBatching,
 }                             from 'redux-batched-actions';
@@ -22,6 +23,7 @@ export default createStore(
   enableBatching(reducer),
   composeEnhancers(
     applyMiddleware(
+      thunk
       // createEpicMiddleware(epic)
     ),
   )

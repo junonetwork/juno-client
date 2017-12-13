@@ -22,7 +22,7 @@ store.subscribe(() => {
 
 store.dispatch(
   batchActions([
-    addSheet('1', 'aa', 20),
+    addSheet('1', 'e', 8),
     addSearchCollectionTable(
       '1',
       generateTableId('1', 'a1'),

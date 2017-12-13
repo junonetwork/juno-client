@@ -1,20 +1,18 @@
 import React                   from 'react';
 import {}                      from 'prop-types';
-import Cell                    from '../Cell';
+import Cell                    from '../../containers/CellContainer';
 
 
-const Row = ({ row }) => (
+const Row = ({ row, focusCell, navigate }) => (
   <tr
     className="row"
   >
-    {row.map(({ address, column, row: rowNumber, sheetId, type }) => (
+    {row.map((cell) => (
       <Cell
-        key={`${column}${row}`}
-        address={address}
-        column={column}
-        row={rowNumber}
-        sheetId={sheetId}
-        type={type}
+        key={cell.address}
+        {...cell}
+        navigate={navigate}
+        focusCell={focusCell}
       />
     ))}
   </tr>

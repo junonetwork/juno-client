@@ -62,13 +62,12 @@ export const createEmptySheet = createCachedSelector(
  * @param {String} sheetId
  */
 export const getSheetCells = createCachedSelector(
-  nthArg(0),
-  nthArg(1),
   (state, sheetId) => getTableIds(state, sheetId)
     .reduce(
       (cells, tableId) => Object.assign(cells, getTableCells(state, sheetId, tableId)),
       {}
-    )
+    ),
+  (cells) => cells
 )(
   (_, sheetId) => sheetId,
   {
@@ -88,10 +87,10 @@ export const getSheetMatrix = createCachedSelector(
   (sheetId, cells, emptySheet) => (
     emptySheet.map((row) => (
       // TODO - don't map over a row whose cells are all empty [don't appear in cells]
-      row.map((emptyCell) => {
-        const address = formatAddress(emptyCell.column, emptyCell.row);
-        return cells[address] ? cells[address] : emptyCell;
-      })
+      // Or rather, what's the most efficient way to merge cells and emptySheet while maintaining reference equality for all cells that haven't updated
+      row.map((emptyCell) => (
+        cells[emptyCell.address] ? cells[emptyCell.address] : emptyCell)
+      )
     ))
   )
 )(

@@ -23,6 +23,7 @@ import {
   createIndex,
   createPredicate,
   createObject,
+  materializeObjectCell,
 }                                    from '../../utils/cell';
 
 /**
@@ -45,59 +46,55 @@ export const getTableIds = (state, sheetId) =>
  * @param {String} sheetId
  * @param {String} tableId
  */
-export const getTableCells = createCachedSelector(
-  nthArg(1),
-  nthArg(2),
-  (state, _, tableId) => getTable(state, tableId),
-  (sheetId, tableId, table) => {
-    const {
-      collectionType, collectionAddress,
-      predicates, indices,
-      collectionURI, parentObjectSheetId, parentObjectAddress,
-    } = table;
+export const getTableCells = (state, sheetId, tableId) => {
+  const {
+    collectionType, collectionAddress,
+    predicates, indices,
+    collectionURI, parentObjectSheetId, parentObjectAddress,
+  } = getTable(state, tableId);
 
-    const column = getColumnFromAddress(collectionAddress);
-    const row = getRowFromAddress(collectionAddress);
+  const column = getColumnFromAddress(collectionAddress);
+  const row = getRowFromAddress(collectionAddress);
 
-    const collection = collectionType === 'searchCollection' ?
-      createSearchCollection(collectionAddress, sheetId, tableId, collectionURI) :
-      createObjectCollection(
-        collectionAddress, sheetId, tableId, parentObjectSheetId, parentObjectAddress
-      );
+  const collection = collectionType === 'searchCollection' ?
+    createSearchCollection(collectionAddress, sheetId, tableId, collectionURI) :
+    createObjectCollection(
+      collectionAddress, sheetId, tableId, parentObjectSheetId, parentObjectAddress
+    );
 
-    return expandIndicesKeySet(indices).reduce((cells, index, rowIdx) => {
-      // remaining rows [[index, object, object, ...], ...]
-      const indexAddress = formatAddress(column, row + rowIdx + 1);
+  return expandIndicesKeySet(indices).reduce((cells, index, rowIdx) => {
+    // remaining rows [[index, object, object, ...], ...]
+    const indexAddress = formatAddress(column, row + rowIdx + 1);
 
-      return Object.assign(cells, {
-        [indexAddress]: createIndex(indexAddress, sheetId, tableId, collectionAddress, index),
-        ...predicates.reduce((objectCells, _, columnIdx) => {
-          const objectAddress = formatAddress(add(column, columnIdx + 1), row + rowIdx + 1);
+    return Object.assign(cells, {
+      [indexAddress]: createIndex(indexAddress, sheetId, tableId, collectionAddress, index),
+      ...predicates.reduce((objectCells, _, columnIdx) => {
+        const objectAddress = formatAddress(add(column, columnIdx + 1), row + rowIdx + 1);
 
-          return Object.assign(objectCells, {
-            [objectAddress]: createObject(
-              objectAddress, sheetId, tableId, collectionAddress,
-              formatAddress(column, row + rowIdx + 1),
-              formatAddress(add(column, columnIdx + 1), row)
-            ),
-          });
-        }, {}),
-      });
-    }, {
-      // top row [collection, predicate, predicate, ...]
-      [collectionAddress]: collection,
-      ...predicates.reduce((predicateCells, predicateURI, columnIdx) => {
-        const predicateAddress = formatAddress(add(column, columnIdx + 1), row);
+        objectCells[objectAddress] = createObject(
+          objectAddress,
+          sheetId,
+          tableId,
+          collectionAddress,
+          formatAddress(column, row + rowIdx + 1),
+          formatAddress(add(column, columnIdx + 1), row)
+        );
 
-        return Object.assign(predicateCells, {
-          [predicateAddress]: createPredicate(predicateAddress, sheetId, tableId, predicateURI),
-        });
+        return objectCells;
       }, {}),
     });
-  }
-)(
-  (_, sheetId, tableId) => `s${sheetId}-t${tableId}`
-);
+  }, {
+    // top row [collection, predicate, predicate, ...]
+    [collectionAddress]: collection,
+    ...predicates.reduce((predicateCells, predicateURI, columnIdx) => {
+      const predicateAddress = formatAddress(add(column, columnIdx + 1), row);
+
+      return Object.assign(predicateCells, {
+        [predicateAddress]: createPredicate(predicateAddress, sheetId, tableId, predicateURI),
+      });
+    }, {}),
+  });
+};
 
 
 /**
