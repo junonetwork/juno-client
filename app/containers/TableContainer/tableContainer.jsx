@@ -15,6 +15,7 @@ import {
   focusCell,
   navigate,
 }                          from '../../redux/modules/focus';
+import throttle            from '../../utils/throttleAnimationFrame';
 
 
 export default compose(
@@ -31,8 +32,9 @@ export default compose(
     }),
     (dispatch, { sheetId }) => ({
       focusCell: (address) => dispatch(focusCell(sheetId, address)), // TODO - add focus to node view
-      navigate: (column, row, direction, steps) =>
-        dispatch(navigate(column, row, sheetId, direction, steps)),
+      navigate: throttle((column, row, direction, steps) => (
+        dispatch(navigate(column, row, sheetId, direction, steps))
+      )),
     })
   )
 )(Table);

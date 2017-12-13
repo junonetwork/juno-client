@@ -41,15 +41,16 @@ export const getSheetMaxRow = (state, sheetId) => state.sheets[sheetId].maxRow;
  * @param {String} sheetId
  */
 export const createEmptySheet = createCachedSelector(
+  nthArg(0),
   nthArg(1),
   getSheetMaxColumn,
   getSheetMaxRow,
-  (sheetId, maxColumn, maxRow) => (
+  (state, sheetId, maxColumn, maxRow) => (
     range(1, maxRow + 1)
       .map((row) =>
         range(1, from(maxColumn) + 1)
           .map((numericColumn) =>
-            createEmpty(formatAddress(to(numericColumn), row), sheetId)
+            createEmpty(state, sheetId, formatAddress(to(numericColumn), row))
           )
       )
   )

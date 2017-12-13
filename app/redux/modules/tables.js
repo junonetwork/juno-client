@@ -6,7 +6,6 @@ import {
   filter,
   omit,
 }                                    from 'ramda';
-import createCachedSelector          from 're-reselect';
 import {
   add,
 }                                    from 'base26';
@@ -19,11 +18,9 @@ import {
   getRowFromAddress,
   formatAddress,
   createSearchCollection,
-  createObjectCollection,
+  createObject,
   createIndex,
   createPredicate,
-  createObject,
-  materializeObjectCell,
 }                                    from '../../utils/cell';
 
 /**
@@ -48,33 +45,30 @@ export const getTableIds = (state, sheetId) =>
  */
 export const getTableCells = (state, sheetId, tableId) => {
   const {
-    collectionType, collectionAddress,
-    predicates, indices,
-    collectionURI, parentObjectSheetId, parentObjectAddress,
+    collectionAddress, predicates, indices, collectionURI,
   } = getTable(state, tableId);
 
   const column = getColumnFromAddress(collectionAddress);
   const row = getRowFromAddress(collectionAddress);
 
-  const collection = collectionType === 'searchCollection' ?
-    createSearchCollection(collectionAddress, sheetId, tableId, collectionURI) :
-    createObjectCollection(
-      collectionAddress, sheetId, tableId, parentObjectSheetId, parentObjectAddress
-    );
+  const collection = createSearchCollection(
+    state, sheetId, tableId, collectionAddress, collectionURI
+  );
 
   return expandIndicesKeySet(indices).reduce((cells, index, rowIdx) => {
     // remaining rows [[index, object, object, ...], ...]
     const indexAddress = formatAddress(column, row + rowIdx + 1);
 
     return Object.assign(cells, {
-      [indexAddress]: createIndex(indexAddress, sheetId, tableId, collectionAddress, index),
+      [indexAddress]: createIndex(state, sheetId, tableId, indexAddress, collectionAddress, index),
       ...predicates.reduce((objectCells, _, columnIdx) => {
         const objectAddress = formatAddress(add(column, columnIdx + 1), row + rowIdx + 1);
 
         objectCells[objectAddress] = createObject(
-          objectAddress,
+          state,
           sheetId,
           tableId,
+          objectAddress,
           collectionAddress,
           formatAddress(column, row + rowIdx + 1),
           formatAddress(add(column, columnIdx + 1), row)
@@ -90,7 +84,7 @@ export const getTableCells = (state, sheetId, tableId) => {
       const predicateAddress = formatAddress(add(column, columnIdx + 1), row);
 
       return Object.assign(predicateCells, {
-        [predicateAddress]: createPredicate(predicateAddress, sheetId, tableId, predicateURI),
+        [predicateAddress]: createPredicate(state, sheetId, tableId, predicateAddress, predicateURI),
       });
     }, {}),
   });

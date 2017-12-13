@@ -13,7 +13,85 @@ export const getRowFromAddress = (address) => +/[0-9]+$/.exec(address)[0];
 
 export const getColumnFromAddress = (address) => /^[a-z]+/.exec(address)[0];
 
-export const createSearchCollection = (address, sheetId, tableId, uri) => ({
+// export const createSearchCollection = (address, sheetId, tableId, uri) => ({
+//   type: 'searchCollection',
+//   sheetId,
+//   tableId,
+//   address,
+//   column: getColumnFromAddress(address),
+//   row: getRowFromAddress(address),
+//   uri,
+// });
+
+// export const createObjectCollection = (
+//   address, sheetId, tableId, parentObjectSheetId, parentObjectAddress
+// ) => ({
+//   type: 'objectCollection',
+//   sheetId,
+//   tableId,
+//   address,
+//   column: getColumnFromAddress(address),
+//   row: getRowFromAddress(address),
+//   parentObjectSheetId,
+//   parentObjectAddress,
+// });
+
+// export const createIndex = (address, sheetId, tableId, collectionAddress, index) => ({
+//   type: 'index',
+//   sheetId,
+//   tableId,
+//   address,
+//   column: getColumnFromAddress(address),
+//   row: getRowFromAddress(address),
+//   index,
+//   collectionAddress,
+// });
+
+// export const createPredicate = (address, sheetId, tableId, uri) => ({
+//   type: 'predicate',
+//   sheetId,
+//   tableId,
+//   address,
+//   column: getColumnFromAddress(address),
+//   row: getRowFromAddress(address),
+//   uri,
+// });
+
+// export const createObject = (
+//   address, sheetId, tableId, collectionAddress, indexAddress, predicateAddress
+// ) => ({
+//   type: 'object',
+//   sheetId,
+//   tableId,
+//   address,
+//   column: getColumnFromAddress(address),
+//   row: getRowFromAddress(address),
+//   collectionAddress,
+//   // indexAddress and predicateAddress can be inferred from objectAddress and collectionAddress
+//   // remove?
+//   indexAddress,
+//   predicateAddress,
+// });
+
+// export const createEmpty = (address, sheetId) => ({
+//   type: 'empty',
+//   sheetId,
+//   address,
+//   column: getColumnFromAddress(address),
+//   row: getRowFromAddress(address),
+// });
+
+
+/**
+ * @param {Object} state
+ * @param {String} sheetId
+ * @param {String} tableId
+ * @param {String} address
+ * @param {String} searchURI
+ */
+export const createSearchCollection = (
+  state, sheetId, tableId, address, uri
+) => ({
   type: 'searchCollection',
   sheetId,
   tableId,
@@ -21,44 +99,20 @@ export const createSearchCollection = (address, sheetId, tableId, uri) => ({
   column: getColumnFromAddress(address),
   row: getRowFromAddress(address),
   uri,
+  focusView: cellIsFocused(state, sheetId, address),
 });
 
-export const createObjectCollection = (
-  address, sheetId, tableId, parentObjectSheetId, parentObjectAddress
-) => ({
-  type: 'objectCollection',
-  sheetId,
-  tableId,
-  address,
-  column: getColumnFromAddress(address),
-  row: getRowFromAddress(address),
-  parentObjectSheetId,
-  parentObjectAddress,
-});
-
-export const createIndex = (address, sheetId, tableId, collectionAddress, index) => ({
-  type: 'index',
-  sheetId,
-  tableId,
-  address,
-  column: getColumnFromAddress(address),
-  row: getRowFromAddress(address),
-  index,
-  collectionAddress,
-});
-
-export const createPredicate = (address, sheetId, tableId, uri) => ({
-  type: 'predicate',
-  sheetId,
-  tableId,
-  address,
-  column: getColumnFromAddress(address),
-  row: getRowFromAddress(address),
-  uri,
-});
-
+/**
+ * @param {Object} state
+ * @param {String} sheetId
+ * @param {String} tableId
+ * @param {String} address
+ * @param {String} collectionAddress
+ * @param {String} indexAddress
+ * @param {String} predicateAddress
+ */
 export const createObject = (
-  address, sheetId, tableId, collectionAddress, indexAddress, predicateAddress
+  state, sheetId, tableId, address, collectionAddress, indexAddress, predicateAddress
 ) => ({
   type: 'object',
   sheetId,
@@ -67,66 +121,71 @@ export const createObject = (
   column: getColumnFromAddress(address),
   row: getRowFromAddress(address),
   collectionAddress,
-  // indexAddress and predicateAddress can be inferred from objectAddress and collectionAddress
-  // remove?
   indexAddress,
   predicateAddress,
+  focusView: cellIsFocused(state, sheetId, address),
 });
 
-export const createEmpty = (address, sheetId) => ({
+
+/**
+ * @param {Object} state
+ * @param {String} sheetId
+ * @param {String} tableId
+ * @param {String} address
+ * @param {String} collectionAddress
+ * @param {Number} index
+ */
+export const createIndex = (
+  state, sheetId, tableId, address, collectionAddress, index
+) => ({
+  type: 'index',
+  sheetId,
+  tableId,
+  address,
+  column: getColumnFromAddress(address),
+  row: getRowFromAddress(address),
+  index,
+  collectionAddress,
+  focusView: cellIsFocused(state, sheetId, address),
+});
+
+
+/**
+ * @param {Object} state
+ * @param {String} sheetId
+ * @param {String} tableId
+ * @param {String} address
+ * @param {String} uri
+ */
+export const createPredicate = (
+  state, sheetId, tableId, address, uri
+) => ({
+  type: 'predicate',
+  sheetId,
+  tableId,
+  address,
+  column: getColumnFromAddress(address),
+  row: getRowFromAddress(address),
+  uri,
+  focusView: cellIsFocused(state, sheetId, address),
+});
+
+
+/**
+ * @param {Object} state
+ * @param {String} sheetId
+ * @param {String} address
+ */
+export const createEmpty = (
+  state, sheetId, address
+) => ({
   type: 'empty',
   sheetId,
   address,
   column: getColumnFromAddress(address),
   row: getRowFromAddress(address),
+  focusView: cellIsFocused(state, sheetId, address),
 });
-
-
-/**
- * @param {Object} state
- * @param {String} address
- * @param {String} sheetId
- * @param {String} tableId
- * @param {String} collectionAddress
- * @param {String} indexAddress
- * @param {String} predicateAddress
- */
-export const materializeObjectCell = createCachedSelector(
-  nthArg(1),
-  nthArg(2),
-  nthArg(3),
-  nthArg(4),
-  nthArg(5),
-  nthArg(6),
-  (state, address, sheetId) => cellIsFocused(state, sheetId, address),
-  (address, sheetId, tableId, collectionAddress, indexAddress, predicateAddress, isFocused) => ({
-    type: 'object',
-    sheetId,
-    tableId,
-    address,
-    column: getColumnFromAddress(address),
-    row: getRowFromAddress(address),
-    collectionAddress,
-    indexAddress,
-    predicateAddress,
-    focusView: isFocused,
-  }),
-)(
-  (_, address) => address
-);
-
-
-/**
- * @param {Object} state
- * @param {Object} nonMaterializedCell
- */
-export const materializeCell = (state, cell) => {
-  if (cell.type === 'object') {
-    return materializeObjectCell(state, cell);
-  }
-
-  return cell;
-};
 
 
 // export const materializeCell = createCachedSelector(
