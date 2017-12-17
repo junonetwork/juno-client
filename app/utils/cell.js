@@ -10,18 +10,19 @@ export const getColumnFromAddress = (address) => +/^[0-9]+/.exec(address)[0];
 /**
  * @param {String} sheetId
  * @param {String} tableId
- * @param {String} address
+ * @param {Number} column
+ * @param {Number} row
  * @param {String} search
  */
 export const createSearchCollection = (
-  sheetId, tableId, address, search
+  sheetId, tableId, column, row, search
 ) => ({
   type: 'searchCollection',
   sheetId,
   tableId,
-  address,
-  column: getColumnFromAddress(address),
-  row: getRowFromAddress(address),
+  address: formatAddress(column, row),
+  column,
+  row,
   search,
   focusView: false,
 });
@@ -29,20 +30,21 @@ export const createSearchCollection = (
 /**
  * @param {String} sheetId
  * @param {String} tableId
- * @param {String} address
+ * @param {Number} column
+ * @param {Number} row
  * @param {String} collectionAddress
  * @param {String} indexAddress
  * @param {String} predicateAddress
  */
 export const createObject = (
-  sheetId, tableId, address, collectionAddress, indexAddress, predicateAddress
+  sheetId, tableId, column, row, collectionAddress, indexAddress, predicateAddress
 ) => ({
   type: 'object',
   sheetId,
   tableId,
-  address,
-  column: getColumnFromAddress(address),
-  row: getRowFromAddress(address),
+  address: formatAddress(column, row),
+  column,
+  row,
   collectionAddress,
   indexAddress,
   predicateAddress,
@@ -53,19 +55,20 @@ export const createObject = (
 /**
  * @param {String} sheetId
  * @param {String} tableId
- * @param {String} address
+ * @param {Number} column
+ * @param {Number} row
  * @param {String} collectionAddress
  * @param {Number} index
  */
 export const createIndex = (
-  sheetId, tableId, address, collectionAddress, index
+  sheetId, tableId, column, row, collectionAddress, index
 ) => ({
   type: 'index',
   sheetId,
   tableId,
-  address,
-  column: getColumnFromAddress(address),
-  row: getRowFromAddress(address),
+  address: formatAddress(column, row),
+  column,
+  row,
   index,
   collectionAddress,
   focusView: false,
@@ -75,18 +78,19 @@ export const createIndex = (
 /**
  * @param {String} sheetId
  * @param {String} tableId
- * @param {String} address
+ * @param {Number} column
+ * @param {Number} row
  * @param {String} uri
  */
 export const createPredicate = (
-  sheetId, tableId, address, uri
+  sheetId, tableId, column, row, uri
 ) => ({
   type: 'predicate',
   sheetId,
   tableId,
-  address,
-  column: getColumnFromAddress(address),
-  row: getRowFromAddress(address),
+  address: formatAddress(column, row),
+  column,
+  row,
   uri,
   focusView: false,
 });
@@ -94,16 +98,17 @@ export const createPredicate = (
 
 /**
  * @param {String} sheetId
- * @param {String} address
+ * @param {Number} column
+ * @param {Number} row
  */
 export const createEmpty = (
-  sheetId, address
+  sheetId, column, row
 ) => ({
   type: 'empty',
   sheetId,
-  address,
-  column: getColumnFromAddress(address),
-  row: getRowFromAddress(address),
+  address: formatAddress(column, row),
+  column,
+  row,
   focusView: false,
 });
 
