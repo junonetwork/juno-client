@@ -1,4 +1,5 @@
 import { Model }             from 'falcor';
+import HTTPDataSource        from 'falcor-http-datasource';
 import {
   createEventHandler,
 }                            from 'recompose';
@@ -9,11 +10,7 @@ const {
 } = createEventHandler();
 
 export default new Model({
-  cache: {
-    app: {
-      value: 'XXX',
-    },
-  },
+  source: new HTTPDataSource('/api/model.json'),
   onChange: graphChange,
 })
   .batch()

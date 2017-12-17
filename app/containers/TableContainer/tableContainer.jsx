@@ -1,4 +1,7 @@
 import {
+  prop,
+}                          from 'ramda';
+import {
   compose,
   setDisplayName,
 }                          from 'recompose';
@@ -9,6 +12,7 @@ import mapPropsStream      from '../../falcor/mapPropsStream';
 import connectFalcor       from '../../falcor/connect';
 import Table               from '../../components/Table';
 import {
+  getSheetPathSets,
   getSheetMatrix,
 }                          from '../../redux/modules/sheets';
 import {
@@ -20,12 +24,12 @@ import throttle            from '../../utils/throttleAnimationFrame';
 
 export default compose(
   setDisplayName('TableContainer'),
-  // connect(
-  //   (state, { sheetId }) => ({
-  //     sheetPaths: getSheetPathSets(state, sheetId),
-  //   }),
-  // ),
-  mapPropsStream(connectFalcor(() => [['app', 'value']])),
+  connect(
+    (state, { sheetId }) => ({
+      sheetPaths: getSheetPathSets(state, sheetId),
+    }),
+  ),
+  mapPropsStream(connectFalcor(prop('sheetPaths'))),
   connect(
     (state, { sheetId }) => ({
       sheetMatrix: getSheetMatrix(state, sheetId),
