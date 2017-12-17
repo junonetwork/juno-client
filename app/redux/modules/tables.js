@@ -91,7 +91,7 @@ export const getTableCells = createCachedSelector(
           predicateURI
         ));
         return matrixRow;
-      }, [createSearchCollection(sheetId, tableId, collectionAddress, collectionURI)])
+      }, [createSearchCollection(sheetId, tableId, collectionAddress, collectionURI)]),
     ]);
   }
 )(

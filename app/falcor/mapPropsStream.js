@@ -9,5 +9,5 @@ import {
 
 export default mapPropsStreamWithConfig({
   fromESObservable: Observable.from,
-  toESObservable: stream => stream,
+  toESObservable: (stream) => stream,
 });
