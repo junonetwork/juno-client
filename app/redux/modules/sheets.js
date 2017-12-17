@@ -14,9 +14,15 @@ import {
   getTableCells,
 }                                    from './tables';
 import {
+  getCellFocusDescriptor,
+}                                    from './focus';
+import {
   formatAddress,
   createEmpty,
 }                                    from '../../utils/cell';
+import {
+  updateInMatrix,
+}                                    from '../../utils/table';
 import {
   createSingleDepthEqualitySelector,
 }                                    from '../../utils/selectors';
@@ -36,21 +42,21 @@ export const getSheet = (state, sheetId) => state.sheets[sheetId];
 export const getSheetMaxColumn = (state, sheetId) => state.sheets[sheetId].maxColumn;
 export const getSheetMaxRow = (state, sheetId) => state.sheets[sheetId].maxRow;
 
+
 /**
  * @param {Object} state
  * @param {String} sheetId
  */
 export const createEmptySheet = createCachedSelector(
-  nthArg(0),
   nthArg(1),
   getSheetMaxColumn,
   getSheetMaxRow,
-  (state, sheetId, maxColumn, maxRow) => (
+  (sheetId, maxColumn, maxRow) => (
     range(1, maxRow + 1)
       .map((row) =>
         range(1, from(maxColumn) + 1)
           .map((numericColumn) =>
-            createEmpty(state, sheetId, formatAddress(to(numericColumn), row))
+            createEmpty(sheetId, formatAddress(to(numericColumn), row))
           )
       )
   )
@@ -58,10 +64,12 @@ export const createEmptySheet = createCachedSelector(
   (_, sheetId) => sheetId
 );
 
+
 /**
  * @param {Object} state
  * @param {String} sheetId
  */
+// TODO - might not want/need to memoize this...
 export const getSheetCells = createCachedSelector(
   (state, sheetId) => getTableIds(state, sheetId)
     .reduce(
@@ -81,7 +89,7 @@ export const getSheetCells = createCachedSelector(
  * @param {Object} state
  * @param {String} sheetId
  */
-export const getSheetMatrix = createCachedSelector(
+export const getSheetMatrixWithoutViewState = createCachedSelector(
   nthArg(1),
   getSheetCells,
   createEmptySheet,
@@ -89,11 +97,42 @@ export const getSheetMatrix = createCachedSelector(
     emptySheet.map((row) => (
       // TODO - don't map over a row whose cells are all empty [don't appear in cells]
       // Or rather, what's the most efficient way to merge cells and emptySheet while maintaining reference equality for all cells that haven't updated
+      // use setInMatrix
+      // or better yet, rewrite getSheetCells to return a matrix and merge the matrix
       row.map((emptyCell) => (
         cells[emptyCell.address] ? cells[emptyCell.address] : emptyCell)
       )
     ))
   )
+)(
+  (_, sheetId) => sheetId
+);
+
+
+/**
+ * @param {Object} state
+ * @param {String} sheetId
+ */
+export const getSheetMatrix = createCachedSelector(
+  nthArg(1),
+  getSheetMatrixWithoutViewState,
+  getCellFocusDescriptor,
+  (
+    sheetId,
+    matrix,
+    cellFocusDescriptor
+  ) => {
+    if (cellFocusDescriptor && cellFocusDescriptor.sheetId === sheetId) {
+      return updateInMatrix(
+        from(cellFocusDescriptor.column) - 1,
+        cellFocusDescriptor.row - 1,
+        (cell) => ({ ...cell, focusView: true }),
+        matrix
+      );
+    }
+
+    return matrix;
+  }
 )(
   (_, sheetId) => sheetId
 );

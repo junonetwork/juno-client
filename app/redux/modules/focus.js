@@ -10,9 +10,6 @@ import {
   batchActions,
 }                             from 'redux-batched-actions';
 import {
-  formatAddress,
-}                             from '../../utils/cell';
-import {
   getSheetMaxColumn,
   getSheetMaxRow,
   increaseSheetMaxColumn,
@@ -24,6 +21,8 @@ import {
  * selectors
  */
 export const getFocusDescriptor = (state) => state.focus;
+export const getCellFocusDescriptor = (state) =>
+  path(['focus', 'sheet'], state);
 export const cellIsFocused = (state, sheetId, address) =>
   path(['focus', 'sheet', 'sheetId'], state) === sheetId &&
   path(['focus', 'sheet', 'address'], state) === address;
@@ -40,8 +39,8 @@ const SET_FOCUS = 'SET_FOCUS';
  */
 export const setFocus = (focusDescriptor) =>
   ({ type: SET_FOCUS, focusDescriptor });
-export const focusCell = (sheetId, address) =>
-  ({ type: SET_FOCUS, focusDescriptor: { sheet: { sheetId, address } } });
+export const focusCell = (sheetId, column, row) =>
+  ({ type: SET_FOCUS, focusDescriptor: { sheet: { sheetId, column, row } } });
 
 
 export const navigate = (column, row, sheetId, direction, steps) => (dispatch, getState) => {
@@ -56,7 +55,7 @@ export const navigate = (column, row, sheetId, direction, steps) => (dispatch, g
       // navigated off right of table, create new column
       return dispatch(batchActions([
         increaseSheetMaxColumn(sheetId),
-        setFocus({ sheet: { sheetId, address: formatAddress(newColumn, newRow) } }),
+        focusCell(sheetId, newColumn, newRow),
       ]));
     } else if (from(add(column, steps)) > from(maxColumn)) {
       // navigated off table when stepping by > 1, navigate to edge of table
@@ -69,7 +68,7 @@ export const navigate = (column, row, sheetId, direction, steps) => (dispatch, g
       // navigated off bottom of table, create new row
       return dispatch(batchActions([
         increaseSheetMaxRow(sheetId),
-        setFocus({ sheet: { sheetId, address: formatAddress(newColumn, newRow) } }),
+        focusCell(sheetId, newColumn, newRow),
       ]));
     } else if (row + steps > maxRow) {
       // navigated off table when stepping by > 1, navigate to edge of table
@@ -99,7 +98,7 @@ export const navigate = (column, row, sheetId, direction, steps) => (dispatch, g
     }
   }
 
-  return dispatch(setFocus({ sheet: { sheetId, address: formatAddress(newColumn, newRow) } }));
+  return dispatch(focusCell(sheetId, newColumn, newRow));
 };
 
 

@@ -31,7 +31,7 @@ export default compose(
       sheetMatrix: getSheetMatrix(state, sheetId),
     }),
     (dispatch, { sheetId }) => ({
-      focusCell: (address) => dispatch(focusCell(sheetId, address)), // TODO - add focus to node view
+      focusCell: (column, row) => dispatch(focusCell(sheetId, column, row)), // TODO - add focus to node view
       navigate: throttle((column, row, direction, steps) => (
         dispatch(navigate(column, row, sheetId, direction, steps))
       )),

@@ -71,11 +71,11 @@ export default compose(
     }
   ),
   withHandlers({
-    onClick: ({ address, focusCell }) => (e) => {
+    onClick: ({ column, row, focusCell }) => (e) => {
       e.preventDefault();
       e.stopPropagation();
 
-      focusCell(address);
+      focusCell(column, row);
     },
   }),
   // shouldUpdate((current, next) => {

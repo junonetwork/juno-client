@@ -9,6 +9,7 @@ import {
 import {
   add,
 }                                    from 'base26';
+import createCachedSelector          from 're-reselect';
 import {
   expandIndicesKeySet,
   createSearchCollectionTable,
@@ -43,52 +44,68 @@ export const getTableIds = (state, sheetId) =>
  * @param {String} sheetId
  * @param {String} tableId
  */
-export const getTableCells = (state, sheetId, tableId) => {
-  const {
-    collectionAddress, predicates, indices, collectionURI,
-  } = getTable(state, tableId);
+/**
+ * TODO - this really should be memoized (as should the whole sheet materialization process)
+ * there are three types of state
+ * - graph state: changes slowly, large
+ * - table state: changes medium, large
+ * - view state: changes quickly, small
+ *
+ * possible approach:
+ * - materialize the table state (memoized), either as a flat map, or as a 2-D matrix
+ *   - materializing table state can involve injecting graph state, assuming it can be determined to be referentially equivalent via some selector
+ *   - need to find the most efficient way to merge tables w/ empty sheet matrix
+ * - go back and setIn map/matrix to inject relatively small view state
+ *
+ */
+export const getTableCells = createCachedSelector(
+  nthArg(1),
+  nthArg(2),
+  (state, _, tableId) => getTable(state, tableId),
+  (sheetId, tableId, { collectionAddress, predicates, indices, collectionURI }) => {
+    const column = getColumnFromAddress(collectionAddress);
+    const row = getRowFromAddress(collectionAddress);
 
-  const column = getColumnFromAddress(collectionAddress);
-  const row = getRowFromAddress(collectionAddress);
+    const collection = createSearchCollection(
+      sheetId, tableId, collectionAddress, collectionURI
+    );
 
-  const collection = createSearchCollection(
-    state, sheetId, tableId, collectionAddress, collectionURI
-  );
+    return expandIndicesKeySet(indices).reduce((cells, index, rowIdx) => {
+      // remaining rows [[index, object, object, ...], ...]
+      const indexAddress = formatAddress(column, row + rowIdx + 1);
 
-  return expandIndicesKeySet(indices).reduce((cells, index, rowIdx) => {
-    // remaining rows [[index, object, object, ...], ...]
-    const indexAddress = formatAddress(column, row + rowIdx + 1);
+      return Object.assign(cells, {
+        [indexAddress]: createIndex(sheetId, tableId, indexAddress, collectionAddress, index),
+        ...predicates.reduce((objectCells, _, columnIdx) => {
+          const objectAddress = formatAddress(add(column, columnIdx + 1), row + rowIdx + 1);
 
-    return Object.assign(cells, {
-      [indexAddress]: createIndex(state, sheetId, tableId, indexAddress, collectionAddress, index),
-      ...predicates.reduce((objectCells, _, columnIdx) => {
-        const objectAddress = formatAddress(add(column, columnIdx + 1), row + rowIdx + 1);
+          objectCells[objectAddress] = createObject( // eslint-disable-line no-param-reassign
+            sheetId,
+            tableId,
+            objectAddress,
+            collectionAddress,
+            formatAddress(column, row + rowIdx + 1),
+            formatAddress(add(column, columnIdx + 1), row)
+          );
 
-        objectCells[objectAddress] = createObject(
-          state,
-          sheetId,
-          tableId,
-          objectAddress,
-          collectionAddress,
-          formatAddress(column, row + rowIdx + 1),
-          formatAddress(add(column, columnIdx + 1), row)
-        );
+          return objectCells;
+        }, {}),
+      });
+    }, {
+      // top row [collection, predicate, predicate, ...]
+      [collectionAddress]: collection,
+      ...predicates.reduce((predicateCells, predicateURI, columnIdx) => {
+        const predicateAddress = formatAddress(add(column, columnIdx + 1), row);
 
-        return objectCells;
+        return Object.assign(predicateCells, {
+          [predicateAddress]: createPredicate(sheetId, tableId, predicateAddress, predicateURI),
+        });
       }, {}),
     });
-  }, {
-    // top row [collection, predicate, predicate, ...]
-    [collectionAddress]: collection,
-    ...predicates.reduce((predicateCells, predicateURI, columnIdx) => {
-      const predicateAddress = formatAddress(add(column, columnIdx + 1), row);
-
-      return Object.assign(predicateCells, {
-        [predicateAddress]: createPredicate(state, sheetId, tableId, predicateAddress, predicateURI),
-      });
-    }, {}),
-  });
-};
+  }
+)(
+  (_, sheetId, tableId) => `s${sheetId}-t${tableId}`
+);
 
 
 /**
