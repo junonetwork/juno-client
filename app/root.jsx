@@ -22,11 +22,11 @@ store.subscribe(() => {
 
 store.dispatch(
   batchActions([
-    addSheet('1', 'z', 30),
+    addSheet('1', 'g', 12),
     addSearchCollectionTable(
       '1',
-      generateTableId('1', 'a1'),
-      'a1',
+      generateTableId('1', 'a0'),
+      'a0',
       'schema:Person',
       ['skos:prefLabel', 'schema:birthPlace'],
       [0, 2, 3]

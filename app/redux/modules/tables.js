@@ -66,10 +66,6 @@ export const getTableCells = createCachedSelector(
     const column = getColumnFromAddress(collectionAddress);
     const row = getRowFromAddress(collectionAddress);
 
-    const collection = createSearchCollection(
-      sheetId, tableId, collectionAddress, collectionURI
-    );
-
     return expandIndicesKeySet(indices).reduce((cells, index, rowIdx) => {
       // remaining rows [[index, object, object, ...], ...]
       const indexAddress = formatAddress(column, row + rowIdx + 1);
@@ -93,7 +89,9 @@ export const getTableCells = createCachedSelector(
       });
     }, {
       // top row [collection, predicate, predicate, ...]
-      [collectionAddress]: collection,
+      [collectionAddress]: createSearchCollection(
+        sheetId, tableId, collectionAddress, collectionURI
+      ),
       ...predicates.reduce((predicateCells, predicateURI, columnIdx) => {
         const predicateAddress = formatAddress(add(column, columnIdx + 1), row);
 

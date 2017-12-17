@@ -87,10 +87,10 @@ export const navigate = (column, row, sheetId, direction, steps) => (dispatch, g
       newColumn = subtract(column, steps);
     }
   } else if (direction === 'up') {
-    if (row === 1) {
+    if (row === 0) {
       // navigated off top of table, noop
       return null;
-    } else if (row - steps < 1) {
+    } else if (row - steps < 0) {
       // navigated off table when stepping by > 1, navigate to edge of table
       newRow = 1;
     } else {

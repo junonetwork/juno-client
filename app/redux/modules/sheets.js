@@ -52,7 +52,7 @@ export const createEmptySheet = createCachedSelector(
   getSheetMaxColumn,
   getSheetMaxRow,
   (sheetId, maxColumn, maxRow) => (
-    range(1, maxRow + 1)
+    range(0, maxRow)
       .map((row) =>
         range(1, from(maxColumn) + 1)
           .map((numericColumn) =>
@@ -125,7 +125,7 @@ export const getSheetMatrix = createCachedSelector(
     if (cellFocusDescriptor && cellFocusDescriptor.sheetId === sheetId) {
       return updateInMatrix(
         from(cellFocusDescriptor.column) - 1,
-        cellFocusDescriptor.row - 1,
+        cellFocusDescriptor.row,
         (cell) => ({ ...cell, focusView: true }),
         matrix
       );
