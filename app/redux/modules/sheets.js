@@ -5,11 +5,6 @@ import {
 }                                    from 'ramda';
 import createCachedSelector          from 're-reselect';
 import {
-  add,
-  from,
-  to,
-}                                    from 'base26';
-import {
   getTableIds,
   getTableCells,
 }                                    from './tables';
@@ -52,11 +47,11 @@ export const createEmptySheet = createCachedSelector(
   getSheetMaxColumn,
   getSheetMaxRow,
   (sheetId, maxColumn, maxRow) => (
-    range(0, maxRow)
+    range(0, maxRow + 1)
       .map((row) =>
-        range(1, from(maxColumn) + 1)
+        range(0, maxColumn + 1)
           .map((numericColumn) =>
-            createEmpty(sheetId, formatAddress(to(numericColumn), row))
+            createEmpty(sheetId, formatAddress(numericColumn, row))
           )
       )
   )
@@ -124,7 +119,7 @@ export const getSheetMatrix = createCachedSelector(
   ) => {
     if (cellFocusDescriptor && cellFocusDescriptor.sheetId === sheetId) {
       return updateInMatrix(
-        from(cellFocusDescriptor.column) - 1,
+        cellFocusDescriptor.column,
         cellFocusDescriptor.row,
         (cell) => ({ ...cell, focusView: true }),
         matrix
@@ -183,7 +178,7 @@ export default (
       ...state,
       [action.sheetId]: {
         ...state[action.sheetId],
-        maxColumn: add(state[action.sheetId].maxColumn, 1),
+        maxColumn: state[action.sheetId].maxColumn + 1,
       },
     };
   } else if (action.type === INCREASE_SHEET_MAX_ROW) {

@@ -1,10 +1,5 @@
 import R                  from 'ramda';
 import {
-  add,
-  subtract,
-  from,
-}                         from 'base26';
-import {
   batchActions,
 }                         from 'redux-batched-actions';
 import {

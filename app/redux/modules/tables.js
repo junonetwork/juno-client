@@ -6,9 +6,6 @@ import {
   filter,
   omit,
 }                                    from 'ramda';
-import {
-  add,
-}                                    from 'base26';
 import createCachedSelector          from 're-reselect';
 import {
   expandIndicesKeySet,
@@ -73,7 +70,7 @@ export const getTableCells = createCachedSelector(
       return Object.assign(cells, {
         [indexAddress]: createIndex(sheetId, tableId, indexAddress, collectionAddress, index),
         ...predicates.reduce((objectCells, _, columnIdx) => {
-          const objectAddress = formatAddress(add(column, columnIdx + 1), row + rowIdx + 1);
+          const objectAddress = formatAddress(column + columnIdx + 1, row + rowIdx + 1);
 
           objectCells[objectAddress] = createObject( // eslint-disable-line no-param-reassign
             sheetId,
@@ -81,7 +78,7 @@ export const getTableCells = createCachedSelector(
             objectAddress,
             collectionAddress,
             formatAddress(column, row + rowIdx + 1),
-            formatAddress(add(column, columnIdx + 1), row)
+            formatAddress(column + columnIdx + 1, row)
           );
 
           return objectCells;
@@ -93,7 +90,7 @@ export const getTableCells = createCachedSelector(
         sheetId, tableId, collectionAddress, collectionURI
       ),
       ...predicates.reduce((predicateCells, predicateURI, columnIdx) => {
-        const predicateAddress = formatAddress(add(column, columnIdx + 1), row);
+        const predicateAddress = formatAddress(column + columnIdx + 1, row);
 
         return Object.assign(predicateCells, {
           [predicateAddress]: createPredicate(sheetId, tableId, predicateAddress, predicateURI),

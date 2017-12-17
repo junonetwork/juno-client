@@ -2,11 +2,6 @@ import {
   path,
 }                             from 'ramda';
 import {
-  add,
-  subtract,
-  from,
-}                             from 'base26';
-import {
   batchActions,
 }                             from 'redux-batched-actions';
 import {
@@ -47,44 +42,42 @@ export const navigate = (column, row, sheetId, direction, steps) => (dispatch, g
   const state = getState();
   const maxColumn = getSheetMaxColumn(state, sheetId);
   const maxRow = getSheetMaxRow(state, sheetId);
-  let newRow = row;
-  let newColumn = column;
 
   if (direction === 'right') {
     if (column === maxColumn) {
       // navigated off right of table, create new column
       return dispatch(batchActions([
         increaseSheetMaxColumn(sheetId),
-        focusCell(sheetId, newColumn, newRow),
+        focusCell(sheetId, column, row),
       ]));
-    } else if (from(add(column, steps)) > from(maxColumn)) {
+    } else if (column + steps > maxColumn) {
       // navigated off table when stepping by > 1, navigate to edge of table
-      newColumn = maxColumn;
+      column = maxColumn; // eslint-disable-line no-param-reassign
     } else {
-      newColumn = add(column, steps);
+      column += steps; // eslint-disable-line no-param-reassign
     }
   } else if (direction === 'down') {
     if (row === maxRow) {
       // navigated off bottom of table, create new row
       return dispatch(batchActions([
         increaseSheetMaxRow(sheetId),
-        focusCell(sheetId, newColumn, newRow),
+        focusCell(sheetId, column, row),
       ]));
     } else if (row + steps > maxRow) {
       // navigated off table when stepping by > 1, navigate to edge of table
-      newRow = maxRow;
+      row = maxRow; // eslint-disable-line no-param-reassign
     } else {
-      newRow += steps;
+      row += steps; // eslint-disable-line no-param-reassign
     }
   } else if (direction === 'left') {
-    if (column === 'a') {
+    if (column === 0) {
       // navigated off left of table, noop
       return null;
-    } else if (from(subtract(column, steps)) < from('a')) {
+    } else if (column - steps < 0) {
       // navigated off table when stepping by > 1, navigate to edge of table
-      newColumn = 'a';
+      column = 0; // eslint-disable-line no-param-reassign
     } else {
-      newColumn = subtract(column, steps);
+      column -= steps; // eslint-disable-line no-param-reassign
     }
   } else if (direction === 'up') {
     if (row === 0) {
@@ -92,13 +85,13 @@ export const navigate = (column, row, sheetId, direction, steps) => (dispatch, g
       return null;
     } else if (row - steps < 0) {
       // navigated off table when stepping by > 1, navigate to edge of table
-      newRow = 1;
+      row = 1; // eslint-disable-line no-param-reassign
     } else {
-      newRow -= steps;
+      row -= steps; // eslint-disable-line no-param-reassign
     }
   }
 
-  return dispatch(focusCell(sheetId, newColumn, newRow));
+  return dispatch(focusCell(sheetId, column, row));
 };
 
 

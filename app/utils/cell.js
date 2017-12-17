@@ -1,10 +1,10 @@
 
 
-export const formatAddress = (column, row) => `${column}${row}`;
+export const formatAddress = (column, row) => `${column}-${row}`;
 
 export const getRowFromAddress = (address) => +/[0-9]+$/.exec(address)[0];
 
-export const getColumnFromAddress = (address) => /^[a-z]+/.exec(address)[0];
+export const getColumnFromAddress = (address) => +/^[0-9]+/.exec(address)[0];
 
 
 /**
