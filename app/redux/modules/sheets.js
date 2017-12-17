@@ -12,7 +12,6 @@ import {
   getCellFocusDescriptor,
 }                                    from './focus';
 import {
-  formatAddress,
   createEmpty,
 }                                    from '../../utils/cell';
 import {
@@ -51,8 +50,8 @@ export const createEmptySheet = createCachedSelector(
     range(0, maxRow + 1)
       .map((row) =>
         range(0, maxColumn + 1)
-          .map((numericColumn) =>
-            createEmpty(sheetId, formatAddress(numericColumn, row))
+          .map((column) =>
+            createEmpty(sheetId, column, row)
           )
       )
   )

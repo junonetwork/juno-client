@@ -60,25 +60,24 @@ export const getTableCells = createCachedSelector(
   nthArg(2),
   (state, _, tableId) => getTable(state, tableId),
   (sheetId, tableId, { collectionAddress, predicates, indices, search }) => {
-    const column = getColumnFromAddress(collectionAddress);
-    const row = getRowFromAddress(collectionAddress);
+    const collectionColumn = getColumnFromAddress(collectionAddress);
+    const collectionRow = getRowFromAddress(collectionAddress);
 
     return expandIndicesKeySet(indices).reduce((matrix, index, rowIdx) => {
       // remaining rows [[index, object, object, ...], ...]
-      const indexAddress = formatAddress(column, row + rowIdx + 1);
-
       matrix.push(predicates.reduce((matrixRow, _, columnIdx) => {
         matrixRow.push(createObject(
           sheetId,
           tableId,
-          formatAddress(column + columnIdx + 1, row + rowIdx + 1),
+          collectionColumn + columnIdx + 1,
+          collectionRow + rowIdx + 1,
           collectionAddress,
-          indexAddress,
-          formatAddress(column + columnIdx + 1, row)
+          formatAddress(collectionColumn, collectionRow + rowIdx + 1),
+          formatAddress(collectionColumn + columnIdx + 1, collectionRow)
         ));
 
         return matrixRow;
-      }, [createIndex(sheetId, tableId, indexAddress, collectionAddress, index)]));
+      }, [createIndex(sheetId, tableId, collectionColumn, collectionRow + rowIdx + 1, collectionAddress, index)]));
 
       return matrix;
     }, [
@@ -87,11 +86,12 @@ export const getTableCells = createCachedSelector(
         matrixRow.push(createPredicate(
           sheetId,
           tableId,
-          formatAddress(column + columnIdx + 1, row), // TODO - createCell helpers should take row/column, not address
+          collectionColumn + columnIdx + 1,
+          collectionRow,
           predicateURI
         ));
         return matrixRow;
-      }, [createSearchCollection(sheetId, tableId, collectionAddress, search)]),
+      }, [createSearchCollection(sheetId, tableId, collectionColumn, collectionRow, search)]),
     ]);
   }
 )(
