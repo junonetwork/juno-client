@@ -63,40 +63,36 @@ export const getTableCells = createCachedSelector(
     const column = getColumnFromAddress(collectionAddress);
     const row = getRowFromAddress(collectionAddress);
 
-    return expandIndicesKeySet(indices).reduce((cells, index, rowIdx) => {
+    return expandIndicesKeySet(indices).reduce((matrix, index, rowIdx) => {
       // remaining rows [[index, object, object, ...], ...]
       const indexAddress = formatAddress(column, row + rowIdx + 1);
 
-      return Object.assign(cells, {
-        [indexAddress]: createIndex(sheetId, tableId, indexAddress, collectionAddress, index),
-        ...predicates.reduce((objectCells, _, columnIdx) => {
-          const objectAddress = formatAddress(column + columnIdx + 1, row + rowIdx + 1);
+      matrix.push(predicates.reduce((matrixRow, _, columnIdx) => {
+        matrixRow.push(createObject(
+          sheetId,
+          tableId,
+          formatAddress(column + columnIdx + 1, row + rowIdx + 1),
+          collectionAddress,
+          indexAddress,
+          formatAddress(column + columnIdx + 1, row)
+        ));
 
-          objectCells[objectAddress] = createObject( // eslint-disable-line no-param-reassign
-            sheetId,
-            tableId,
-            objectAddress,
-            collectionAddress,
-            formatAddress(column, row + rowIdx + 1),
-            formatAddress(column + columnIdx + 1, row)
-          );
+        return matrixRow;
+      }, [createIndex(sheetId, tableId, indexAddress, collectionAddress, index)]));
 
-          return objectCells;
-        }, {}),
-      });
-    }, {
-      // top row [collection, predicate, predicate, ...]
-      [collectionAddress]: createSearchCollection(
-        sheetId, tableId, collectionAddress, collectionURI
-      ),
-      ...predicates.reduce((predicateCells, predicateURI, columnIdx) => {
-        const predicateAddress = formatAddress(column + columnIdx + 1, row);
-
-        return Object.assign(predicateCells, {
-          [predicateAddress]: createPredicate(sheetId, tableId, predicateAddress, predicateURI),
-        });
-      }, {}),
-    });
+      return matrix;
+    }, [
+      // top row [[collection, predicate, predicate, ...]]
+      predicates.reduce((matrixRow, predicateURI, columnIdx) => {
+        matrixRow.push(createPredicate(
+          sheetId,
+          tableId,
+          formatAddress(column + columnIdx + 1, row), // TODO - createCell helpers should take row/column, not address
+          predicateURI
+        ));
+        return matrixRow;
+      }, [createSearchCollection(sheetId, tableId, collectionAddress, collectionURI)])
+    ]);
   }
 )(
   (_, sheetId, tableId) => `s${sheetId}-t${tableId}`

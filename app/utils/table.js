@@ -31,13 +31,17 @@ export const updateInMatrix = (column, row, updater, matrix) => {
 };
 
 
-export const mergeRowIntoMatrix = (column, row, mergeRow, matrix) => {
+export const setRowInMatrix = (column, row, mergeRow, matrix) => {
+  if (row >= matrix.length) {
+    throw new Error('Row must be in matrix');
+  }
+
   const newRow = [
     ...matrix[row].slice(0, column),
     ...mergeRow.slice(0, matrix[row].length - column),
     ...matrix[row].slice(
-      (matrix[row].length - column) + 1,
-      matrix[row].length - column - mergeRow.length
+      column + mergeRow.length,
+      matrix[row].length
     ),
   ];
 

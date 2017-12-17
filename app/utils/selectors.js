@@ -2,12 +2,15 @@ import {
   equals,
 }                                    from 'ramda';
 import {
+  shallowEqual,
+} from 'recompose';
+import {
   createSelectorCreator,
   defaultMemoize,
 }                                    from 'reselect';
 
 
-export const createSingleDepthEqualitySelector = createSelectorCreator(
+export const arraySingleDepthEqualitySelector = createSelectorCreator(
   defaultMemoize,
   (prev, next) => {
     if (Array.isArray(prev) && Array.isArray(next) && prev.length === next.length) {
@@ -24,7 +27,14 @@ export const createSingleDepthEqualitySelector = createSelectorCreator(
   }
 );
 
-export const createDeepEqualitySelector = createSelectorCreator(
+
+export const objectSingleDepthEqualitySelector = createSelectorCreator(
   defaultMemoize,
-  (prev, next) => equals(prev, next)
+  shallowEqual
+);
+
+
+export const deepEqualitySelector = createSelectorCreator(
+  defaultMemoize,
+  equals
 );

@@ -16,19 +16,17 @@ import {
 }                             from './utils/table';
 
 
-store.subscribe(() => {
-  console.log('store emit');
-});
+store.subscribe(() => console.log('store emit'));
 
 store.dispatch(
   batchActions([
-    addSheet('1', 20, 20),
+    addSheet('1', 30, 30),
     addSearchCollectionTable(
       '1',
       generateTableId('1', '0-0'),
       '0-0',
       'schema:Person',
-      ['skos:prefLabel', 'schema:birthPlace'],
+      ['skos:prefLabel', 'schema:birthPlace', 'schema:age', 'schema:birthDate'],
       [0, 2, 3]
     ),
   ])

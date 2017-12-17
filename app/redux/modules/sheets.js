@@ -17,9 +17,10 @@ import {
 }                                    from '../../utils/cell';
 import {
   updateInMatrix,
+  setRowInMatrix,
 }                                    from '../../utils/table';
 import {
-  createSingleDepthEqualitySelector,
+  arraySingleDepthEqualitySelector,
 }                                    from '../../utils/selectors';
 
 
@@ -64,18 +65,17 @@ export const createEmptySheet = createCachedSelector(
  * @param {Object} state
  * @param {String} sheetId
  */
-// TODO - might not want/need to memoize this...
-export const getSheetCells = createCachedSelector(
+export const getSheetTables = createCachedSelector(
   (state, sheetId) => getTableIds(state, sheetId)
-    .reduce(
-      (cells, tableId) => Object.assign(cells, getTableCells(state, sheetId, tableId)),
-      {}
-    ),
+    .reduce((tables, tableId) => {
+      tables.push(getTableCells(state, sheetId, tableId));
+      return tables;
+    }, []),
   (cells) => cells
 )(
   (_, sheetId) => sheetId,
   {
-    selectorCreator: createSingleDepthEqualitySelector,
+    selectorCreator: arraySingleDepthEqualitySelector,
   }
 );
 
@@ -86,18 +86,21 @@ export const getSheetCells = createCachedSelector(
  */
 export const getSheetMatrixWithoutViewState = createCachedSelector(
   nthArg(1),
-  getSheetCells,
+  getSheetTables,
   createEmptySheet,
-  (sheetId, cells, emptySheet) => (
-    emptySheet.map((row) => (
-      // TODO - don't map over a row whose cells are all empty [don't appear in cells]
-      // Or rather, what's the most efficient way to merge cells and emptySheet while maintaining reference equality for all cells that haven't updated
-      // use setInMatrix
-      // or better yet, rewrite getSheetCells to return a matrix and merge the matrix
-      row.map((emptyCell) => (
-        cells[emptyCell.address] ? cells[emptyCell.address] : emptyCell)
-      )
-    ))
+  (sheetId, tables, emptySheetMatrix) => tables.reduce(
+    (sheetMatrix, tableMatrix) => (
+      tableMatrix
+        .slice(0, Math.max(sheetMatrix.length - tableMatrix[0][0].row, 0))
+        .reduce((_sheetMatrix, tableRow, idx) => (
+          setRowInMatrix(
+            tableMatrix[0][0].column,
+            tableMatrix[0][0].row + idx,
+            tableRow,
+            _sheetMatrix)
+        ), sheetMatrix)
+    ),
+    emptySheetMatrix
   )
 )(
   (_, sheetId) => sheetId
