@@ -5,6 +5,7 @@ import {
 }                                    from 'ramda';
 import createCachedSelector          from 're-reselect';
 import {
+  getTablePathSets,
   getTableIds,
   getTableCells,
 }                                    from './tables';
@@ -42,6 +43,26 @@ export const getSheetMaxRow = (state, sheetId) => state.sheets[sheetId].maxRow;
  * @param {Object} state
  * @param {String} sheetId
  */
+export const getSheetPathSets = createCachedSelector(
+  (state, sheetId) => (
+    getTableIds(state, sheetId).reduce((pathSets, tableId) => {
+      pathSets.push(...getTablePathSets(state, tableId));
+      return pathSets;
+    }, [])
+  ),
+  (pathSets) => pathSets
+)(
+  (_, sheetId) => sheetId,
+  {
+    selectorCreator: arraySingleDepthEqualitySelector,
+  }
+);
+
+
+/**
+ * @param {Object} state
+ * @param {String} sheetId
+ */
 export const createEmptySheet = createCachedSelector(
   nthArg(1),
   getSheetMaxColumn,
@@ -70,7 +91,7 @@ export const getSheetTables = createCachedSelector(
       tables.push(getTableCells(state, sheetId, tableId));
       return tables;
     }, []),
-  (cells) => cells
+  (tables) => tables
 )(
   (_, sheetId) => sheetId,
   {

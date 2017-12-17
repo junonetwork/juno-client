@@ -36,24 +36,30 @@ export const getTableIds = (state, sheetId) =>
     filter(sheetIdEquals(sheetId), state.tables)
   );
 
+
+/**
+ * @param {Object} state
+ * @param {String} tableId
+ */
+export const getTablePathSets = createCachedSelector(
+  getTable,
+  ({ search, indices, predicates }) => [
+    // TODO - mapping search to URIs should move to falcor router
+    ['resource', `schema:${search}`, 'skos:prefLabel'], // collection
+    ['collection', `schema:${search}`, 'length'], // collection length
+    ['resource', predicates, 'skos:prefLabel'], // predicates
+    ['collection', `schema:${search}`, indices, predicates, 0, ['skos:prefLabel', 'uri']], // object values
+    ['collection', `schema:${search}`, indices, predicates, 'length'], // object lengths
+  ]
+)(
+  nthArg(1)
+);
+
+
 /**
  * @param {Object} state
  * @param {String} sheetId
  * @param {String} tableId
- */
-/**
- * TODO - this really should be memoized (as should the whole sheet materialization process)
- * there are three types of state
- * - graph state: changes slowly, large
- * - table state: changes medium, large
- * - view state: changes quickly, small
- *
- * possible approach:
- * - materialize the table state (memoized), either as a flat map, or as a 2-D matrix
- *   - materializing table state can involve injecting graph state, assuming it can be determined to be referentially equivalent via some selector
- *   - need to find the most efficient way to merge tables w/ empty sheet matrix
- * - go back and setIn map/matrix to inject relatively small view state
- *
  */
 export const getTableCells = createCachedSelector(
   nthArg(1),
@@ -77,7 +83,15 @@ export const getTableCells = createCachedSelector(
         ));
 
         return matrixRow;
-      }, [createIndex(sheetId, tableId, collectionColumn, collectionRow + rowIdx + 1, collectionAddress, index)]));
+      }, [
+        createIndex(sheetId,
+          tableId,
+          collectionColumn,
+          collectionRow + rowIdx + 1,
+          collectionAddress,
+          index
+        ),
+      ]));
 
       return matrix;
     }, [
@@ -95,7 +109,7 @@ export const getTableCells = createCachedSelector(
     ]);
   }
 )(
-  (_, sheetId, tableId) => `s${sheetId}-t${tableId}`
+  nthArg(2)
 );
 
 
