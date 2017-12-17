@@ -25,7 +25,7 @@ store.dispatch(
       '1',
       generateTableId('1', '0-0'),
       '0-0',
-      'schema:Person',
+      'Person',
       ['skos:prefLabel', 'schema:birthPlace', 'schema:age', 'schema:birthDate'],
       [0, 2, 3]
     ),

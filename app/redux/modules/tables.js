@@ -59,7 +59,7 @@ export const getTableCells = createCachedSelector(
   nthArg(1),
   nthArg(2),
   (state, _, tableId) => getTable(state, tableId),
-  (sheetId, tableId, { collectionAddress, predicates, indices, collectionURI }) => {
+  (sheetId, tableId, { collectionAddress, predicates, indices, search }) => {
     const column = getColumnFromAddress(collectionAddress);
     const row = getRowFromAddress(collectionAddress);
 
@@ -91,7 +91,7 @@ export const getTableCells = createCachedSelector(
           predicateURI
         ));
         return matrixRow;
-      }, [createSearchCollection(sheetId, tableId, collectionAddress, collectionURI)]),
+      }, [createSearchCollection(sheetId, tableId, collectionAddress, search)]),
     ]);
   }
 )(

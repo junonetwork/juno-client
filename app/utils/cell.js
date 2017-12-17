@@ -11,10 +11,10 @@ export const getColumnFromAddress = (address) => +/^[0-9]+/.exec(address)[0];
  * @param {String} sheetId
  * @param {String} tableId
  * @param {String} address
- * @param {String} searchURI
+ * @param {String} search
  */
 export const createSearchCollection = (
-  sheetId, tableId, address, uri
+  sheetId, tableId, address, search
 ) => ({
   type: 'searchCollection',
   sheetId,
@@ -22,7 +22,7 @@ export const createSearchCollection = (
   address,
   column: getColumnFromAddress(address),
   row: getRowFromAddress(address),
-  uri,
+  search,
   focusView: false,
 });
 
