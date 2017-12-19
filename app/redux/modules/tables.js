@@ -66,47 +66,53 @@ export const getTableCells = createCachedSelector(
   nthArg(2),
   (state, _, tableId) => getTable(state, tableId),
   (sheetId, tableId, { collectionAddress, predicates, indices, search }) => {
+    // console.log('getTableCells');
+
     const collectionColumn = getColumnFromAddress(collectionAddress);
     const collectionRow = getRowFromAddress(collectionAddress);
 
-    return expandIndicesKeySet(indices).reduce((matrix, index, rowIdx) => {
-      // remaining rows [[index, object, object, ...], ...]
-      matrix.push(predicates.reduce((matrixRow, _, columnIdx) => {
-        matrixRow.push(createObject(
-          sheetId,
-          tableId,
-          collectionColumn + columnIdx + 1,
-          collectionRow + rowIdx + 1,
-          collectionAddress,
-          formatAddress(collectionColumn, collectionRow + rowIdx + 1),
-          formatAddress(collectionColumn + columnIdx + 1, collectionRow)
-        ));
+    return {
+      column: collectionColumn,
+      row: collectionRow,
+      table: expandIndicesKeySet(indices).reduce((matrix, index, rowIdx) => {
+        // remaining rows [[index, object, object, ...], ...]
+        matrix.push(predicates.reduce((matrixRow, _, columnIdx) => {
+          matrixRow.push(createObject(
+            sheetId,
+            tableId,
+            collectionColumn + columnIdx + 1,
+            collectionRow + rowIdx + 1,
+            collectionAddress,
+            formatAddress(collectionColumn, collectionRow + rowIdx + 1),
+            formatAddress(collectionColumn + columnIdx + 1, collectionRow)
+          ));
 
-        return matrixRow;
+          return matrixRow;
+        }, [
+          createIndex(sheetId,
+            tableId,
+            collectionColumn,
+            collectionRow + rowIdx + 1,
+            collectionAddress,
+            index
+          ),
+        ]));
+
+        return matrix;
       }, [
-        createIndex(sheetId,
-          tableId,
-          collectionColumn,
-          collectionRow + rowIdx + 1,
-          collectionAddress,
-          index
-        ),
-      ]));
-
-      return matrix;
-    }, [
-      // top row [[collection, predicate, predicate, ...]]
-      predicates.reduce((matrixRow, predicateURI, columnIdx) => {
-        matrixRow.push(createPredicate(
-          sheetId,
-          tableId,
-          collectionColumn + columnIdx + 1,
-          collectionRow,
-          predicateURI
-        ));
-        return matrixRow;
-      }, [createSearchCollection(sheetId, tableId, collectionColumn, collectionRow, search)]),
-    ]);
+        // top row [[collection, predicate, predicate, ...]]
+        predicates.reduce((matrixRow, predicateURI, columnIdx) => {
+          matrixRow.push(createPredicate(
+            sheetId,
+            tableId,
+            collectionColumn + columnIdx + 1,
+            collectionRow,
+            predicateURI
+          ));
+          return matrixRow;
+        }, [createSearchCollection(sheetId, tableId, collectionColumn, collectionRow, search)]),
+      ]),
+    };
   }
 )(
   nthArg(2)

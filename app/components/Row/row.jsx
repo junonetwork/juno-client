@@ -1,5 +1,8 @@
 import React                   from 'react';
 import {}                      from 'prop-types';
+import {
+  pure,
+}                              from 'recompose';
 import Cell                    from '../../containers/CellContainer';
 
 
@@ -21,4 +24,4 @@ const Row = ({ row, focusCell, navigate }) => (
 
 Row.propTypes = {};
 
-export default Row;
+export default pure(Row);

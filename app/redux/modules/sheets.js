@@ -1,3 +1,4 @@
+/* eslint-disable arrow-body-style */
 import {
   nthArg,
   omit,
@@ -13,6 +14,10 @@ import {
   getCellFocusDescriptor,
 }                                    from './focus';
 import {
+  materializeSearchCollection,
+  materializeIndex,
+  materializePredicate,
+  materializeObject,
   createEmpty,
 }                                    from '../../utils/cell';
 import {
@@ -52,7 +57,7 @@ export const getSheetPathSets = createCachedSelector(
   ),
   (pathSets) => pathSets
 )(
-  (_, sheetId) => sheetId,
+  nthArg(1),
   {
     selectorCreator: arraySingleDepthEqualitySelector,
   }
@@ -77,7 +82,7 @@ export const createEmptySheet = createCachedSelector(
       )
   )
 )(
-  (_, sheetId) => sheetId
+  nthArg(1)
 );
 
 
@@ -86,14 +91,18 @@ export const createEmptySheet = createCachedSelector(
  * @param {String} sheetId
  */
 export const getSheetTables = createCachedSelector(
-  (state, sheetId) => getTableIds(state, sheetId)
-    .reduce((tables, tableId) => {
-      tables.push(getTableCells(state, sheetId, tableId));
-      return tables;
-    }, []),
-  (tables) => tables
+  (state, sheetId) => (
+    getTableIds(state, sheetId)
+      .map((tableId) => getTableCells(state, sheetId, tableId))
+  ),
+  (tables) => {
+    // console.log('getSheetTables');
+
+    // TODO - materialize tables here, rather than across entire sheetMatrix
+    return tables;
+  }
 )(
-  (_, sheetId) => sheetId,
+  nthArg(1),
   {
     selectorCreator: arraySingleDepthEqualitySelector,
   }
@@ -103,33 +112,59 @@ export const getSheetTables = createCachedSelector(
 /**
  * @param {Object} state
  * @param {String} sheetId
+ * @param {Object} graphFragment
  */
 export const getSheetMatrixWithoutViewState = createCachedSelector(
   nthArg(1),
-  getSheetTables,
+  nthArg(2),
   createEmptySheet,
-  (sheetId, tables, emptySheetMatrix) => tables.reduce(
-    (sheetMatrix, tableMatrix) => (
-      tableMatrix
-        .slice(0, Math.max(sheetMatrix.length - tableMatrix[0][0].row, 0))
-        .reduce((_sheetMatrix, tableRow, idx) => (
-          setRowInMatrix(
-            tableMatrix[0][0].column,
-            tableMatrix[0][0].row + idx,
-            tableRow,
-            _sheetMatrix)
-        ), sheetMatrix)
-    ),
-    emptySheetMatrix
-  )
+  getSheetTables,
+  (sheetId, graphFragment, emptySheetMatrix, tables) => {
+    // console.log('getSheetMatrixWithoutViewState');
+
+    return tables
+      .reduce(
+        (sheetMatrix, { column, row, table }) => (
+          table
+            .slice(0, Math.max(sheetMatrix.length - row, 0))
+            .reduce((_sheetMatrix, tableRow, idx) => (
+              setRowInMatrix(column, row + idx, tableRow, _sheetMatrix)
+            ), sheetMatrix)
+        ),
+        emptySheetMatrix
+      )
+      .map((row, _, sheetMatrix) => (
+        row.map((cell) => {
+          if (cell.type === 'searchCollection') {
+            return materializeSearchCollection(cell, graphFragment, sheetMatrix);
+          } else if (cell.type === 'index') {
+            return materializeIndex(cell, graphFragment, sheetMatrix);
+          } else if (cell.type === 'predicate') {
+            return materializePredicate(cell, graphFragment, sheetMatrix);
+          } else if (cell.type === 'object') {
+            return materializeObject(cell, graphFragment, sheetMatrix);
+          } else if (cell.type === 'empty') {
+            return cell;
+          }
+
+          throw new Error('tried to get path for unknown cell type', cell.type);
+        })
+      ));
+  }
 )(
-  (_, sheetId) => sheetId
+  nthArg(1)
 );
 
 
 /**
  * @param {Object} state
  * @param {String} sheetId
+ * @param {Object} graphFragment
+ */
+/**
+ * NOTE
+ *   - punt on nodeView state and focus on more important things.  the implications of this part of the architecture depend on a bunch of other things that aren't built.  properly implementing this will be easier once those other parts are in place
+ *   - though maybe it still makes sense to materialize tableMatrices, rather than the entire sheetMatrix
  */
 export const getSheetMatrix = createCachedSelector(
   nthArg(1),
@@ -152,7 +187,7 @@ export const getSheetMatrix = createCachedSelector(
     return matrix;
   }
 )(
-  (_, sheetId) => sheetId
+  nthArg(1)
 );
 
 

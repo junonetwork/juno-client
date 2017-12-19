@@ -1,3 +1,6 @@
+import {
+  path,
+}                 from 'ramda';
 
 
 export const formatAddress = (column, row) => `${column}-${row}`;
@@ -5,6 +8,9 @@ export const formatAddress = (column, row) => `${column}-${row}`;
 export const getRowFromAddress = (address) => +/[0-9]+$/.exec(address)[0];
 
 export const getColumnFromAddress = (address) => +/^[0-9]+/.exec(address)[0];
+
+const getRow = getRowFromAddress;
+const getColumn = getColumnFromAddress;
 
 
 /**
@@ -113,69 +119,113 @@ export const createEmpty = (
 });
 
 
-// export const materializeCell = createCachedSelector(
-//   (state, sheetId, column, row, falcorJSON) => {
-//     const cell = getCell(state, sheetId, formatAddress(column, row));
-//     const { type, tableId, uri } = cell;
+export const cell2PathFragment = (cell, sheetMatrix) => {
+  if (cell.type === 'searchCollection') {
+    return ['collection', `schema:${cell.search}`];
+  } else if (cell.type === 'objectCollection') {
+    // recurse to calculate pathFragment for parentObject
+    return cell2PathFragment(
+      sheetMatrix[getRow(cell.parentObjectAddress)][getColumn(cell.parentObjectAddress)],
+      sheetMatrix
+    );
+  } else if (cell.type === 'predicate') {
+    return [cell.uri];
+  } else if (cell.type === 'index') {
+    return [cell.index];
+  } else if (cell.type === 'object') {
+    // recurse to caculate pathFragment for collection, index, and address
+    return [
+      ...cell2PathFragment(
+        sheetMatrix[getRow(cell.collectionAddress)][getColumn(cell.collectionAddress)],
+        sheetMatrix
+      ),
+      ...cell2PathFragment(
+        sheetMatrix[getRow(cell.indexAddress)][getColumn(cell.indexAddress)],
+        sheetMatrix
+      ),
+      ...cell2PathFragment(
+        sheetMatrix[getRow(cell.predicateAddress)][getColumn(cell.predicateAddress)],
+        sheetMatrix
+      ),
+    ];
+  }
 
-//     const path = cell2Path(state, cell);
-//     let cellLength;
-//     let absolutePath;
+  throw new Error('Tried to get path for unknown cell type', cell.type);
+};
 
-//     if (type === 'index') {
-//       // TODO - this is wonky
-//       absolutePath = R.path([...path, 'value'], falcorJSON) ?
-//         [...R.path([...R.init(path), '$__path'], falcorJSON), R.last(path)] : // nested table - ['resource', <uri>, 'schema:name', 0]
-//         R.path([...path, '$__path'], falcorJSON) ||
-//         [];
-//     } else {
-//       absolutePath = R.path([...path, '$__path'], falcorJSON) || [];
-//     }
 
-//     // TODO - split materializeCell into separate fns for differnt types
-//     // TODO - cellLength is used for both objects and collections, even though
-//     // it means two different things to each cell type
-//     if (type === 'object') {
-//       cellLength = R.path([...path, 'length', 'value'], falcorJSON);
-//       cellLength = cellLength === undefined ? 1 : cellLength;
-//     }
+// TODO - mapping search to URIs should move to falcor router
+export const getSearchCollectionPath = (search) => ['resource', `schema:${search}`, 'skos:prefLabel'];
 
-//     if (type === 'searchCollection') {
-//       cellLength = R.path(['collection', uri, 'length', 'value'], falcorJSON);
-//     }
 
-//     if (type === 'objectCollection') {
-//       const parentPath = cell2Path(
-//         state,
-//         getCell(state, cell.parentObjectSheetId, cell.parentObjectAddress)
-//       );
-//       cellLength = R.path([...parentPath, 'length', 'value'], falcorJSON);
-//     }
-//     const cellUri = R.path([...path, 0, 'uri', 'value'], falcorJSON);
-//     const viewPath = getViewPath(type, path, absolutePath, cellLength, cellUri);
+export const getPredicatePath = (uri) => ['resource', uri, 'skos:prefLabel'];
 
-//     return {
-//       type,
-//       column,
-//       row,
-//       sheetId,
-//       tableId,
-//       boxValue: getBoxValue(falcorJSON, cell, path),
-//       path,
-//       viewPath,
-//       absolutePath,
-//       cellLength,
-//       view: {
-//         // TODO - create a memoized selector for this
-//         ...getCellView(state, sheetId, formatAddress(column, row)),
-//         ...getNodeViewForViewPath(state, viewPath),
-//         ...cellIsFocused(state, sheetId, formatAddress(cell.column, cell.row)) ?
-//           { focus: true } : {},
-//       },
-//     };
-//   },
-//   (materializedCell) => materializedCell
-// )(
-//   (_, sheetId, column, row) => `${sheetId}:${column}:${row}`,
-//   createDeepEqualitySelector
-// );
+
+export const getObjectPath = (collectionAddress, indexAddress, predicateAddress, sheetMatrix) => ([
+  ...cell2PathFragment(
+    sheetMatrix[getRow(collectionAddress)][getColumn(collectionAddress)],
+    sheetMatrix
+  ),
+  ...cell2PathFragment(
+    sheetMatrix[getRow(indexAddress)][getColumn(indexAddress)],
+    sheetMatrix
+  ),
+  ...cell2PathFragment(
+    sheetMatrix[getRow(predicateAddress)][getColumn(predicateAddress)],
+    sheetMatrix
+  ),
+]);
+
+
+export const materializeSearchCollection = (cell, graphFragment) => {
+  const relativePath = getSearchCollectionPath(cell.search);
+
+  // TODO - mapping search to URIs should move to falcor router
+  return {
+    ...cell,
+    cellLength: path(['collection', `schema:${cell.search}`, 'length', 'value'], graphFragment),
+    value: path([...relativePath, 'value'], graphFragment),
+  };
+};
+
+
+export const materializeIndex = (cell) => ({
+  ...cell,
+  value: cell.index,
+});
+
+
+export const materializePredicate = (cell, graphFragment) => {
+  const relativePath = getPredicatePath(cell.uri);
+
+  return {
+    ...cell,
+    value: path([...relativePath, 'value'], graphFragment),
+  };
+};
+
+
+export const materializeObject = (cell, graphFragment, sheetMatrix) => {
+  const relativePath = getObjectPath(
+    cell.collectionAddress, cell.indexAddress, cell.predicateAddress, sheetMatrix
+  );
+  const cellLength = path([...relativePath, 'length', 'value'], graphFragment);
+  let boxValue = path(relativePath, graphFragment);
+
+  // if boxValue is multivalue (not singleton), get first value
+  if (boxValue && boxValue['0']) {
+    boxValue = boxValue['0'];
+  }
+
+  // if boxValue points to an object, get its skos:prefLabel
+  if (boxValue && boxValue['skos:prefLabel']) {
+    boxValue = boxValue['skos:prefLabel'];
+  }
+
+  return {
+    ...cell,
+    cellLength: cellLength === undefined ? 1 : cellLength,
+    absolutePath: path([...relativePath, '$__path'], graphFragment) || [],
+    value: boxValue && boxValue.value,
+  };
+};
