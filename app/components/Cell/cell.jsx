@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React                   from 'react';
 import {}                      from 'prop-types';
+import CellValue               from '../CellValue';
 import                              './style.scss';
 
 
@@ -8,7 +9,7 @@ const camel2Kebab = (str) => str.replace(/([A-Z])/g, (g) => `-${g[0].toLowerCase
 
 
 const Cell = ({
-  column, row, type, hotKeys, focusView,
+  column, row, type, value, cellLength, hotKeys, focusView,
   onClick,
 }) => (
   <td
@@ -17,7 +18,14 @@ const Cell = ({
     onClick={onClick}
     {...hotKeys}
   >
-    {type}
+    <div className="cell-body">
+      <CellValue
+        type="atom"
+        value={value}
+        cellLength={cellLength}
+        pending={false}
+      />
+    </div>
   </td>
 );
 

@@ -31,8 +31,8 @@ export default compose(
   ),
   mapPropsStream(connectFalcor(prop('sheetPaths'))),
   connect(
-    (state, { sheetId }) => ({
-      sheetMatrix: getSheetMatrix(state, sheetId),
+    (state, { sheetId, graphFragment }) => ({
+      sheetMatrix: getSheetMatrix(state, sheetId, graphFragment.json || {}),
     }),
     (dispatch, { sheetId }) => ({
       focusCell: (column, row) => dispatch(focusCell(sheetId, column, row)), // TODO - add focus to node view

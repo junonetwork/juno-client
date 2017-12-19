@@ -16,7 +16,7 @@ import {
 }                             from './utils/table';
 
 
-store.subscribe(() => console.log('store emit'));
+// store.subscribe(() => console.log('store emit'));
 
 store.dispatch(
   batchActions([
@@ -26,7 +26,7 @@ store.dispatch(
       generateTableId('1', '0-0'),
       '0-0',
       'Person',
-      ['skos:prefLabel', 'schema:birthPlace', 'schema:age', 'schema:birthDate'],
+      ['skos:prefLabel', 'schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling'],
       [0, 2, 3]
     ),
   ])
