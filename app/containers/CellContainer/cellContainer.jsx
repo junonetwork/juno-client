@@ -29,62 +29,65 @@ export default compose(
   withHotKeys(
     prop('focusView'),
     {
-      up: ({ column, row, navigate, }) => (e) => {
+      up: ({ sheetId, column, row, navigate, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
-        navigate(column, row, 'up', 1);
+        navigate(sheetId, column, row, 'up', 1);
       },
-      'alt+up': ({ column, row, navigate, }) => (e) => {
+      'alt+up': ({ sheetId, column, row, navigate, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
-        navigate(column, row, 'up', FAST_STEP);
+        navigate(sheetId, column, row, 'up', FAST_STEP);
       },
-      down: ({ column, row, navigate, }) => (e) => {
+      down: ({ sheetId, column, row, navigate, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
-        navigate(column, row, 'down', 1);
+        navigate(sheetId, column, row, 'down', 1);
       },
-      'alt+down': ({ column, row, navigate, }) => (e) => {
+      'alt+down': ({ sheetId, column, row, navigate, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
-        navigate(column, row, 'down', FAST_STEP);
+        navigate(sheetId, column, row, 'down', FAST_STEP);
       },
-      left: ({ column, row, navigate, }) => (e) => {
+      left: ({ sheetId, column, row, navigate, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
-        navigate(column, row, 'left', 1);
+        navigate(sheetId, column, row, 'left', 1);
       },
-      'alt+left': ({ column, row, navigate, }) => (e) => {
+      'alt+left': ({ sheetId, column, row, navigate, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
-        navigate(column, row, 'left', FAST_STEP);
+        navigate(sheetId, column, row, 'left', FAST_STEP);
       },
-      right: ({ column, row, navigate, }) => (e) => {
+      right: ({ sheetId, column, row, navigate, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
-        navigate(column, row, 'right', 1);
+        navigate(sheetId, column, row, 'right', 1);
       },
-      'alt+right': ({ column, row, navigate, }) => (e) => {
+      'alt+right': ({ sheetId, column, row, navigate, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
-        navigate(column, row, 'right', FAST_STEP);
+        navigate(sheetId, column, row, 'right', FAST_STEP);
       },
     }
   ),
   withHandlers({
-    onClick: ({ column, row, focusCell, }) => (e) => {
+    onClick: ({ sheetId, column, row, focusCell, }) => (e) => {
       e.preventDefault();
       e.stopPropagation();
 
-      focusCell(column, row);
+      focusCell(sheetId, column, row);
+    },
+    onMouseEnter: ({ sheetId, column, row, teaseCell, }) => () => {
+      teaseCell(sheetId, column, row);
     },
   })
 )(Cell);

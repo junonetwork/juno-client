@@ -6,7 +6,7 @@ import {
 import Cell                    from '../../containers/CellContainer';
 
 
-const Row = ({ row, focusCell, navigate }) => (
+const Row = ({ row, focusCell, teaseCell, navigate }) => (
   <tr
     className="row"
   >
@@ -14,8 +14,9 @@ const Row = ({ row, focusCell, navigate }) => (
       <Cell
         key={cell.address}
         {...cell}
-        navigate={navigate}
         focusCell={focusCell}
+        teaseCell={teaseCell}
+        navigate={navigate}
       />
     ))}
   </tr>
