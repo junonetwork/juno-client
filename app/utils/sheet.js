@@ -1,6 +1,7 @@
+/* eslint-disable prefer-destructuring */
 import {
   range,
-}                        from 'ramda';
+}                                    from 'ramda';
 
 
 export const createSearchCollectionTable = (

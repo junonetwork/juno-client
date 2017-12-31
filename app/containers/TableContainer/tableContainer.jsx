@@ -35,7 +35,7 @@ export default compose(
       sheetMatrix: getSheetMatrix(state, sheetId, graphFragment.json || {}),
     }),
     (dispatch, { sheetId }) => ({
-      focusCell: (column, row) => dispatch(focusCell(sheetId, column, row)), // TODO - add focus to node view
+      focusCell: (column, row) => dispatch(focusCell(sheetId, column, row)),
       navigate: throttle((column, row, direction, steps) => (
         dispatch(navigate(column, row, sheetId, direction, steps))
       )),

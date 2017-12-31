@@ -20,14 +20,14 @@ import {
 
 store.dispatch(
   batchActions([
-    addSheet('1', 30, 30),
+    addSheet('1', 30, 40),
     addSearchCollectionTable(
       '1',
       generateTableId('1', '0-0'),
       '0-0',
       'Person',
       ['skos:prefLabel', 'schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling'],
-      [0, 2, 3]
+      [0, 2, 3, 0]
     ),
   ])
 );

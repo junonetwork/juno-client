@@ -9,11 +9,11 @@ const camel2Kebab = (str) => str.replace(/([A-Z])/g, (g) => `-${g[0].toLowerCase
 
 
 const Cell = ({
-  column, row, type, value, cellLength, hotKeys, focusView,
+  type, value, cellLength, hotKeys, focusView, focusNodeView,
   onClick,
 }) => (
   <td
-    className={`cell ${camel2Kebab(type)} ${focusView ? 'focus' : ''}`}
+    className={`cell ${camel2Kebab(type)} ${focusView ? 'focus' : ''} ${focusNodeView ? 'node-focus' : ''}`}
     role="gridcell"
     onClick={onClick}
     {...hotKeys}

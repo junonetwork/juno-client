@@ -1,5 +1,6 @@
 import React            from 'react';
 import {
+  oneOfType,
   string,
   number,
   bool,
@@ -40,8 +41,8 @@ const CellValue = ({ type, value, cellLength, pending }) => {
 
 CellValue.propTypes = {
   type: string.isRequired,
-  value: string,
-  cellLength: number.isRequired,
+  value: oneOfType([string, number]),
+  cellLength: number,
   pending: bool.isRequired,
 };
 

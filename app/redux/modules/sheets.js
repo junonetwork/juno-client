@@ -3,6 +3,7 @@ import {
   nthArg,
   omit,
   range,
+  equals,
 }                                    from 'ramda';
 import createCachedSelector          from 're-reselect';
 import {
@@ -21,7 +22,6 @@ import {
   createEmpty,
 }                                    from '../../utils/cell';
 import {
-  updateInMatrix,
   setRowInMatrix,
 }                                    from '../../utils/table';
 import {
@@ -161,30 +161,44 @@ export const getSheetMatrixWithoutViewState = createCachedSelector(
  * @param {String} sheetId
  * @param {Object} graphFragment
  */
-/**
- * NOTE
- *   - punt on nodeView state and focus on more important things.  the implications of this part of the architecture depend on a bunch of other things that aren't built.  properly implementing this will be easier once those other parts are in place
- *   - though maybe it still makes sense to materialize tableMatrices, rather than the entire sheetMatrix
- */
 export const getSheetMatrix = createCachedSelector(
   nthArg(1),
   getSheetMatrixWithoutViewState,
   getCellFocusDescriptor,
-  (
-    sheetId,
-    matrix,
-    cellFocusDescriptor
-  ) => {
-    if (cellFocusDescriptor && cellFocusDescriptor.sheetId === sheetId) {
-      return updateInMatrix(
-        cellFocusDescriptor.column,
-        cellFocusDescriptor.row,
-        (cell) => ({ ...cell, focusView: true }),
-        matrix
-      );
-    }
+  (sheetId, matrix, { sheetId: focusSheetId, column: focusColumn, row: focusRow } = {}) => {
+    const absolutePath = focusRow &&
+      focusColumn &&
+      matrix[focusRow][focusColumn].absolutePath ?
+      matrix[focusRow][focusColumn].absolutePath :
+      [];
 
-    return matrix;
+    return matrix
+      .map((row) => {
+        // TODO - find a more idiomatic way to maintain referential equality for unmutated rows
+        let mutatedRow = false;
+
+        const newRow = row.map((cell) => {
+          let _cell = cell;
+
+          if (
+            focusSheetId === sheetId &&
+            focusColumn === cell.column &&
+            focusRow === cell.row
+          ) {
+            mutatedRow = true;
+            _cell = { ..._cell, focusView: true };
+          }
+
+          if (absolutePath.length > 0 && equals(cell.absolutePath, absolutePath)) {
+            mutatedRow = true;
+            _cell = { ..._cell, focusNodeView: true };
+          }
+
+          return _cell;
+        });
+
+        return mutatedRow ? newRow : row;
+      });
   }
 )(
   nthArg(1)
