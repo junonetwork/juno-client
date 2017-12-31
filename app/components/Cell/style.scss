@@ -14,18 +14,17 @@ $cell-height: 26px;
   &:focus {
     outline: none;
   }
-  &.teaser:hover,
-  &.empty:hover,
-  &:hover {
+  &.node-focus {
+    box-shadow: 0px 0px 0px 1px transparentize($table-active, .2) inset;
+  }
+  &.focus {
+    box-shadow: 0px 0px 0px 1px $table-active inset;
+  }
+  &:hover:not(.focus) {
     box-shadow: 0px 0px 0px 1px $table-teaser inset;
   }
   &.teaser {
     box-shadow: 0px 0px 0px 1px transparentize($table-teaser, .2) inset;
-  }
-  &.active.focus,
-  &.empty.focus,
-  &:focus { // NOTE - being in :focus state and not also either in .active.focus or .empty.focus is a bug
-    box-shadow: 0px 0px 0px 1px $table-active inset;
   }
   &.active {
     box-shadow: 0px 0px 0px 1px transparentize($table-active, .4) inset;
@@ -40,10 +39,6 @@ $cell-height: 26px;
     // outline: 1px solid $b_cyan;
     box-shadow: 0px 0px 0px 2px $b_cyan inset;
   }
-  // &.enhanced-mirrored {
-  //   // outline: 1px solid transparentize($b_cyan, .6);
-  //   box-shadow: 0px 0px 0px 2px transparentize($b_cyan, .6) inset;
-  // }
   &.copied:before {
     content: ' ';
     position: absolute;
