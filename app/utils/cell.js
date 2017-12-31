@@ -210,6 +210,17 @@ export const materializeObject = (cell, graphFragment, sheetMatrix) => {
     cell.collectionAddress, cell.indexAddress, cell.predicateAddress, sheetMatrix
   );
   const cellLength = path([...relativePath, 'length', 'value'], graphFragment);
+
+  let absolutePath;
+
+  if (cellLength === 1 && path([...relativePath, 0, '$__path'], graphFragment)) {
+    absolutePath = path([...relativePath, 0, '$__path'], graphFragment);
+  } else if (path([...relativePath, '$__path'], graphFragment)) {
+    absolutePath = path([...relativePath, '$__path'], graphFragment);
+  } else {
+    absolutePath = [];
+  }
+
   let boxValue = path(relativePath, graphFragment);
 
   // if boxValue is multivalue (not singleton), get first value
@@ -222,10 +233,14 @@ export const materializeObject = (cell, graphFragment, sheetMatrix) => {
     boxValue = boxValue['skos:prefLabel'];
   }
 
+  if (cell.row === 1 && cell.column === 2 && graphFragment) {
+    console.log('materialize', path([...relativePath, '$__path'], graphFragment));
+  }
+
   return {
     ...cell,
     cellLength: cellLength === undefined ? 1 : cellLength,
-    absolutePath: path([...relativePath, '$__path'], graphFragment) || [],
+    absolutePath,
     value: boxValue && boxValue.value,
   };
 };
