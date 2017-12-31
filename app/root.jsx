@@ -26,8 +26,8 @@ store.dispatch(
       generateTableId('1', '0-0'),
       '0-0',
       'Person',
-      ['skos:prefLabel', 'schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling'],
-      [0, 2, 3, 0]
+      ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling'],
+      [0, 2, 3, 0, 2, 3]
     ),
   ])
 );
