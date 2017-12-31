@@ -19,7 +19,7 @@ const keyMap = {
   // TODO - add letters, numbers, symbols
 };
 
-const event2HandlerKey = ({ which, metaKey, altKey, shiftKey }) =>
+const event2HandlerKey = ({ which, metaKey, altKey, shiftKey, }) =>
   `${altKey ? 'alt+' : ''}${shiftKey ? 'shift+' : ''}${metaKey ? 'cmd+' : ''}${keyMap[which]}`;
 
 

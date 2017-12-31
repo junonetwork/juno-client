@@ -45,7 +45,7 @@ const connect = (falcorModel, _graphChange$) => (
       const _paths = typeof paths === 'function' ? paths(props) : paths;
 
       if (!_paths) {
-        return Observable.of({ ...props, graphFragment: {}, graphFragmentStatus: 'complete' });
+        return Observable.of({ ...props, graphFragment: {}, graphFragmentStatus: 'complete', });
       } else if (_paths instanceof Error) {
         return Observable.of({
           ...props, graphFragment: {}, graphFragmentStatus: 'error', error: _paths.message,
@@ -72,12 +72,12 @@ const connect = (falcorModel, _graphChange$) => (
       return Observable.merge(
         graphQuery$
           .startWith({})
-          .map((graphFragment) => ({ ...props, graphFragment, graphFragmentStatus: 'next' }))
+          .map((graphFragment) => ({ ...props, graphFragment, graphFragmentStatus: 'next', }))
           .catch((err, caught) => errorHandler(err, props, caught)),
         graphQuery$
           .last()
           .catch(() => Observable.empty())
-          .map((graphFragment) => ({ ...props, graphFragment, graphFragmentStatus: 'complete' }))
+          .map((graphFragment) => ({ ...props, graphFragment, graphFragmentStatus: 'complete', }))
       )
         .repeatWhen(() => _graphChange$)
         .auditTime(0); // audit time screws everything up: latency perf tests, input cursors jumping to end in input
