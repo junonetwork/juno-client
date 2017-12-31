@@ -25,16 +25,16 @@ import throttle            from '../../utils/throttleAnimationFrame';
 export default compose(
   setDisplayName('TableContainer'),
   connect(
-    (state, { sheetId }) => ({
+    (state, { sheetId, }) => ({
       sheetPaths: getSheetPathSets(state, sheetId),
     }),
   ),
   mapPropsStream(connectFalcor(prop('sheetPaths'))),
   connect(
-    (state, { sheetId, graphFragment }) => ({
+    (state, { sheetId, graphFragment, }) => ({
       sheetMatrix: getSheetMatrix(state, sheetId, graphFragment.json || {}),
     }),
-    (dispatch, { sheetId }) => ({
+    (dispatch, { sheetId, }) => ({
       focusCell: (column, row) => dispatch(focusCell(sheetId, column, row)),
       navigate: throttle((column, row, direction, steps) => (
         dispatch(navigate(column, row, sheetId, direction, steps))

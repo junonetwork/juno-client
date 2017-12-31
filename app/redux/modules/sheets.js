@@ -33,7 +33,7 @@ import {
  * utils
  */
 const createSheet = (maxColumn, maxRow, tables) =>
-  ({ maxColumn, maxRow, tables });
+  ({ maxColumn, maxRow, tables, });
 
 
 /**
@@ -124,7 +124,7 @@ export const getSheetMatrixWithoutViewState = createCachedSelector(
 
     return tables
       .reduce(
-        (sheetMatrix, { column, row, table }) => (
+        (sheetMatrix, { column, row, table, }) => (
           table
             .slice(0, Math.max(sheetMatrix.length - row, 0))
             .reduce((_sheetMatrix, tableRow, idx) => (
@@ -165,7 +165,7 @@ export const getSheetMatrix = createCachedSelector(
   nthArg(1),
   getSheetMatrixWithoutViewState,
   getCellFocusDescriptor,
-  (sheetId, matrix, { sheetId: focusSheetId, column: focusColumn, row: focusRow } = {}) => {
+  (sheetId, matrix, { sheetId: focusSheetId, column: focusColumn, row: focusRow, } = {}) => {
     const absolutePath = focusRow &&
       focusColumn &&
       matrix[focusRow][focusColumn].absolutePath ?
@@ -186,12 +186,12 @@ export const getSheetMatrix = createCachedSelector(
             focusRow === cell.row
           ) {
             mutatedRow = true;
-            _cell = { ..._cell, focusView: true };
+            _cell = { ..._cell, focusView: true, };
           }
 
           if (absolutePath.length > 0 && equals(cell.absolutePath, absolutePath)) {
             mutatedRow = true;
-            _cell = { ..._cell, focusNodeView: true };
+            _cell = { ..._cell, focusNodeView: true, };
           }
 
           return _cell;
@@ -218,13 +218,13 @@ export const INCREASE_SHEET_MAX_ROW = 'INCREASE_SHEET_MAX_ROW';
  * action creators
  */
 export const addSheet = (sheetId, maxColumn, maxRow, tables = []) =>
-  ({ type: ADD_SHEET, sheetId, maxColumn, maxRow, tables });
+  ({ type: ADD_SHEET, sheetId, maxColumn, maxRow, tables, });
 export const removeSheet = (sheetId) =>
-  ({ type: REMOVE_SHEET, sheetId });
+  ({ type: REMOVE_SHEET, sheetId, });
 export const increaseSheetMaxColumn = (sheetId) =>
-  ({ type: INCREASE_SHEET_MAX_COLUMN, sheetId });
+  ({ type: INCREASE_SHEET_MAX_COLUMN, sheetId, });
 export const increaseSheetMaxRow = (sheetId) =>
-  ({ type: INCREASE_SHEET_MAX_ROW, sheetId });
+  ({ type: INCREASE_SHEET_MAX_ROW, sheetId, });
 
 
 /**
@@ -235,7 +235,7 @@ export default (
   action
 ) => {
   if (action.type === ADD_SHEET) {
-    const { maxColumn, maxRow, tables } = action;
+    const { maxColumn, maxRow, tables, } = action;
 
     return {
       ...state,

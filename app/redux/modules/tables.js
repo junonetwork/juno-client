@@ -43,7 +43,7 @@ export const getTableIds = (state, sheetId) =>
  */
 export const getTablePathSets = createCachedSelector(
   getTable,
-  ({ search, indices, predicates }) => [
+  ({ search, indices, predicates, }) => [
     // TODO - mapping search to URIs should move to falcor router
     ['resource', `schema:${search}`, 'skos:prefLabel'], // collection
     ['collection', `schema:${search}`, 'length'], // collection length
@@ -65,7 +65,7 @@ export const getTableCells = createCachedSelector(
   nthArg(1),
   nthArg(2),
   (state, _, tableId) => getTable(state, tableId),
-  (sheetId, tableId, { collectionAddress, predicates, indices, search }) => {
+  (sheetId, tableId, { collectionAddress, predicates, indices, search, }) => {
     // console.log('getTableCells');
 
     const collectionColumn = getColumnFromAddress(collectionAddress);
@@ -142,7 +142,7 @@ export const addSearchCollectionTable = (
 });
 
 export const removeTable = (sheetId, tableId) =>
-  ({ type: REMOVE_TABLE, sheetId, tableId });
+  ({ type: REMOVE_TABLE, sheetId, tableId, });
 
 
 /**
@@ -153,7 +153,7 @@ export default (
   action
 ) => {
   if (action.type === ADD_SEARCH_COLLECTION_TABLE) {
-    const { sheetId, tableId, collectionAddress, search, predicates, indices } = action;
+    const { sheetId, tableId, collectionAddress, search, predicates, indices, } = action;
     return {
       ...state,
       [tableId]: createSearchCollectionTable(

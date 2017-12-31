@@ -32,10 +32,10 @@ const SET_FOCUS = 'SET_FOCUS';
 /**
  * actions
  */
-export const setFocus = (focusDescriptor) =>
-  ({ type: SET_FOCUS, focusDescriptor });
-export const focusCell = (sheetId, column, row) =>
-  ({ type: SET_FOCUS, focusDescriptor: { sheet: { sheetId, column, row } } });
+export const setFocus = (focusDescriptor) => ({ type: SET_FOCUS, focusDescriptor, });
+export const focusCell = (sheetId, column, row) => ({
+  type: SET_FOCUS, focusDescriptor: { sheet: { sheetId, column, row, }, },
+});
 
 
 export const navigate = (column, row, sheetId, direction, steps) => (dispatch, getState) => {

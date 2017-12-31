@@ -29,49 +29,49 @@ export default compose(
   withHotKeys(
     prop('focusView'),
     {
-      up: ({ column, row, navigate }) => (e) => {
+      up: ({ column, row, navigate, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
         navigate(column, row, 'up', 1);
       },
-      'alt+up': ({ column, row, navigate }) => (e) => {
+      'alt+up': ({ column, row, navigate, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
         navigate(column, row, 'up', FAST_STEP);
       },
-      down: ({ column, row, navigate }) => (e) => {
+      down: ({ column, row, navigate, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
         navigate(column, row, 'down', 1);
       },
-      'alt+down': ({ column, row, navigate }) => (e) => {
+      'alt+down': ({ column, row, navigate, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
         navigate(column, row, 'down', FAST_STEP);
       },
-      left: ({ column, row, navigate }) => (e) => {
+      left: ({ column, row, navigate, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
         navigate(column, row, 'left', 1);
       },
-      'alt+left': ({ column, row, navigate }) => (e) => {
+      'alt+left': ({ column, row, navigate, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
         navigate(column, row, 'left', FAST_STEP);
       },
-      right: ({ column, row, navigate }) => (e) => {
+      right: ({ column, row, navigate, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
         navigate(column, row, 'right', 1);
       },
-      'alt+right': ({ column, row, navigate }) => (e) => {
+      'alt+right': ({ column, row, navigate, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
@@ -80,7 +80,7 @@ export default compose(
     }
   ),
   withHandlers({
-    onClick: ({ column, row, focusCell }) => (e) => {
+    onClick: ({ column, row, focusCell, }) => (e) => {
       e.preventDefault();
       e.stopPropagation();
 
