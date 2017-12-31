@@ -10,24 +10,24 @@ $cell-height: 26px;
   vertical-align: bottom;
   user-select: none;
 
-  // state
   &:focus {
     outline: none;
+  }
+
+  &:hover:not(.focus) {
+    box-shadow: 0px 0px 0px 1px $table-teaser inset;
+  }
+  &.teaser {
+    box-shadow: 0px 0px 0px 1px transparentize($table-teaser, .2) inset;
+  }
+  &.node-tease {
+    box-shadow: 0px 0px 0px 1px transparentize($table-teaser, .4) inset;
   }
   &.node-focus {
     box-shadow: 0px 0px 0px 1px transparentize($table-active, .2) inset;
   }
   &.focus {
     box-shadow: 0px 0px 0px 1px $table-active inset;
-  }
-  &:hover:not(.focus) {
-    box-shadow: 0px 0px 0px 1px $table-teaser inset;
-  }
-  &.node-tease {
-    box-shadow: 0px 0px 0px 1px transparentize($table-teaser, .4) inset;
-  }
-  &.teaser {
-    box-shadow: 0px 0px 0px 1px transparentize($table-teaser, .2) inset;
   }
   // &.active {
   //   box-shadow: 0px 0px 0px 1px transparentize($table-active, .4) inset;
