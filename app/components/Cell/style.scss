@@ -23,22 +23,25 @@ $cell-height: 26px;
   &:hover:not(.focus) {
     box-shadow: 0px 0px 0px 1px $table-teaser inset;
   }
+  &.node-tease {
+    box-shadow: 0px 0px 0px 1px transparentize($table-teaser, .4) inset;
+  }
   &.teaser {
     box-shadow: 0px 0px 0px 1px transparentize($table-teaser, .2) inset;
   }
-  &.active {
-    box-shadow: 0px 0px 0px 1px transparentize($table-active, .4) inset;
-  }
-  &.active.enhanced {
-    outline: 1px solid $table-active;
-  }
-  &:active {
-    box-shadow: 0px 0px 0px 1px $table-click inset;
-  }
-  &.enhanced {
-    // outline: 1px solid $b_cyan;
-    box-shadow: 0px 0px 0px 2px $b_cyan inset;
-  }
+  // &.active {
+  //   box-shadow: 0px 0px 0px 1px transparentize($table-active, .4) inset;
+  // }
+  // &.active.enhanced {
+  //   outline: 1px solid $table-active;
+  // }
+  // &:active {
+  //   box-shadow: 0px 0px 0px 1px $table-click inset;
+  // }
+  // &.enhanced {
+  //   // outline: 1px solid $b_cyan;
+  //   box-shadow: 0px 0px 0px 2px $b_cyan inset;
+  // }
   &.copied:before {
     content: ' ';
     position: absolute;

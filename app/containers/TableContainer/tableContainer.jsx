@@ -19,6 +19,9 @@ import {
   focusCell,
   navigate,
 }                          from '../../redux/modules/focus';
+import {
+  teaseCell,
+}                          from '../../redux/modules/teaser';
 import throttle            from '../../utils/throttleAnimationFrame';
 
 
@@ -34,9 +37,10 @@ export default compose(
     (state, { sheetId, graphFragment, }) => ({
       sheetMatrix: getSheetMatrix(state, sheetId, graphFragment.json || {}),
     }),
-    (dispatch, { sheetId, }) => ({
-      focusCell: (column, row) => dispatch(focusCell(sheetId, column, row)),
-      navigate: throttle((column, row, direction, steps) => (
+    (dispatch) => ({
+      focusCell: (sheetId, column, row) => dispatch(focusCell(sheetId, column, row)),
+      teaseCell: throttle((sheetId, column, row) => dispatch(teaseCell(sheetId, column, row))),
+      navigate: throttle((sheetId, column, row, direction, steps) => (
         dispatch(navigate(column, row, sheetId, direction, steps))
       )),
     })

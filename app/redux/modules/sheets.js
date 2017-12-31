@@ -15,6 +15,9 @@ import {
   getCellFocusDescriptor,
 }                                    from './focus';
 import {
+  getCellTeaserDescriptor,
+}                                    from './teaser';
+import {
   materializeSearchCollection,
   materializeIndex,
   materializePredicate,
@@ -165,12 +168,26 @@ export const getSheetMatrix = createCachedSelector(
   nthArg(1),
   getSheetMatrixWithoutViewState,
   getCellFocusDescriptor,
-  (sheetId, matrix, { sheetId: focusSheetId, column: focusColumn, row: focusRow, } = {}) => {
-    const absolutePath = focusRow &&
+  getCellTeaserDescriptor,
+  (
+    sheetId,
+    matrix,
+    { sheetId: focusSheetId, column: focusColumn, row: focusRow, } = {},
+    { column: teaserColumn, row: teaserRow, } = {},
+  ) => {
+    const focusCellAbsolutePath = focusRow &&
       focusColumn &&
       matrix[focusRow][focusColumn].absolutePath ?
       matrix[focusRow][focusColumn].absolutePath :
       [];
+
+    const teaserCellAbsolutePath = teaserRow &&
+      teaserColumn &&
+      matrix[teaserRow][teaserColumn].absolutePath ?
+      matrix[teaserRow][teaserColumn].absolutePath :
+      [];
+
+    // TODO - if absolutePath is empty or doesn't exist, don't bother looping over every cell
 
     return matrix
       .map((row) => {
@@ -189,9 +206,20 @@ export const getSheetMatrix = createCachedSelector(
             _cell = { ..._cell, focusView: true, };
           }
 
-          if (absolutePath.length > 0 && equals(cell.absolutePath, absolutePath)) {
+          if (
+            focusCellAbsolutePath.length > 0 &&
+            equals(cell.absolutePath, focusCellAbsolutePath)
+          ) {
             mutatedRow = true;
             _cell = { ..._cell, focusNodeView: true, };
+          }
+
+          if (
+            teaserCellAbsolutePath.length > 0 &&
+            equals(cell.absolutePath, teaserCellAbsolutePath)
+          ) {
+            mutatedRow = true;
+            _cell = { ..._cell, teaserNodeView: true, };
           }
 
           return _cell;

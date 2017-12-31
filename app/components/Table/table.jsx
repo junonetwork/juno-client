@@ -4,7 +4,7 @@ import Row                     from '../Row';
 import                              './style.scss';
 
 
-const Table = ({ sheetMatrix, focusCell, navigate }) => (
+const Table = ({ sheetMatrix, focusCell, teaseCell, navigate }) => (
   <table
     className="table"
     role="grid"
@@ -15,6 +15,7 @@ const Table = ({ sheetMatrix, focusCell, navigate }) => (
           key={idx} // eslint-disable-line react/no-array-index-key
           row={row}
           focusCell={focusCell}
+          teaseCell={teaseCell}
           navigate={navigate}
         />
       ))}
