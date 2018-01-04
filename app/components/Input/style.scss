@@ -1,0 +1,11 @@
+@import '../../styles/palette';
+@import '../../styles/fonts';
+
+
+.input {
+  font-family: $monospace;
+  background-color: transparent;
+  width: 100%;
+  color: darken($text-color, 20%);
+  border: none;
+}

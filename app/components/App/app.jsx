@@ -11,7 +11,7 @@ export default () => (
       <div
         className="scroll-styled table-window"
       >
-        <Table sheetId="1" />
+        <Table sheetId="0" />
       </div>
     </div>
   </div>

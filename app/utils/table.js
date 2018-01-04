@@ -1,6 +1,3 @@
-export const generateTableId = (sheetId, address) => `${sheetId}:${address}`;
-
-
 export const setInMatrix = (column, row, value, matrix) => {
   const newRow = [
     ...matrix[row].slice(0, column),

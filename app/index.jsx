@@ -15,8 +15,9 @@ import {
   addSearchCollectionTable,
 }                             from './redux/modules/tables';
 import {
-  generateTableId,
-}                             from './utils/table';
+  formatSheetAddress,
+  formatAddress,
+}                             from './utils/cell';
 import                             './style.scss';
 
 
@@ -29,11 +30,11 @@ if (process.env.NODE_ENV === 'development') {
 
 store.dispatch(
   batchActions([
-    addSheet('1', 30, 30),
+    addSheet(0, 30, 30),
     addSearchCollectionTable(
-      '1',
-      generateTableId('1', '0-0'),
-      '0-0',
+      '0',
+      formatSheetAddress('0', 0, 0),
+      formatAddress(0, 0),
       'Person',
       ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling'],
       [0, 2, 3, 0, 2, 3]
