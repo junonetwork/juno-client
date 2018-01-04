@@ -164,6 +164,63 @@ export const getSheetMatrixWithoutViewState = createCachedSelector(
  * @param {String} sheetId
  * @param {Object} graphFragment
  */
+/**
+ * the body of getSheetMatrix should be a composition of withCellFocus, withCellTeaser, withCellEnhanced, withDraggedTableFootprint
+ *
+ * const getSheetMatrix = pipe(
+ *   (state, sheetId, graphFragment) => ({
+ *     state, sheetId, graphFragment, tables: getSheetTables(state, sheetId),
+ *   }),
+ *   ({ state, sheetId, graphFragment, tables }) => ({
+ *     state, sheetId, graphFragment, sheetMatrix: tables2SheetMatrix(state, sheetId, tables),
+ *   }),
+ *   ({ state, sheetId, graphFragment, sheetMatrix }) => ({
+ *     state, sheetId, ...materializeSheetMatrix(graphFragment, sheetMatrix),
+ *   }),
+ *   ({ state, sheetId, graphPathMap, sheetMatrix }) => ({
+ *     state, sheetId, graphPathMap, sheetMatrix: withCellFocus(state, sheetId, sheetMatrix, graphPathMap),
+ *   }),
+ *   ({ state, sheetId, graphPathMap, sheetMatrix }) => ({
+ *     state, sheetId, graphPathMap, sheetMatrix: withCellTeaser(state, sheetId, sheetMatrix, graphPathMap),
+ *   }),
+ *   ({ state, sheetId, graphPathMap, sheetMatrix }) => ({
+ *     state, sheetId, graphPathMap, sheetMatrix: withCellEnhanced(state, sheetId, sheetMatrix),
+ *   }),
+ *   ({ state, sheetId, graphPathMap, sheetMatrix }) => (
+ *     withDraggedTableFootprint(state, sheetId, sheetMatrix),
+ *   )
+ * );
+ *
+ * getSheetMatrix(state, sheetId, graphFragment);
+ *
+ *
+ *
+ * // or instead close over arguments, instead of forwarding them
+ * const getSheetMatrix = (state, sheetId, graphFragment) => pipe(
+ *   (tables) => (
+ *     tables2SheetMatrix(state, sheetId, tables)
+ *   ),
+ *   (sheetMatrix) => (
+ *     materializeSheetMatrix(graphFragment, sheetMatrix)
+ *   ),
+ *   ({ graphPathMap, sheetMatrix }) => ({
+ *     graphPathMap, sheetMatrix: withCellFocus(state, sheetId, sheetMatrix, graphPathMap),
+ *   }),
+ *   ({ graphPathMap, sheetMatrix }) => ({
+ *     graphPathMap, sheetMatrix: withCellTeaser(state, sheetId, sheetMatrix, graphPathMap),
+ *   }),
+ *   ({ graphPathMap, sheetMatrix }) => (
+ *     withCellEnhanced(state, sheetId, sheetMatrix)
+ *   ),
+ *   (sheetMatrix) => (
+ *     withDraggedTableFootprint(state, sheetId, sheetMatrix),
+ *   )
+ * )(getSheetTables(state, sheetId));
+ *
+ *
+ * getSheetMatrix(state, sheetId, graphFragment);
+ *
+ */
 export const getSheetMatrix = createCachedSelector(
   nthArg(1),
   getSheetMatrixWithoutViewState,
