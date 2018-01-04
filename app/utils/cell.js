@@ -5,6 +5,8 @@ import {
 
 export const formatAddress = (column, row) => `${column}-${row}`;
 
+export const formatSheetAddress = (sheetId, column, row) => `${sheetId}-${column}-${row}`;
+
 export const getRowFromAddress = (address) => +/[0-9]+$/.exec(address)[0];
 
 export const getColumnFromAddress = (address) => +/^[0-9]+/.exec(address)[0];

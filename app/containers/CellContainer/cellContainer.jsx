@@ -6,6 +6,7 @@ import {
   pure,
   setDisplayName,
   withHandlers,
+  withState,
   // shouldUpdate,
 }                          from 'recompose';
 import withHotKeys         from '../../hoc/withHotKeys';
@@ -26,6 +27,7 @@ export default compose(
   //   return true;
   // }),
   pure,
+  withState('cellInput', 'setCellInput', ''),
   withHotKeys(
     prop('focusView'),
     {
@@ -77,6 +79,14 @@ export default compose(
 
         navigate(sheetId, column, row, 'right', FAST_STEP);
       },
+      delete: ({ cellInput, setCellInput, }) => (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (cellInput) {
+          setCellInput(cellInput.slice(0, -1));
+        }
+      },
     }
   ),
   withHandlers({
@@ -88,6 +98,12 @@ export default compose(
     },
     onMouseEnter: ({ sheetId, column, row, teaseCell, }) => () => {
       teaseCell(sheetId, column, row);
+    },
+    onKeyPress: ({ cellInput, setCellInput, }) => (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      setCellInput(cellInput + String.fromCharCode(e.which));
     },
   })
 )(Cell);

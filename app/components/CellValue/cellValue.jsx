@@ -4,15 +4,11 @@ import {
   string,
   number,
   bool,
-  shape,
 }                        from 'prop-types';
-// import {
-//   VALUE,
-// }                        from '../../constants/typeDefs';
 import                        './style.scss';
 
 
-const CellValue = ({ type, value, cellLength, pending }) => {
+const CellValue = ({ type, value, cellLength, pending, }) => {
   if (type === 'error') {
     return (
       <div className="cell-value error" title={value}>ERR</div>
@@ -34,10 +30,12 @@ const CellValue = ({ type, value, cellLength, pending }) => {
       </div>
     );
   }
+
   return (
     <div className="cell-value single">{value}</div>
   );
 };
+
 
 CellValue.propTypes = {
   type: string.isRequired,
