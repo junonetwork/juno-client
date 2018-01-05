@@ -15,6 +15,9 @@ import {
   addSearchCollectionTable,
 }                             from './redux/modules/tables';
 import {
+  focusCell,
+}                             from './redux/modules/focus';
+import {
   formatSheetAddress,
   formatAddress,
 }                             from './utils/cell';
@@ -39,6 +42,7 @@ store.dispatch(
       ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling'],
       [0, 2, 3, 0, 2, 3]
     ),
+    // focusCell('0', 0, 0),
   ])
 );
 

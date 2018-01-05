@@ -6,7 +6,9 @@ import {
 import Cell                    from '../../containers/CellContainer';
 
 
-const Row = ({ row, focusCell, teaseCell, navigate }) => (
+const Row = ({
+  row, focusCell, teaseCell, enhanceCell, removeEnhanceCell, navigate
+}) => (
   <tr
     className="row"
   >
@@ -16,6 +18,8 @@ const Row = ({ row, focusCell, teaseCell, navigate }) => (
         {...cell}
         focusCell={focusCell}
         teaseCell={teaseCell}
+        enhanceCell={enhanceCell}
+        removeEnhanceCell={removeEnhanceCell}
         navigate={navigate}
       />
     ))}

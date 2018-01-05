@@ -14,12 +14,12 @@ $cell-height: 26px;
     outline: none;
   }
 
-  &:hover:not(.focus) {
+  &:hover:not(.focus):not(.node-enhance) {
     box-shadow: 0px 0px 0px 1px $table-teaser inset;
   }
-  &.teaser {
-    box-shadow: 0px 0px 0px 1px transparentize($table-teaser, .2) inset;
-  }
+  // &.teaser {
+  //   box-shadow: 0px 0px 0px 1px transparentize($table-teaser, .2) inset;
+  // }
   &.node-tease {
     box-shadow: 0px 0px 0px 1px transparentize($table-teaser, .4) inset;
   }
@@ -38,10 +38,10 @@ $cell-height: 26px;
   // &:active {
   //   box-shadow: 0px 0px 0px 1px $table-click inset;
   // }
-  // &.enhanced {
-  //   // outline: 1px solid $b_cyan;
-  //   box-shadow: 0px 0px 0px 2px $b_cyan inset;
-  // }
+  &.node-enhance {
+    // outline: 1px solid $b_cyan;
+    box-shadow: 0px 0px 0px 2px $b_cyan inset;
+  }
   &.copied:before {
     content: ' ';
     position: absolute;

@@ -3,13 +3,17 @@ import {
 }                 from 'ramda';
 
 
+// TODO - replace formatAddress and getRow/Column with formatSheetAddress and destructureAddress, maintaining the names of the former
 export const formatAddress = (column, row) => `${column}-${row}`;
-
-export const formatSheetAddress = (sheetId, column, row) => `${sheetId}-${column}-${row}`;
 
 export const getRowFromAddress = (address) => +/[0-9]+$/.exec(address)[0];
 
 export const getColumnFromAddress = (address) => +/^[0-9]+/.exec(address)[0];
+
+export const formatSheetAddress = (sheetId, column, row) => `${sheetId}-${column}-${row}`;
+
+export const destructureSheetAddress = (sheetAddress) => sheetAddress.split('-');
+
 
 const getRow = getRowFromAddress;
 const getColumn = getColumnFromAddress;
