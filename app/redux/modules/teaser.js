@@ -9,6 +9,7 @@ import {
 export const getTeaserDescriptor = (state) => state.teaser;
 export const getCellTeaserDescriptor = (state) => path(['teaser', 'sheet'], state);
 
+
 /**
  * constants
  */

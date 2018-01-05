@@ -4,6 +4,7 @@ import {
   omit,
   range,
   equals,
+  assoc,
 }                                    from 'ramda';
 import createCachedSelector          from 're-reselect';
 import {
@@ -25,11 +26,12 @@ import {
   createEmpty,
 }                                    from '../../utils/cell';
 import {
-  setRowInMatrix,
+  setRowInMatrix, updateInMatrix,
 }                                    from '../../utils/table';
 import {
   arraySingleDepthEqualitySelector,
 }                                    from '../../utils/selectors';
+import { getEnhancedCells } from './enhanced';
 
 
 /**
@@ -198,11 +200,32 @@ export const getSheetMatrixWithoutViewState = createCachedSelector(
  * // or instead close over arguments, instead of forwarding them
  * const getSheetMatrix = (state, sheetId, graphFragment) => pipe(
  *   (tables) => (
- *     tables2SheetMatrix(state, sheetId, tables)
+ *     materializeTables(graphFragment, tables)
+ *   ),
+ *   ({ graphPathMap, tables }) => ({
+ *     graphPathMap, sheetMatrix: tables2SheetMatrix(state, sheetId, tables)
+ *   }),
+ *   ({ graphPathMap, sheetMatrix }) => ({
+ *     graphPathMap, sheetMatrix: withCellFocus(state, sheetId, sheetMatrix, graphPathMap),
+ *   }),
+ *   ({ graphPathMap, sheetMatrix }) => ({
+ *     graphPathMap, sheetMatrix: withCellTeaser(state, sheetId, sheetMatrix, graphPathMap),
+ *   }),
+ *   ({ graphPathMap, sheetMatrix }) => (
+ *     withCellEnhanced(state, sheetId, sheetMatrix)
  *   ),
  *   (sheetMatrix) => (
- *     materializeSheetMatrix(graphFragment, sheetMatrix)
- *   ),
+ *     withDraggedTableFootprint(state, sheetId, sheetMatrix),
+ *   )
+ * )(getSheetTables(state, sheetId));
+ *
+ *
+ * // or move piped functions outside of getSheetMatrix closure
+ * const getSheetMatrix = (state, sheetId, graphFragment) => pipe(
+ *   materializeTables(graphFragment)
+ *   ({ graphPathMap, tables }) => ({
+ *     graphPathMap, sheetMatrix: tables2SheetMatrix(state, sheetId, tables)
+ *   }),
  *   ({ graphPathMap, sheetMatrix }) => ({
  *     graphPathMap, sheetMatrix: withCellFocus(state, sheetId, sheetMatrix, graphPathMap),
  *   }),
@@ -226,11 +249,13 @@ export const getSheetMatrix = createCachedSelector(
   getSheetMatrixWithoutViewState,
   getCellFocusDescriptor,
   getCellTeaserDescriptor,
+  getEnhancedCells,
   (
     sheetId,
     matrix,
     { sheetId: focusSheetId, column: focusColumn, row: focusRow, } = {},
     { column: teaserColumn, row: teaserRow, } = {},
+    enhancedCells,
   ) => {
     const focusCellAbsolutePath = focusRow &&
       focusColumn &&
@@ -246,7 +271,13 @@ export const getSheetMatrix = createCachedSelector(
 
     // TODO - if absolutePath is empty or doesn't exist, don't bother looping over every cell
 
-    return matrix
+    // TODO - is there a more idiomatic function than reduce?  that presumably takes matrix as the last arg, not enhancedCells
+    return enhancedCells
+      .reduce((matrixWithEnhancedCells, { sheetId: enhancedSheetId, column, row, }) => (
+        enhancedSheetId === sheetId ?
+          updateInMatrix(column, row, assoc('enhanceView', true), matrixWithEnhancedCells) :
+          matrixWithEnhancedCells
+      ), matrix)
       .map((row) => {
         // TODO - find a more idiomatic way to maintain referential equality for unmutated rows
         let mutatedRow = false;
@@ -260,6 +291,7 @@ export const getSheetMatrix = createCachedSelector(
             focusRow === cell.row
           ) {
             mutatedRow = true;
+            // TODO - use assoc
             _cell = { ..._cell, focusView: true, };
           }
 
@@ -268,6 +300,7 @@ export const getSheetMatrix = createCachedSelector(
             equals(cell.absolutePath, focusCellAbsolutePath)
           ) {
             mutatedRow = true;
+            // TODO - use assoc
             _cell = { ..._cell, focusNodeView: true, };
           }
 
@@ -276,6 +309,7 @@ export const getSheetMatrix = createCachedSelector(
             equals(cell.absolutePath, teaserCellAbsolutePath)
           ) {
             mutatedRow = true;
+            // TODO - use assoc
             _cell = { ..._cell, teaserNodeView: true, };
           }
 

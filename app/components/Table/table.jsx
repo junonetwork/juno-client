@@ -4,7 +4,9 @@ import Row                     from '../Row';
 import                              './style.scss';
 
 
-const Table = ({ sheetMatrix, focusCell, teaseCell, navigate }) => (
+const Table = ({
+  sheetMatrix, focusCell, teaseCell, enhanceCell, removeEnhanceCell, navigate
+}) => (
   <table
     className="table"
     role="grid"
@@ -16,6 +18,8 @@ const Table = ({ sheetMatrix, focusCell, teaseCell, navigate }) => (
           row={row}
           focusCell={focusCell}
           teaseCell={teaseCell}
+          enhanceCell={enhanceCell}
+          removeEnhanceCell={removeEnhanceCell}
           navigate={navigate}
         />
       ))}

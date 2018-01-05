@@ -87,6 +87,17 @@ export default compose(
           setCellInput(cellInput.slice(0, -1));
         }
       },
+      enter: ({ sheetId, column, row, enhanceView, enhanceCell, removeEnhanceCell, }) => (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (enhanceView) {
+          console.log('remove')
+          removeEnhanceCell(sheetId, column, row);
+        } else {
+          enhanceCell(sheetId, column, row);
+        }
+      },
     }
   ),
   withHandlers({
