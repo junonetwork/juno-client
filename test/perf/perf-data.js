@@ -1,27 +1,4 @@
 /* eslint-disable quote-props, quotes, comma-dangle */
-exports.state = {
-  sheets: {
-    '0': {
-      maxColumn: 100,
-      maxRow: 400,
-    },
-  },
-  tables: {
-    '0-0-0': {
-      collectionType: 'searchCollection',
-      sheetId: '0',
-      tableId: '0-0-0',
-      collectionAddress: '0-0',
-      search: 'Person',
-      predicates: ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling'],
-      indices: [0, 1, 2, 3],
-    },
-  },
-  focus: {},
-  teaser: {},
-  enhanced: [],
-};
-
 exports.graphFragment = {
   "json": {
     "resource": {

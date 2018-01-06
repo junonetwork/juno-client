@@ -10,10 +10,9 @@ const nsTime = exports.nsTime = (hrtime) => (hrtime[0] * 1e9) + hrtime[1];
 exports.runPerfTests = (tests) => (
   tests.forEach(({
     title,
-    count,
+    count = 50,
     pre = () => {},
     perf,
-    post = () => {},
   }) => {
     const totalTime = range(0, count)
       .reduce((runningSum) => {
@@ -22,8 +21,6 @@ exports.runPerfTests = (tests) => (
         const t1 = nsTime(process.hrtime());
         perf(preArg);
         const t2 = nsTime(process.hrtime());
-
-        post();
 
         return runningSum + (t2 - t1);
       }, 0);
