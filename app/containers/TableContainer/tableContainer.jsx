@@ -38,6 +38,7 @@ export default compose(
   mapPropsStream(connectFalcor(prop('sheetPaths'))),
   connect(
     (state, { sheetId, graphFragment, }) => ({
+      // TODO - just pass graphFragment
       sheetMatrix: getSheetMatrix(state, sheetId, graphFragment.json || {}),
     }),
     (dispatch) => ({

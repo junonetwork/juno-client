@@ -92,7 +92,6 @@ export default compose(
         e.stopPropagation();
 
         if (enhanceView) {
-          console.log('remove')
           removeEnhanceCell(sheetId, column, row);
         } else {
           enhanceCell(sheetId, column, row);

@@ -2,9 +2,7 @@ import {
   reject,
   equals,
 }                         from 'ramda';
-import {
-  formatSheetAddress,
-}                         from '../../utils/cell';
+
 
 /**
  * selectors
