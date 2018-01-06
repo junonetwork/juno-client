@@ -7,6 +7,7 @@
     "import"
   ],
   "rules": {
+    "no-multi-assign": 0,
     "no-underscore-dangle": 0,
     "arrow-parens": ["error", "always"],
     "object-curly-newline": 0,

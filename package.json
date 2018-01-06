@@ -26,6 +26,7 @@
     "babel-preset-env": "^1.6.1",
     "babel-preset-react": "^6.11.1",
     "babel-register": "^6.26.0",
+    "benchmark": "^2.1.4",
     "copy-webpack-plugin": "^4.2.0",
     "css-loader": "^0.28.7",
     "eslint": "^4.11.0",
