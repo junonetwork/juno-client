@@ -224,7 +224,7 @@ export const materializeObject = (cell, graphFragment, sheetMatrix) => {
   } else if (path([...relativePath, '$__path'], graphFragment)) {
     absolutePath = path([...relativePath, '$__path'], graphFragment);
   } else {
-    absolutePath = [];
+    absolutePath = null;
   }
 
   let boxValue = path(relativePath, graphFragment);
