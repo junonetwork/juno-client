@@ -33,14 +33,14 @@ if (process.env.NODE_ENV === 'development') {
 
 store.dispatch(
   batchActions([
-    addSheet(0, 30, 30),
+    addSheet(0, 50, 100),
     addSearchCollectionTable(
       '0',
       formatSheetAddress('0', 0, 0),
       formatAddress(0, 0),
       'Person',
-      ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling'],
-      [0, 1, 2, 3, 0, 1]
+      ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling', 'schema:sibling'],
+      [0, 1, 2, 3, 0, 1, 0, 10]
     ),
     // focusCell('0', 0, 0),
   ])

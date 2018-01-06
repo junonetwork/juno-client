@@ -101,17 +101,16 @@ $cell-height: 26px;
   .cell-body {
     padding: 0px 18px 3px 8px;
   }
-  // .cell-body {
-  //   min-width: 40px;
-  //   height: 100%;
-  //   // TODO
-  //   overflow: hidden;
-  //   text-overflow: ellipsis;
-  //   white-space: nowrap;
-  // }
-  // &.enhanced .cell-body {
-  //   max-width: none;
-  // }
+  .cell-body {
+    min-width: 40px;
+    height: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  &.enhanced .cell-body {
+    max-width: none;
+  }
 
   // edit-value
   .edit-value {
