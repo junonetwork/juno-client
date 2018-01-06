@@ -40,7 +40,7 @@ store.dispatch(
       formatAddress(0, 0),
       'Person',
       ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling'],
-      [0, 2, 3, 0, 2, 3]
+      [0, 1, 2, 3, 0, 1]
     ),
     // focusCell('0', 0, 0),
   ])

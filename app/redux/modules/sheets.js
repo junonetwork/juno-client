@@ -5,6 +5,7 @@ import {
   range,
   equals,
   assoc,
+  pipe,
 }                                    from 'ramda';
 import createCachedSelector          from 're-reselect';
 import {
@@ -33,7 +34,7 @@ import {
 }                                    from '../../utils/selectors';
 import { getEnhancedCells } from './enhanced';
 
-
+// console.log('init');
 /**
  * utils
  */
@@ -117,15 +118,14 @@ export const getSheetTables = createCachedSelector(
 /**
  * @param {Object} state
  * @param {String} sheetId
- * @param {Object} graphFragment
+ * @param {Object} tables
  */
-export const getSheetMatrixWithoutViewState = createCachedSelector(
+export const tables2SheetMatrix = createCachedSelector(
   nthArg(1),
   nthArg(2),
   createEmptySheet,
-  getSheetTables,
-  (sheetId, graphFragment, emptySheetMatrix, tables) => {
-    // console.log('getSheetMatrixWithoutViewState');
+  (sheetId, tables, emptySheetMatrix) => {
+    // console.log('tables2SheetMatrix');
 
     return tables
       .reduce(
@@ -137,8 +137,26 @@ export const getSheetMatrixWithoutViewState = createCachedSelector(
             ), sheetMatrix)
         ),
         emptySheetMatrix
-      )
-      .map((row, _, sheetMatrix) => (
+      );
+  }
+)(
+  nthArg(1)
+);
+
+
+/**
+ * @param {String} sheetId
+ * @param {Object} graphFragment
+ * @param {Object} sheetMatrix
+ */
+export const materializeSheetMatrix = createCachedSelector(
+  nthArg(1),
+  nthArg(2),
+  (graphFragment, sheetMatrix) => {
+    // console.log('materializeSheetMatrix');
+
+    return sheetMatrix
+      .map((row) => (
         row.map((cell) => {
           if (cell.type === 'searchCollection') {
             return materializeSearchCollection(cell, graphFragment, sheetMatrix);
@@ -157,6 +175,137 @@ export const getSheetMatrixWithoutViewState = createCachedSelector(
       ));
   }
 )(
+  nthArg(0)
+);
+
+
+/**
+ * @param {Object} state
+ * @param {String} sheetId
+ * @param {Object} sheetMatrix
+ */
+export const withFocus = createCachedSelector(
+  nthArg(1),
+  nthArg(2),
+  getCellFocusDescriptor,
+  (
+    sheetId,
+    matrix,
+    { sheetId: focusSheetId, column: focusColumn, row: focusRow, } = {}
+  ) => {
+    const focusCellAbsolutePath = focusRow &&
+      focusColumn &&
+      matrix[focusRow][focusColumn].absolutePath ?
+      matrix[focusRow][focusColumn].absolutePath :
+      [];
+
+    return matrix.map((row) => {
+      // TODO - find a more idiomatic way to maintain referential equality for unmutated rows
+      let mutatedRow = false;
+
+      const newRow = row.map((cell) => {
+        let _cell = cell;
+
+        if (
+          focusSheetId === sheetId &&
+          focusColumn === cell.column &&
+          focusRow === cell.row
+        ) {
+          mutatedRow = true;
+          // TODO - use assoc
+          _cell = { ..._cell, focusView: true, };
+        }
+
+        if (
+          focusCellAbsolutePath.length > 0 &&
+          equals(cell.absolutePath, focusCellAbsolutePath)
+        ) {
+          mutatedRow = true;
+          // TODO - use assoc
+          _cell = { ..._cell, focusNodeView: true, };
+        }
+
+        return _cell;
+      });
+
+      return mutatedRow ? newRow : row;
+    });
+  }
+)(
+  nthArg(1)
+);
+
+
+/**
+ * @param {Object} state
+ * @param {String} sheetId
+ * @param {Object} sheetMatrix
+ */
+export const withTeaser = createCachedSelector(
+  nthArg(1),
+  nthArg(2),
+  getCellTeaserDescriptor,
+  (
+    sheetId,
+    matrix,
+    { column: teaserColumn, row: teaserRow, } = {},
+  ) => {
+    const teaserCellAbsolutePath = teaserRow &&
+      teaserColumn &&
+      matrix[teaserRow][teaserColumn].absolutePath ?
+      matrix[teaserRow][teaserColumn].absolutePath :
+      [];
+
+    return matrix.map((row) => {
+      // TODO - find a more idiomatic way to maintain referential equality for unmutated rows
+      let mutatedRow = false;
+
+      const newRow = row.map((cell) => {
+        let _cell = cell;
+
+        if (
+          teaserCellAbsolutePath.length > 0 &&
+          equals(cell.absolutePath, teaserCellAbsolutePath)
+        ) {
+          mutatedRow = true;
+          // TODO - use assoc
+          _cell = { ..._cell, teaserNodeView: true, };
+        }
+
+        return _cell;
+      });
+
+      return mutatedRow ? newRow : row;
+    });
+  }
+)(
+  nthArg(1)
+);
+
+
+/**
+ * @param {Object} state
+ * @param {String} sheetId
+ * @param {Object} sheetMatrix
+ */
+export const withEnhanced = createCachedSelector(
+  nthArg(1),
+  nthArg(2),
+  getEnhancedCells,
+  (
+    sheetId,
+    matrix,
+    enhancedCells,
+  ) => {
+    // TODO - is there a more idiomatic function than reduce?  that presumably takes matrix as the last arg, not enhancedCells
+    return enhancedCells
+      .reduce((matrixWithEnhancedCells, { sheetId: enhancedSheetId, column, row, }) => (
+        enhancedSheetId === sheetId ?
+          updateInMatrix(column, row, assoc('enhanceView', true), matrixWithEnhancedCells) :
+          matrixWithEnhancedCells
+      ), matrix);
+  }
+)(
   nthArg(1)
 );
 
@@ -166,161 +315,39 @@ export const getSheetMatrixWithoutViewState = createCachedSelector(
  * @param {String} sheetId
  * @param {Object} graphFragment
  */
-/**
- * the body of getSheetMatrix should be a composition of withCellFocus, withCellTeaser, withCellEnhanced, withDraggedTableFootprint
- *
- * const getSheetMatrix = pipe(
- *   (state, sheetId, graphFragment) => ({
- *     state, sheetId, graphFragment, tables: getSheetTables(state, sheetId),
- *   }),
- *   ({ state, sheetId, graphFragment, tables }) => ({
- *     state, sheetId, graphFragment, sheetMatrix: tables2SheetMatrix(state, sheetId, tables),
- *   }),
- *   ({ state, sheetId, graphFragment, sheetMatrix }) => ({
- *     state, sheetId, ...materializeSheetMatrix(graphFragment, sheetMatrix),
- *   }),
- *   ({ state, sheetId, graphPathMap, sheetMatrix }) => ({
- *     state, sheetId, graphPathMap, sheetMatrix: withCellFocus(state, sheetId, sheetMatrix, graphPathMap),
- *   }),
- *   ({ state, sheetId, graphPathMap, sheetMatrix }) => ({
- *     state, sheetId, graphPathMap, sheetMatrix: withCellTeaser(state, sheetId, sheetMatrix, graphPathMap),
- *   }),
- *   ({ state, sheetId, graphPathMap, sheetMatrix }) => ({
- *     state, sheetId, graphPathMap, sheetMatrix: withCellEnhanced(state, sheetId, sheetMatrix),
- *   }),
- *   ({ state, sheetId, graphPathMap, sheetMatrix }) => (
- *     withDraggedTableFootprint(state, sheetId, sheetMatrix),
- *   )
- * );
- *
- * getSheetMatrix(state, sheetId, graphFragment);
- *
- *
- *
- * // or instead close over arguments, instead of forwarding them
- * const getSheetMatrix = (state, sheetId, graphFragment) => pipe(
- *   (tables) => (
- *     materializeTables(graphFragment, tables)
- *   ),
- *   ({ graphPathMap, tables }) => ({
- *     graphPathMap, sheetMatrix: tables2SheetMatrix(state, sheetId, tables)
- *   }),
- *   ({ graphPathMap, sheetMatrix }) => ({
- *     graphPathMap, sheetMatrix: withCellFocus(state, sheetId, sheetMatrix, graphPathMap),
- *   }),
- *   ({ graphPathMap, sheetMatrix }) => ({
- *     graphPathMap, sheetMatrix: withCellTeaser(state, sheetId, sheetMatrix, graphPathMap),
- *   }),
- *   ({ graphPathMap, sheetMatrix }) => (
- *     withCellEnhanced(state, sheetId, sheetMatrix)
- *   ),
- *   (sheetMatrix) => (
- *     withDraggedTableFootprint(state, sheetId, sheetMatrix),
- *   )
- * )(getSheetTables(state, sheetId));
- *
- *
- * // or move piped functions outside of getSheetMatrix closure
- * const getSheetMatrix = (state, sheetId, graphFragment) => pipe(
- *   materializeTables(graphFragment)
- *   ({ graphPathMap, tables }) => ({
- *     graphPathMap, sheetMatrix: tables2SheetMatrix(state, sheetId, tables)
- *   }),
- *   ({ graphPathMap, sheetMatrix }) => ({
- *     graphPathMap, sheetMatrix: withCellFocus(state, sheetId, sheetMatrix, graphPathMap),
- *   }),
- *   ({ graphPathMap, sheetMatrix }) => ({
- *     graphPathMap, sheetMatrix: withCellTeaser(state, sheetId, sheetMatrix, graphPathMap),
- *   }),
- *   ({ graphPathMap, sheetMatrix }) => (
- *     withCellEnhanced(state, sheetId, sheetMatrix)
- *   ),
- *   (sheetMatrix) => (
- *     withDraggedTableFootprint(state, sheetId, sheetMatrix),
- *   )
- * )(getSheetTables(state, sheetId));
- *
- *
- * getSheetMatrix(state, sheetId, graphFragment);
- *
- */
-export const getSheetMatrix = createCachedSelector(
-  nthArg(1),
-  getSheetMatrixWithoutViewState,
-  getCellFocusDescriptor,
-  getCellTeaserDescriptor,
-  getEnhancedCells,
-  (
+export const getSheetMatrix = pipe(
+  (state, sheetId, graphFragment) => ({
+    state,
     sheetId,
-    matrix,
-    { sheetId: focusSheetId, column: focusColumn, row: focusRow, } = {},
-    { column: teaserColumn, row: teaserRow, } = {},
-    enhancedCells,
-  ) => {
-    const focusCellAbsolutePath = focusRow &&
-      focusColumn &&
-      matrix[focusRow][focusColumn].absolutePath ?
-      matrix[focusRow][focusColumn].absolutePath :
-      [];
-
-    const teaserCellAbsolutePath = teaserRow &&
-      teaserColumn &&
-      matrix[teaserRow][teaserColumn].absolutePath ?
-      matrix[teaserRow][teaserColumn].absolutePath :
-      [];
-
-    // TODO - if absolutePath is empty or doesn't exist, don't bother looping over every cell
-
-    // TODO - is there a more idiomatic function than reduce?  that presumably takes matrix as the last arg, not enhancedCells
-    return enhancedCells
-      .reduce((matrixWithEnhancedCells, { sheetId: enhancedSheetId, column, row, }) => (
-        enhancedSheetId === sheetId ?
-          updateInMatrix(column, row, assoc('enhanceView', true), matrixWithEnhancedCells) :
-          matrixWithEnhancedCells
-      ), matrix)
-      .map((row) => {
-        // TODO - find a more idiomatic way to maintain referential equality for unmutated rows
-        let mutatedRow = false;
-
-        const newRow = row.map((cell) => {
-          let _cell = cell;
-
-          if (
-            focusSheetId === sheetId &&
-            focusColumn === cell.column &&
-            focusRow === cell.row
-          ) {
-            mutatedRow = true;
-            // TODO - use assoc
-            _cell = { ..._cell, focusView: true, };
-          }
-
-          if (
-            focusCellAbsolutePath.length > 0 &&
-            equals(cell.absolutePath, focusCellAbsolutePath)
-          ) {
-            mutatedRow = true;
-            // TODO - use assoc
-            _cell = { ..._cell, focusNodeView: true, };
-          }
-
-          if (
-            teaserCellAbsolutePath.length > 0 &&
-            equals(cell.absolutePath, teaserCellAbsolutePath)
-          ) {
-            mutatedRow = true;
-            // TODO - use assoc
-            _cell = { ..._cell, teaserNodeView: true, };
-          }
-
-          return _cell;
-        });
-
-        return mutatedRow ? newRow : row;
-      });
-  }
-)(
-  nthArg(1)
+    graphFragment,
+    tables: getSheetTables(state, sheetId),
+  }),
+  ({ state, sheetId, graphFragment, tables, }) => ({
+    state,
+    sheetId,
+    graphFragment,
+    sheetMatrix: tables2SheetMatrix(state, sheetId, tables),
+  }),
+  ({ state, sheetId, graphFragment, sheetMatrix, }) => ({
+    // TODO - return graphPathMap
+    // state, sheetId, ...materializeSheetMatrix(sheetId, graphFragment, sheetMatrix),
+    state,
+    sheetId,
+    sheetMatrix: materializeSheetMatrix(sheetId, graphFragment, sheetMatrix),
+  }),
+  ({ state, sheetId, sheetMatrix, }) => ({
+    state,
+    sheetId,
+    sheetMatrix: withFocus(state, sheetId, sheetMatrix),
+  }),
+  ({ state, sheetId, sheetMatrix, }) => ({
+    state,
+    sheetId,
+    sheetMatrix: withTeaser(state, sheetId, sheetMatrix),
+  }),
+  ({ state, sheetId, sheetMatrix, }) => (
+    withEnhanced(state, sheetId, sheetMatrix)
+  )
 );
 
 
