@@ -24,9 +24,11 @@ import {
   addEnhancedCell,
 }                             from '../../app/redux/modules/enhanced';
 import {
-  formatSheetAddress,
   formatAddress,
 }                             from '../../app/utils/cell';
+import {
+  formatTableId,
+}                             from '../../app/utils/table';
 import {
   runPerfTests,
 }                             from './utils';
@@ -38,21 +40,23 @@ import {
 const initStore = () => {
   const store =  createStore(
     enableBatching(reducer),
-    applyMiddleware(
-      thunk
-      // createEpicMiddleware(epic)
-    )
+    applyMiddleware(thunk)
   );
+
+  const sheetId = '0';
+  const tableId = formatTableId(sheetId, 0, 0);
+  const collectionAddress = formatAddress(0, 0);
 
   store.dispatch(addSheet(0, 50, 500));
   store.dispatch(addSearchCollectionTable(
-    '0',
-    formatSheetAddress('0', 0, 0),
-    formatAddress(0, 0),
+    sheetId,
+    tableId,
+    collectionAddress,
     'Person',
-    ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling'],
-    [0, 1, 2, 3]
+    ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling', 'schema:sibling'],
+    [0, 1, 2, 3, 0, 1, 0, 10]
   ));
+  store.dispatch(focusCell(sheetId, 0, 0));
 
   return store;
 };
@@ -162,7 +166,7 @@ runPerfTests([
 
       getSheetMatrix(store.getState(), '0', graphFragment.json);
 
-      store.dispatch(focusCell('0', 1, 0));
+      store.dispatch(focusCell('0', 1, 4));
 
       return { state: store.getState(), getSheetMatrix, };
     },
@@ -180,7 +184,7 @@ runPerfTests([
 
       getSheetMatrix(store.getState(), '0', graphFragment.json);
 
-      store.dispatch(teaseCell('0', 1, 0));
+      store.dispatch(teaseCell('0', 1, 4));
 
       return { state: store.getState(), getSheetMatrix, };
     },
