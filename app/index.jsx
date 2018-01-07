@@ -42,7 +42,7 @@ store.dispatch(
       ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling', 'schema:sibling'],
       [0, 1, 2, 3, 0, 1, 0, 10]
     ),
-    // focusCell('0', 0, 0),
+    focusCell('0', 0, 0),
   ])
 );
 
