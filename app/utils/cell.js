@@ -3,15 +3,12 @@ import {
 }                 from 'ramda';
 
 
-export const formatAddress = (column, row) => `${column}-${row}`;
+export const formatAddress = (sheetId, column, row) => `${sheetId}-${column}-${row}`;
 
-export const getRowFromAddress = (address) => +/[0-9]+$/.exec(address)[0];
-
-export const getColumnFromAddress = (address) => +/^[0-9]+/.exec(address)[0];
-
-
-const getRow = getRowFromAddress;
-const getColumn = getColumnFromAddress;
+export const destructureAddress = (address) => {
+  const [sheetId, column, row] = address.split('-');
+  return { sheetId, column: +column, row: +row, };
+};
 
 
 /**
@@ -27,7 +24,7 @@ export const createSearchCollection = (
   type: 'searchCollection',
   sheetId,
   tableId,
-  address: formatAddress(column, row),
+  address: formatAddress(sheetId, column, row),
   column,
   row,
   search,
@@ -49,7 +46,7 @@ export const createObject = (
   type: 'object',
   sheetId,
   tableId,
-  address: formatAddress(column, row),
+  address: formatAddress(sheetId, column, row),
   column,
   row,
   collectionAddress,
@@ -73,7 +70,7 @@ export const createIndex = (
   type: 'index',
   sheetId,
   tableId,
-  address: formatAddress(column, row),
+  address: formatAddress(sheetId, column, row),
   column,
   row,
   index,
@@ -95,7 +92,7 @@ export const createPredicate = (
   type: 'predicate',
   sheetId,
   tableId,
-  address: formatAddress(column, row),
+  address: formatAddress(sheetId, column, row),
   column,
   row,
   uri,
@@ -113,7 +110,7 @@ export const createEmpty = (
 ) => ({
   type: 'empty',
   sheetId,
-  address: formatAddress(column, row),
+  address: formatAddress(sheetId, column, row),
   column,
   row,
   focusView: false,
@@ -125,27 +122,39 @@ export const cell2PathFragment = (cell, sheetMatrix) => {
     return ['collection', `schema:${cell.search}`];
   } else if (cell.type === 'objectCollection') {
     // recurse to calculate pathFragment for parentObject
-    return cell2PathFragment(
-      sheetMatrix[getRow(cell.parentObjectAddress)][getColumn(cell.parentObjectAddress)],
-      sheetMatrix
-    );
+    const { column, row, } = destructureAddress(cell.parentObjectAddress);
+
+    return cell2PathFragment(sheetMatrix[row][column], sheetMatrix);
   } else if (cell.type === 'predicate') {
     return [cell.uri];
   } else if (cell.type === 'index') {
     return [cell.index];
   } else if (cell.type === 'object') {
     // recurse to caculate pathFragment for collection, index, and address
+    const {
+      column: collectionColumn,
+      row: collectionRow,
+    } = destructureAddress(cell.collectionAddress);
+    const {
+      column: indexColumn,
+      row: indexRow,
+    } = destructureAddress(cell.indexAddress);
+    const {
+      column: predicateColumn,
+      row: predicateRow,
+    } = destructureAddress(cell.predicateAddress);
+
     return [
       ...cell2PathFragment(
-        sheetMatrix[getRow(cell.collectionAddress)][getColumn(cell.collectionAddress)],
+        sheetMatrix[collectionRow][collectionColumn],
         sheetMatrix
       ),
       ...cell2PathFragment(
-        sheetMatrix[getRow(cell.indexAddress)][getColumn(cell.indexAddress)],
+        sheetMatrix[indexRow][indexColumn],
         sheetMatrix
       ),
       ...cell2PathFragment(
-        sheetMatrix[getRow(cell.predicateAddress)][getColumn(cell.predicateAddress)],
+        sheetMatrix[predicateRow][predicateColumn],
         sheetMatrix
       ),
     ];
@@ -162,20 +171,35 @@ export const getSearchCollectionPath = (search) => ['resource', `schema:${search
 export const getPredicatePath = (uri) => ['resource', uri, 'skos:prefLabel'];
 
 
-export const getObjectPath = (collectionAddress, indexAddress, predicateAddress, sheetMatrix) => ([
-  ...cell2PathFragment(
-    sheetMatrix[getRow(collectionAddress)][getColumn(collectionAddress)],
-    sheetMatrix
-  ),
-  ...cell2PathFragment(
-    sheetMatrix[getRow(indexAddress)][getColumn(indexAddress)],
-    sheetMatrix
-  ),
-  ...cell2PathFragment(
-    sheetMatrix[getRow(predicateAddress)][getColumn(predicateAddress)],
-    sheetMatrix
-  ),
-]);
+export const getObjectPath = (collectionAddress, indexAddress, predicateAddress, sheetMatrix) => {
+  const {
+    column: collectionColumn,
+    row: collectionRow,
+  } = destructureAddress(collectionAddress);
+  const {
+    column: indexColumn,
+    row: indexRow,
+  } = destructureAddress(indexAddress);
+  const {
+    column: predicateColumn,
+    row: predicateRow,
+  } = destructureAddress(predicateAddress);
+
+  return [
+    ...cell2PathFragment(
+      sheetMatrix[collectionRow][collectionColumn],
+      sheetMatrix
+    ),
+    ...cell2PathFragment(
+      sheetMatrix[indexRow][indexColumn],
+      sheetMatrix
+    ),
+    ...cell2PathFragment(
+      sheetMatrix[predicateRow][predicateColumn],
+      sheetMatrix
+    ),
+  ];
+};
 
 
 export const materializeSearchCollection = (cell, graphFragment) => {

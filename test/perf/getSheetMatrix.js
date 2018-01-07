@@ -45,7 +45,7 @@ const initStore = () => {
 
   const sheetId = '0';
   const tableId = formatTableId(sheetId, 0, 0);
-  const collectionAddress = formatAddress(0, 0);
+  const collectionAddress = formatAddress(sheetId, 0, 0);
 
   store.dispatch(addSheet(0, 50, 500));
   store.dispatch(addSearchCollectionTable(

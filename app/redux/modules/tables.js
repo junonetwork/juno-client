@@ -12,13 +12,12 @@ import {
   createSearchCollectionTable,
 }                                    from '../../utils/sheet';
 import {
-  getColumnFromAddress,
-  getRowFromAddress,
   formatAddress,
   createSearchCollection,
   createObject,
   createIndex,
   createPredicate,
+  destructureAddress,
 }                                    from '../../utils/cell';
 
 /**
@@ -68,8 +67,10 @@ export const getTableCells = createCachedSelector(
   (sheetId, tableId, { collectionAddress, predicates, indices, search, }) => {
     // console.log('getTableCells');
 
-    const collectionColumn = getColumnFromAddress(collectionAddress);
-    const collectionRow = getRowFromAddress(collectionAddress);
+    const {
+      column: collectionColumn,
+      row: collectionRow,
+    } = destructureAddress(collectionAddress);
 
     return {
       column: collectionColumn,
@@ -83,8 +84,8 @@ export const getTableCells = createCachedSelector(
             collectionColumn + columnIdx + 1,
             collectionRow + rowIdx + 1,
             collectionAddress,
-            formatAddress(collectionColumn, collectionRow + rowIdx + 1),
-            formatAddress(collectionColumn + columnIdx + 1, collectionRow)
+            formatAddress(sheetId, collectionColumn, collectionRow + rowIdx + 1),
+            formatAddress(sheetId, collectionColumn + columnIdx + 1, collectionRow)
           ));
 
           return matrixRow;

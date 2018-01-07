@@ -34,7 +34,7 @@ if (process.env.NODE_ENV === 'development') {
 // store.subscribe(() => console.log('store emit'));
 const sheetId = '0';
 const tableId = formatTableId(sheetId, 0, 0);
-const collectionAddress = formatAddress(0, 0);
+const collectionAddress = formatAddress(sheetId, 0, 0);
 
 store.dispatch(
   batchActions([
