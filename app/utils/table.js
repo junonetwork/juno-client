@@ -1,3 +1,6 @@
+export const formatTableId = (sheetId, column, row) => `${sheetId}-${column}-${row}`;
+
+
 export const setInMatrix = (column, row, value, matrix) => {
   const newRow = [
     ...matrix[row].slice(0, column),

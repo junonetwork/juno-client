@@ -18,9 +18,11 @@ import {
   focusCell,
 }                             from './redux/modules/focus';
 import {
-  formatSheetAddress,
   formatAddress,
 }                             from './utils/cell';
+import {
+  formatTableId,
+}                             from './utils/table';
 import                             './style.scss';
 
 
@@ -30,19 +32,22 @@ if (process.env.NODE_ENV === 'development') {
 
 
 // store.subscribe(() => console.log('store emit'));
+const sheetId = '0';
+const tableId = formatTableId(sheetId, 0, 0);
+const collectionAddress = formatAddress(0, 0);
 
 store.dispatch(
   batchActions([
-    addSheet(0, 50, 100),
+    addSheet(sheetId, 50, 100),
     addSearchCollectionTable(
-      '0',
-      formatSheetAddress('0', 0, 0),
-      formatAddress(0, 0),
+      sheetId,
+      tableId,
+      collectionAddress,
       'Person',
       ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling', 'schema:sibling'],
       [0, 1, 2, 3, 0, 1, 0, 10]
     ),
-    focusCell('0', 0, 0),
+    focusCell(sheetId, 0, 0),
   ])
 );
 
