@@ -11,28 +11,28 @@ import                        './style.scss';
 const CellValue = ({ type, value, cellLength, pending, }) => {
   if (type === 'error') {
     return (
-      <div className="cell-value error" title={value}>ERR</div>
+      <span className="cell-value error" title={value}>ERR</span>
     );
   } else if (pending) {
     return (
-      <div className="cell-value pending"><div className="spinner" /></div>
+      <span className="cell-value pending"><span className="spinner" /></span>
     );
   } else if (typeof value === 'undefined' || value === null) {
     return (
-      // <div className="cell-value non-existent">-</div>
-      <div className="cell-value non-existent" />
+      // <span className="cell-value non-existent">-</span>
+      <span className="cell-value non-existent" />
     );
   } else if (cellLength > 1) {
     return (
-      <div className="cell-value multi">
+      <span className="cell-value multi">
         {value}
         <small>{`+${cellLength}`}</small>
-      </div>
+      </span>
     );
   }
 
   return (
-    <div className="cell-value single">{value}</div>
+    <span className="cell-value single">{value}</span>
   );
 };
 
