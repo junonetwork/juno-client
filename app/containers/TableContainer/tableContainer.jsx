@@ -23,7 +23,8 @@ import {
   teaseCell,
 }                          from '../../redux/modules/teaser';
 import {
-  addEnhancedCell, removeEnhancedCell,
+  addEnhancedCell,
+  removeEnhancedCell,
 }                          from '../../redux/modules/enhanced';
 import throttle            from '../../utils/throttleAnimationFrame';
 
@@ -39,7 +40,7 @@ export default compose(
   connect(
     (state, { sheetId, graphFragment, }) => ({
       // TODO - just pass graphFragment
-      sheetMatrix: getSheetMatrix(state, sheetId, graphFragment.json || {}),
+      sheetMatrix: getSheetMatrix(state, sheetId, graphFragment.json || {}) || [],
     }),
     (dispatch) => ({
       focusCell: (sheetId, column, row) => dispatch(focusCell(sheetId, column, row)),

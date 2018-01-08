@@ -10,7 +10,6 @@
   &.non-existent {
     color: $white;
     text-align: center;
-    padding-left: calc(18px - 0.3rem); // must match the difference bt/ right padding and left padding of Cell
   }
   &.multi small {
     font-size: 8px;
