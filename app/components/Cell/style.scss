@@ -12,6 +12,7 @@ $cell-height: 26px;
 
   &:focus {
     outline: none;
+    // background-color: red !important;
   }
 
   &:hover:not(.focus):not(.node-enhance) {

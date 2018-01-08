@@ -32,6 +32,7 @@ if (process.env.NODE_ENV === 'development') {
 
 
 // store.subscribe(() => console.log('store emit'));
+
 const sheetId = '0';
 const tableId = formatTableId(sheetId, 0, 0);
 const collectionAddress = formatAddress(sheetId, 0, 0);
@@ -51,7 +52,8 @@ store.dispatch(
   ])
 );
 
-store.dispatch(focusCell(sheetId, 0, 0));
+// TODO - setting focus while page is still rendering doesn't work
+setTimeout(() => store.dispatch(focusCell(sheetId, 0, 0)), 100);
 
 
 render((
