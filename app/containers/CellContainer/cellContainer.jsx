@@ -97,6 +97,14 @@ export default compose(
           enhanceCell(sheetId, column, row);
         }
       },
+      esc: ({ sheetId, column, row, enhanceView, removeEnhanceCell, }) => (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (enhanceView) {
+          removeEnhanceCell(sheetId, column, row);
+        }
+      },
     }
   ),
   withHandlers({

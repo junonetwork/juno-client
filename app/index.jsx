@@ -38,7 +38,7 @@ const collectionAddress = formatAddress(sheetId, 0, 0);
 
 store.dispatch(
   batchActions([
-    addSheet(sheetId, 50, 100),
+    addSheet(sheetId, 30, 50),
     addSearchCollectionTable(
       sheetId,
       tableId,
@@ -47,9 +47,11 @@ store.dispatch(
       ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling', 'schema:sibling'],
       [0, 1, 2, 3, 0, 1, 0, 10]
     ),
-    focusCell(sheetId, 0, 0),
+    // focusCell(sheetId, 0, 0),
   ])
 );
+
+store.dispatch(focusCell(sheetId, 0, 0));
 
 
 render((
