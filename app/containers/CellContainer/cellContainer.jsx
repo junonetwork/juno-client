@@ -7,7 +7,6 @@ import {
   setDisplayName,
   withHandlers,
   withState,
-  // shouldUpdate,
 }                          from 'recompose';
 import withHotKeys         from '../../hoc/withHotKeys';
 import Cell                from '../../components/Cell';
@@ -17,15 +16,6 @@ const FAST_STEP = 2;
 
 export default compose(
   setDisplayName('CellContainer'),
-  // shouldUpdate((current, next) => {
-  //   // Object.keys(current).forEach((prop) => {
-  //   //   if (current[prop] !== next[prop]) {
-  //   //     console.log('not memoized', prop);
-  //   //   }
-  //   // });
-
-  //   return true;
-  // }),
   pure,
   withState('cellInput', 'setCellInput', ''),
   withHotKeys(

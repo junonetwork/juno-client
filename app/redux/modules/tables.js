@@ -30,6 +30,7 @@ const sheetIdEquals = (val) => compose(equals(val), prop('sheetId'));
  */
 export const getTable = (state, tableId) =>
   state.tables[tableId];
+// TODO - this could return referentially equivalent list if sheetId maintains a list of it's tableIds
 export const getTableIds = (state, sheetId) =>
   Object.keys(
     filter(sheetIdEquals(sheetId), state.tables)
@@ -126,6 +127,10 @@ export const getTableCells = createCachedSelector(
 export const ADD_SEARCH_COLLECTION_TABLE = 'ADD_SEARCH_COLLECTION_TABLE';
 export const REMOVE_TABLE = 'REMOVE_TABLE';
 
+export const REPLACE_SEARCH_COLLECTION_SEARCH = 'REPLACE_SEARCH_COLLECTION_SEARCH';
+export const REPLACE_PREDICATES = 'REPLACE_PREDICATES';
+export const REPLACE_INDICES = 'REPLACE_INDICES';
+
 
 /**
  * action creators
@@ -142,8 +147,21 @@ export const addSearchCollectionTable = (
   indices,
 });
 
-export const removeTable = (sheetId, tableId) =>
-  ({ type: REMOVE_TABLE, sheetId, tableId, });
+export const removeTable = (sheetId, tableId) => ({
+  type: REMOVE_TABLE, sheetId, tableId,
+});
+
+export const replaceSearchCollectionSearch = (sheetId, tableId, search) => ({
+  type: REPLACE_SEARCH_COLLECTION_SEARCH, sheetId, tableId, search,
+});
+
+export const replacePredicates = (sheetId, tableId, predicates) => ({
+  type: REPLACE_PREDICATES, sheetId, tableId, predicates,
+});
+
+export const replaceIndices = (sheetId, tableId, indices) => ({
+  type: REPLACE_INDICES, sheetId, tableId, indices,
+});
 
 
 /**
@@ -163,6 +181,30 @@ export default (
     };
   } else if (action.type === REMOVE_TABLE) {
     return omit([action.tableId], state);
+  } else if (action.type === REPLACE_SEARCH_COLLECTION_SEARCH) {
+    return {
+      ...state,
+      [action.tableId]: {
+        ...state[action.tableId],
+        search: action.search,
+      },
+    };
+  } else if (action.type === REPLACE_PREDICATES) {
+    return {
+      ...state,
+      [action.tableId]: {
+        ...state[action.tableId],
+        predicates: action.predicates,
+      },
+    };
+  } else if (action.type === REPLACE_INDICES) {
+    return {
+      ...state,
+      [action.tableId]: {
+        ...state[action.tableId],
+        indices: action.indices,
+      },
+    };
   }
 
   return state;

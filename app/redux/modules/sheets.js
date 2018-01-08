@@ -38,8 +38,8 @@ import { getEnhancedCells } from './enhanced';
 /**
  * utils
  */
-const createSheet = (maxColumn, maxRow, tables) =>
-  ({ maxColumn, maxRow, tables, });
+const createSheet = (maxColumn, maxRow) =>
+  ({ maxColumn, maxRow, });
 
 
 /**
@@ -369,8 +369,8 @@ export const INCREASE_SHEET_MAX_ROW = 'INCREASE_SHEET_MAX_ROW';
 /**
  * action creators
  */
-export const addSheet = (sheetId, maxColumn, maxRow, tables = []) =>
-  ({ type: ADD_SHEET, sheetId, maxColumn, maxRow, tables, });
+export const addSheet = (sheetId, maxColumn, maxRow) =>
+  ({ type: ADD_SHEET, sheetId, maxColumn, maxRow, });
 export const removeSheet = (sheetId) =>
   ({ type: REMOVE_SHEET, sheetId, });
 export const increaseSheetMaxColumn = (sheetId) =>
@@ -387,11 +387,11 @@ export default (
   action
 ) => {
   if (action.type === ADD_SHEET) {
-    const { maxColumn, maxRow, tables, } = action;
+    const { maxColumn, maxRow, } = action;
 
     return {
       ...state,
-      [action.sheetId]: createSheet(maxColumn, maxRow, tables),
+      [action.sheetId]: createSheet(maxColumn, maxRow),
     };
   } else if (action.type === REMOVE_SHEET) {
     // TODO - remove nested sheets

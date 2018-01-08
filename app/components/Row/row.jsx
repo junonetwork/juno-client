@@ -1,26 +1,27 @@
 import React                   from 'react';
 import {}                      from 'prop-types';
 import {
+  path,
+}                              from 'ramda';
+import {
   pure,
 }                              from 'recompose';
 import Cell                    from '../../containers/CellContainer';
 
 
-const Row = ({
-  row, focusCell, teaseCell, enhanceCell, removeEnhanceCell, navigate
-}) => (
+const Row = ({ row, upperRow, ...functions }) => (
   <tr
     className="row"
   >
-    {row.map((cell) => (
+    {row.map((cell, idx) => (
       <Cell
         key={cell.address}
+        leftCellType={path([idx - 1, 'type'], row)}
+        leftCellTableId={path([idx - 1, 'tableId'], row)}
+        upCellType={path([idx, 'type'], upperRow)}
+        upCellTableId={path([idx, 'tableId'], upperRow)}
         {...cell}
-        focusCell={focusCell}
-        teaseCell={teaseCell}
-        enhanceCell={enhanceCell}
-        removeEnhanceCell={removeEnhanceCell}
-        navigate={navigate}
+        {...functions}
       />
     ))}
   </tr>
