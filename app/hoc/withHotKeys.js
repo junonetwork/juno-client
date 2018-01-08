@@ -30,6 +30,12 @@ const withHotKeys = (
   const factory = createFactory(BaseComponent);
 
   return class WithHotKeys extends Component {
+    componentDidMount() {
+      if (focus(this.props)) {
+        this.node.focus();
+      }
+    }
+
     componentDidUpdate() {
       if (focus(this.props)) {
         this.node.focus();

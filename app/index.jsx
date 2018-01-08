@@ -48,12 +48,9 @@ store.dispatch(
       ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling', 'schema:sibling'],
       [0, 1, 2, 3, 0, 1, 0, 10]
     ),
-    // focusCell(sheetId, 0, 0),
+    focusCell(sheetId, 0, 0),
   ])
 );
-
-// TODO - setting focus while page is still rendering doesn't work
-setTimeout(() => store.dispatch(focusCell(sheetId, 0, 0)), 100);
 
 
 render((
