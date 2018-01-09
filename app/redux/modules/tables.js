@@ -182,29 +182,35 @@ export default (
   } else if (action.type === REMOVE_TABLE) {
     return omit([action.tableId], state);
   } else if (action.type === REPLACE_SEARCH_COLLECTION_SEARCH) {
-    return {
-      ...state,
-      [action.tableId]: {
-        ...state[action.tableId],
-        search: action.search,
-      },
-    };
+    return action.search === state[action.tableId].search ?
+      state :
+      {
+        ...state,
+        [action.tableId]: {
+          ...state[action.tableId],
+          search: action.search,
+        },
+      };
   } else if (action.type === REPLACE_PREDICATES) {
-    return {
-      ...state,
-      [action.tableId]: {
-        ...state[action.tableId],
-        predicates: action.predicates,
-      },
-    };
+    return equals(action.predicates, state[action.tableId].predicates) ?
+      state :
+      {
+        ...state,
+        [action.tableId]: {
+          ...state[action.tableId],
+          predicates: action.predicates,
+        },
+      };
   } else if (action.type === REPLACE_INDICES) {
-    return {
-      ...state,
-      [action.tableId]: {
-        ...state[action.tableId],
-        indices: action.indices,
-      },
-    };
+    return equals(action.indices, state[action.tableId].indices) ?
+      state :
+      {
+        ...state,
+        [action.tableId]: {
+          ...state[action.tableId],
+          indices: action.indices,
+        },
+      };
   }
 
   return state;
