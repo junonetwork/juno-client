@@ -6,6 +6,7 @@ import {
   equals,
   update,
   pathOr,
+  uniq,
   contains,
   map,
   not,
@@ -147,10 +148,8 @@ export default compose(
 
         if (selectionIdx === -1) {
           addPredicates(selectedPredicates);
-        } else if (predicateList[selectionIdx].selected) {
-          addPredicates(reject(equals(predicateList[selectionIdx].uri))(selectedPredicates));
         } else {
-          addPredicates([...selectedPredicates, predicateList[selectionIdx].uri]);
+          addPredicates(uniq([...selectedPredicates, predicateList[selectionIdx].uri]));
         }
       },
       // TODO - allow for multiple selections at the same time
