@@ -1,12 +1,32 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions */
 import React                 from 'react';
 import {
 }                            from 'prop-types';
+import {
+  withHandlers,
+}                            from 'recompose';
 import                            './style.scss';
 
 
+const PredicateInputItem = withHandlers({
+  itemClick: ({ uri, addPredicates, }) => () => addPredicates([uri]),
+})(
+  ({ label, idx, selectionIdx, selected, itemClick, }) => (
+    <li
+      className={`predicate-input-item ${idx === selectionIdx ? 'active' : ''} ${selected ? 'selected' : ''}`}
+    >
+      <button
+        className="unstyled"
+        onClick={itemClick}
+      >
+        <strong>{label}</strong>
+      </button>
+    </li>
+  )
+);
+
+
 const PredicateInput = ({
-  predicateList, value, selectionIdx, graphFragmentStatus, hotKeys,
+  predicateList, value, selectionIdx, graphFragmentStatus, hotKeys, addPredicates,
 }) => (
   <div
     className="predicate-input"
@@ -29,12 +49,15 @@ const PredicateInput = ({
         className="unselected-predicates"
       >
         {predicateList.map(({ uri, label, selected, }, idx) => (
-          <li
+          <PredicateInputItem
             key={uri}
-            className={`predicate-input-item ${idx === selectionIdx ? 'active' : ''} ${selected ? 'selected' : ''}`}
-          >
-            <strong>{label}</strong>
-          </li>
+            uri={uri}
+            label={label}
+            idx={idx}
+            selectionIdx={selectionIdx}
+            selected={selected}
+            addPredicates={addPredicates}
+          />
         ))}
       </ul>
     </div>

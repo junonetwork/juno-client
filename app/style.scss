@@ -39,6 +39,15 @@ button {
   background: $cyan;
   color: white;
   cursor: pointer;
+
+  &.unstyled {
+    font-family: inherit;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+  }
 }
 
 .scroll-styled {
