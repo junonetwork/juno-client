@@ -6,6 +6,7 @@ import {
   equals,
   pathOr,
   contains,
+  map,
   not,
 }                            from 'ramda';
 import { connect }           from 'react-redux';
@@ -63,9 +64,10 @@ export default compose(
       }),
     }
   ),
-  withProps(({ graphFragment, search, existingPredicates, }) => ({
+  withProps(({ graphFragment, search, existingPredicates, selectedPredicates, }) => ({
     predicateList: pipe(
       pathOr([], ['json', 'collection', `schema:${search}`, 'ontology', 'list', 'value']),
+      map(({ uri, label, }) => ({ uri, label, selected: contains(uri, selectedPredicates), })),
       filter(({ uri, label, }) => label && uri && not(contains(uri, existingPredicates))),
     )(graphFragment),
   })),

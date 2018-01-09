@@ -39,7 +39,7 @@ const collectionAddress = formatAddress(sheetId, 0, 0);
 
 store.dispatch(
   batchActions([
-    addSheet(sheetId, 30, 50),
+    addSheet(sheetId, 20, 20),
     addSearchCollectionTable(
       sheetId,
       tableId,
