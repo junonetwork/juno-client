@@ -34,7 +34,7 @@ import {
 }                                    from '../../utils/selectors';
 import { getEnhancedCells } from './enhanced';
 
-// console.log('init');
+
 /**
  * utils
  */
