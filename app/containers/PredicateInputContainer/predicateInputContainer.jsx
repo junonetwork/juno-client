@@ -1,12 +1,9 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 import {
   pipe,
-  values,
-  map,
   filter,
   reject,
   equals,
-  path,
   pathOr,
   contains,
   not,
@@ -146,6 +143,7 @@ export default compose(
           addPredicates([...selectedPredicates, predicateList[selectionIdx].uri]);
         }
       },
+      // TODO - allow for multiple selections at the same time
       'shift+enter': ({
         selectedPredicates, predicateList, selectionIdx,
         addPredicates, selectPredicate, unselectPredicate,
@@ -173,6 +171,11 @@ export default compose(
           e.stopPropagation();
         }
       },
+    },
+    {
+      // TODO - in order to exit on blur, withHotKeys selector has to use a focusDescriptor
+      // which will make rendering predicateInput moderately more complicated
+      // onBlur: ({ exit, }) => () => exit(),
     }
   )
 )(PredicateInput);

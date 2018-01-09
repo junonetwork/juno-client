@@ -26,6 +26,9 @@ const event2HandlerKey = ({ which, metaKey, altKey, shiftKey, }) =>
 const withHotKeys = (
   focus = () => true,
   hotKeyHandlers = {},
+  {
+    onBlur,
+  } = {}
 ) => (BaseComponent) => {
   const factory = createFactory(BaseComponent);
 
@@ -53,6 +56,11 @@ const withHotKeys = (
       },
       ref: (node) => {
         this.node = node;
+      },
+      onBlur: (e) => {
+        if (onBlur) {
+          onBlur(this.props)(e);
+        }
       },
     }
 
