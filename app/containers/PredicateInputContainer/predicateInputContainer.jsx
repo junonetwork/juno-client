@@ -32,9 +32,6 @@ import {
 }                            from '../../redux/modules/enhanced';
 
 
-const ONTOLOGY_COUNT = 10;
-
-
 export default compose(
   connect(
     (state, { tableId, }) => {
@@ -55,11 +52,7 @@ export default compose(
   ),
   mapPropsStream(connectFalcor(({ search, }) => ([
     // TODO - mapping search to URIs should move to falcor router
-    ['collection', `schema:${search}`, 'ontology', { to: ONTOLOGY_COUNT - 1, }, 'count'],
-    ['collection', `schema:${search}`, 'ontology', { to: ONTOLOGY_COUNT - 1, },
-      'predicate', ['skos:prefLabel', 'uri'],
-    ],
-    ['collection', `schema:${search}`, 'ontology', 'length'],
+    ['collection', `schema:${search}`, 'ontology', 'list'],
   ]))),
   withStateHandlers(
     { selectionIdx: -1, selectedPredicates: [], },
@@ -75,12 +68,7 @@ export default compose(
   ),
   withProps(({ graphFragment, search, existingPredicates, }) => ({
     predicateList: pipe(
-      pathOr([], ['json', 'collection', `schema:${search}`, 'ontology']),
-      values,
-      map((ontology) => ({
-        uri: path(['predicate', 'uri', 'value'], ontology),
-        label: path(['predicate', 'skos:prefLabel', 'value'], ontology),
-      })),
+      pathOr([], ['json', 'collection', `schema:${search}`, 'ontology', 'list', 'value']),
       filter(({ uri, label, }) => label && uri && not(contains(uri, existingPredicates))),
     )(graphFragment),
   })),
