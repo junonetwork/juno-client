@@ -109,6 +109,7 @@ export const getTableCells = createCachedSelector(
             tableId,
             collectionColumn + columnIdx + 1,
             collectionRow,
+            collectionAddress,
             predicateURI
           ));
           return matrixRow;

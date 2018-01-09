@@ -4,6 +4,7 @@ import {
   filter,
   reject,
   equals,
+  update,
   pathOr,
   contains,
   map,
@@ -72,9 +73,16 @@ export default compose(
     )(graphFragment),
   })),
   withHandlers({
-    addPredicates: ({ existingPredicates, submit, }) => (newPredicates) => (
-      submit([...existingPredicates, ...newPredicates])
-    ),
+    addPredicates: ({ existingPredicates, predicateIdx, submit, }) => (newPredicates) => {
+      if (typeof predicateIdx === 'number') {
+        const [firstPredicate, ...restPredicates] = newPredicates;
+        // cell is predicate type - replace existing predicate w/ first new predicate and append rest
+        submit([...update(predicateIdx, firstPredicate, existingPredicates), ...restPredicates]);
+      } else {
+        // cell is empty type - append all new predicates
+        submit([...existingPredicates, ...newPredicates]);
+      }
+    },
     forwardSelect: ({ predicateList, selectionIdx, setSelectionIdx, }) => () => {
       if (predicateList.length === 0) {
         setSelectionIdx(-1);

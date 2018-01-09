@@ -87,7 +87,7 @@ export const createIndex = (
  * @param {String} uri
  */
 export const createPredicate = (
-  sheetId, tableId, column, row, uri
+  sheetId, tableId, column, row, collectionAddress, uri
 ) => ({
   type: 'predicate',
   sheetId,
@@ -96,6 +96,8 @@ export const createPredicate = (
   column,
   row,
   uri,
+  collectionAddress,
+  predicateIdx: column - destructureAddress(collectionAddress).column - 1,
   focusView: false,
 });
 
