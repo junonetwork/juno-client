@@ -1,17 +1,19 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
 import React                 from 'react';
 import {}                    from 'prop-types';
 import                            './style.scss';
 
 
 const IndexInput = ({
-  collapsedIndices, inputIsValid, hotKeys
+  indicesRangeString, inputIsValid, hotKeys, onKeyPress
 }) => (
   <div
     className="index-input"
+    onKeyPress={onKeyPress}
     {...hotKeys}
   >
     <div className={`input ${inputIsValid ? '' : 'invalid'}`}>
-      {collapsedIndices}
+      {indicesRangeString}
     </div>
 
   </div>

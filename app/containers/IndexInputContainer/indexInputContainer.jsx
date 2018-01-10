@@ -18,20 +18,29 @@ import {
 }                            from '../../redux/modules/tables';
 import {
   indicesKeySet2String,
-  indicesString2KeySet,
 }                            from '../../utils/sheet';
+import {
+  grammar,
+  semantics,
+}                            from '../../ohm/rangeGrammar';
 
 
-const submitHandler = ({ inputIsValid, collapsedIndices, submit, exit, }) => () => (
-  inputIsValid ? submit(indicesString2KeySet(collapsedIndices)) : exit()
-);
+const submitHandler = ({ inputIsValid, indicesFromInput, submit, exit, }) => () => {
+  if (inputIsValid) {
+    submit(indicesFromInput);
+  } else {
+    exit();
+  }
+};
+
 
 export default compose(
   connect(
     (state, { tableId, }) => {
       const { indices, } = getTable(state, tableId);
 
-      return { collapsedIndices: indicesKeySet2String(indices), };
+      // TODO - use ohm to reverse parse
+      return { indicesRangeString: indicesKeySet2String(indices), };
     },
     (dispatch, { column, row, sheetId, tableId, }) => ({
       submit(indicesKeySet) {
@@ -45,10 +54,20 @@ export default compose(
       },
     })
   ),
-  withState('collapsedIndices', 'setCollapsedIndices', R.prop('collapsedIndices')),
-  withProps(({ collapsedIndices, }) => ({
-    inputIsValid: /^[0-9]+([,-][0-9]+)*$/.test(collapsedIndices),
-  })),
+  withState('indicesRangeString', 'setIndicesRangeString', R.prop('indicesRangeString')),
+  withProps(({ indicesRangeString, }) => {
+    const parsedIndicesRangeString = grammar.match(indicesRangeString);
+
+    return parsedIndicesRangeString.succeeded() ?
+      {
+        indicesFromInput: semantics(parsedIndicesRangeString).interpret(),
+        inputIsValid: true,
+      } :
+      {
+        indicesFromInput: false,
+        inputIsValid: false,
+      };
+  }),
   withHotKeys(
     () => true,
     {
@@ -60,20 +79,20 @@ export default compose(
       'alt+right': submitHandler,
       'alt+up': submitHandler,
       'alt+down': submitHandler,
-      enter: ({ inputIsValid, collapsedIndices, submit, exit, }) => (e) => {
+      enter: ({ inputIsValid, indicesFromInput, submit, exit, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
-        submitHandler({ inputIsValid, collapsedIndices, submit, exit, })();
+        submitHandler({ inputIsValid, indicesFromInput, submit, exit, })();
       },
-      esc: ({ inputIsValid, collapsedIndices, submit, exit, }) => (e) => {
+      esc: ({ inputIsValid, indicesFromInput, submit, exit, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
-        submitHandler({ inputIsValid, collapsedIndices, submit, exit, })();
+        submitHandler({ inputIsValid, indicesFromInput, submit, exit, })();
       },
-      delete: ({ collapsedIndices, setCollapsedIndices, }) => (e) => {
+      delete: ({ indicesRangeString, setIndicesRangeString, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
-        setCollapsedIndices(collapsedIndices.slice(0, -1));
+        setIndicesRangeString(indicesRangeString.slice(0, -1));
       },
     },
     {
@@ -81,11 +100,11 @@ export default compose(
     }
   ),
   withHandlers({
-    onKeyPress: ({ collapsedIndices, setCollapsedIndices, }) => (e) => {
+    onKeyPress: ({ indicesRangeString, setIndicesRangeString, }) => (e) => {
       e.preventDefault();
       e.stopPropagation();
 
-      setCollapsedIndices(collapsedIndices + String.fromCharCode(e.which));
+      setIndicesRangeString(indicesRangeString + String.fromCharCode(e.which));
     },
   })
 )(IndexInput);
