@@ -1,7 +1,5 @@
-/* eslint-disable prefer-destructuring */
 import {
   range,
-  last,
   partition,
   contains,
   subtract,
@@ -32,41 +30,17 @@ export const expandIndicesKeySet = (keySet) => (
   }, [])
 );
 
-export const indicesKeySet2String = (indices) => (
-  [...expandIndicesKeySet(indices), null]
-    .reduce(([buffer, parsedIndices], index, idx, collection) => {
-      if (idx === 0) {
-        // initialize buffer
-        return [[index], parsedIndices];
-      } else if (buffer.length === 0) {
-        // re-initialize buffer
-        return [[index], parsedIndices];
-      } else if (index === last(buffer) + 1) {
-        // add to buffer
-        return [[...buffer, index], parsedIndices];
-      } else if (
-        idx === collection.length - 1 ||
-        index !== last(buffer) + 1
-      ) {
-        // if end of list, flush buffer (final index is null and can be ignored)
-        // if next index isn't sequential w/ buffer, flush buffer and reinitialize w/ index
-        if (buffer.length <= 2) {
-          return parsedIndices === '' ?
-            [[index], `${buffer.join(',')}`] :
-            [[index], `${parsedIndices},${buffer.join(',')}`];
-        }
 
-        return parsedIndices === '' ?
-          [[index], `${buffer[0]}-${last(buffer)}`] :
-          [[index], `${parsedIndices},${buffer[0]}-${last(buffer)}`];
-      }
+export const indicesKeySet2String = (indicesKeySet) => (
+  indicesKeySet.reduce((keySets, keySet) => {
+    if (typeof keySet === 'number') {
+      keySets.push(keySet);
+      return keySets;
+    }
 
-      console.log(
-        'warning, indicesKeySet2String failed to catch case',
-        buffer, parsedIndices, index, collection
-      );
-      return [[...buffer, index], parsedIndices];
-    }, [[], ''])[1]
+    keySets.push(`${keySet.from || 0}-${keySet.to}`);
+    return keySets;
+  }, []).join(',')
 );
 
 

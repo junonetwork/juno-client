@@ -47,7 +47,7 @@ store.dispatch(
       'Person',
       // ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling', 'schema:sibling'],
       ['schema:name', 'schema:sibling'],
-      [0, 1, 2, 3, 0, 1, 0, 10]
+      [{ from: 1, to: 3, }, 0, 1, 0, 10]
     ),
     focusCell(sheetId, 0, 0),
   ])
