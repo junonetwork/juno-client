@@ -1,7 +1,4 @@
 import {
-  prop,
-}                          from 'ramda';
-import {
   compose,
   pure,
   setDisplayName,
@@ -10,6 +7,10 @@ import {
 }                          from 'recompose';
 import withHotKeys         from '../../hoc/withHotKeys';
 import Cell                from '../../components/Cell';
+import {
+  shouldRenderPredicateInput,
+  shouldRenderIndexInput,
+}                          from '../../components/Cell/cell';
 
 
 const FAST_STEP = 2;
@@ -19,7 +20,11 @@ export default compose(
   pure,
   withState('cellInput', 'setCellInput', ''),
   withHotKeys(
-    prop('focusView'),
+    ({ focusView, enhanceView, type, leftCellType, upCellType, }) => (
+      focusView &&
+      !shouldRenderPredicateInput(enhanceView, type, leftCellType) &&
+      !shouldRenderIndexInput(enhanceView, type, upCellType)
+    ),
     {
       up: ({ sheetId, column, row, navigate, }) => (e) => {
         e.preventDefault();

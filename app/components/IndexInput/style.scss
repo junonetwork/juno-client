@@ -1,0 +1,16 @@
+@import '../../styles/palette';
+
+.index-input {
+  height: 100%;
+  width: 100%;
+  position: relative;
+
+  .input {
+    color: $text-color;
+    padding: 4px 12px;
+
+    &.invalid {
+      color: $b_red;
+    }
+  }
+}

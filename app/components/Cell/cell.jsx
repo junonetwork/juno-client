@@ -4,10 +4,25 @@ import {}                      from 'prop-types';
 import CellValue               from '../CellValue';
 import Input                   from '../Input';
 import PredicateInput          from '../../containers/PredicateInputContainer';
+import IndexInput              from '../../containers/IndexInputContainer';
 import                              './style.scss';
 
 
 const camel2Kebab = (str) => str.replace(/([A-Z])/g, (g) => `-${g[0].toLowerCase()}`);
+
+export const shouldRenderPredicateInput = (enhanceView, type, leftCellType) => (
+  enhanceView && (
+    type === 'predicate' || leftCellType === 'predicate' ||
+    leftCellType === 'searchCollection' || leftCellType === 'objectCollection'
+  )
+);
+
+export const shouldRenderIndexInput = (enhanceView, type, upCellType) => (
+  enhanceView && (
+    type === 'index' || upCellType === 'index' ||
+    upCellType === 'searchCollection' || upCellType === 'objectCollection'
+  )
+);
 
 
 const Cell = ({
@@ -25,10 +40,7 @@ const Cell = ({
     {...hotKeys}
   >
     {
-      enhanceView && (
-        type === 'predicate' || leftCellType === 'predicate' ||
-        leftCellType === 'searchCollection' || leftCellType === 'objectCollection'
-      ) ?
+      shouldRenderPredicateInput(enhanceView, type, leftCellType) ?
         <PredicateInput
           value={cellInput}
           sheetId={sheetId}
@@ -36,6 +48,13 @@ const Cell = ({
           column={column}
           row={row}
           predicateIdx={predicateIdx}
+        /> :
+      shouldRenderIndexInput(enhanceView, type, upCellType) ?
+        <IndexInput
+          sheetId={sheetId}
+          tableId={type === 'index' ? tableId : upCellTableId}
+          column={column}
+          row={row}
         /> :
       cellInput ?
         <div className="cell-body">

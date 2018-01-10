@@ -182,9 +182,7 @@ export default compose(
       },
     },
     {
-      // TODO - in order to exit on blur, withHotKeys selector has to use a focusDescriptor
-      // which will make rendering predicateInput moderately more complicated
-      // onBlur: ({ exit, }) => () => exit(),
+      onBlur: ({ exit, }) => () => exit(),
     }
   )
 )(PredicateInput);
