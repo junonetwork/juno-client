@@ -40,13 +40,15 @@ export default compose(
 
       return { search, existingPredicates: predicates, };
     },
-    (dispatch, { sheetId, tableId, column, row, }) => ({
-      submit: (predicates) => (
+    (dispatch, { sheetId, tableId, column, row, setCellInput }) => ({
+      submit: (predicates) => {
+        // TODO - manage cellInput in redux store
+        setCellInput('');
         dispatch(batchActions([
           removeEnhancedCell(sheetId, column, row),
           replacePredicates(sheetId, tableId, predicates),
         ]))
-      ),
+      },
       exit: () => dispatch(removeEnhancedCell(sheetId, column, row)),
     })
   ),
@@ -66,11 +68,18 @@ export default compose(
       }),
     }
   ),
-  withProps(({ graphFragment, search, existingPredicates, selectedPredicates, }) => ({
+  withProps(({
+    graphFragment, search, existingPredicates, selectedPredicates, value
+  }) => ({
     predicateList: pipe(
       pathOr([], ['json', 'collection', `schema:${search}`, 'ontology', 'list', 'value']),
       map(({ uri, label, }) => ({ uri, label, selected: contains(uri, selectedPredicates), })),
-      filter(({ uri, label, }) => label && uri && not(contains(uri, existingPredicates))),
+      filter(({ uri, label, }) => {
+        return label &&
+               uri &&
+               not(contains(uri, existingPredicates)) &&
+               RegExp(value, 'i').test(label)
+      })
     )(graphFragment),
   })),
   withHandlers({

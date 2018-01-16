@@ -39,7 +39,6 @@ export default compose(
     (state, { tableId, }) => {
       const { indices, } = getTable(state, tableId);
 
-      // TODO - use ohm to reverse parse
       return { indicesRangeString: indicesKeySet2String(indices), };
     },
     (dispatch, { column, row, sheetId, tableId, }) => ({
@@ -87,7 +86,8 @@ export default compose(
       esc: ({ inputIsValid, indicesFromInput, submit, exit, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
-        submitHandler({ inputIsValid, indicesFromInput, submit, exit, })();
+          // submitHandler({ inputIsValid, indicesFromInput, submit, exit, })();
+        exit();
       },
       delete: ({ indicesRangeString, setIndicesRangeString, }) => (e) => {
         e.preventDefault();
