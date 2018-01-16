@@ -82,23 +82,30 @@ export default compose(
           setCellInput(cellInput.slice(0, -1));
         }
       },
-      enter: ({ sheetId, column, row, enhanceView, enhanceCell, removeEnhanceCell, }) => (e) => {
+      enter: ({
+        sheetId, column, row, enhanceView, enhanceCell, removeEnhanceCell, setCellInput,
+      }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
         if (enhanceView) {
           removeEnhanceCell(sheetId, column, row);
+          setCellInput('');
         } else {
           enhanceCell(sheetId, column, row);
         }
       },
-      esc: ({ sheetId, column, row, enhanceView, removeEnhanceCell, }) => (e) => {
+      esc: ({
+        sheetId, column, row, enhanceView, removeEnhanceCell, setCellInput,
+      }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
         if (enhanceView) {
           removeEnhanceCell(sheetId, column, row);
         }
+
+        setCellInput('');
       },
     }
   ),
