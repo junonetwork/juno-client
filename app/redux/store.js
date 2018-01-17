@@ -9,22 +9,19 @@ import thunk                  from 'redux-thunk';
 import {
   enableBatching,
 }                             from 'redux-batched-actions';
-// import {
-//   createEpicMiddleware,
-// }                             from 'redux-observable';
 import reducer                from './reducer';
-// import epic                   from './epic';
+import createActionStream     from './actionStream';
+import epics                  from './epics';
 
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-
-
-export default createStore(
+const store = createStore(
   enableBatching(reducer),
   composeEnhancers(
-    applyMiddleware(
-      thunk
-      // createEpicMiddleware(epic)
-    ),
+    applyMiddleware(thunk)
   )
 );
+
+
+export const actionStreamDispatch = createActionStream(store, epics);
+export default store;

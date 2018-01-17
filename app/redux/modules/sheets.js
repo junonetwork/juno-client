@@ -32,7 +32,9 @@ import {
 import {
   arraySingleDepthEqualitySelector,
 }                                    from '../../utils/selectors';
-import { getEnhancedCells } from './enhanced';
+import {
+  getEnhancedCells
+}                                     from './enhanced';
 
 
 /**
