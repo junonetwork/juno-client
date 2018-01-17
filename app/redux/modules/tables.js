@@ -6,6 +6,10 @@ import {
   filter,
   omit,
 }                                    from 'ramda';
+import {
+  filter as filterStream,
+  map as mapStream,
+}                                    from 'rxjs/operators';
 import createCachedSelector          from 're-reselect';
 import {
   expandIndicesKeySet,
@@ -132,6 +136,7 @@ export const REPLACE_SEARCH_COLLECTION_SEARCH = 'REPLACE_SEARCH_COLLECTION_SEARC
 export const REPLACE_PREDICATES = 'REPLACE_PREDICATES';
 export const REPLACE_INDICES = 'REPLACE_INDICES';
 
+export const UPDATE_CELL_VALUE = 'UPDATE_CELL_VALUE';
 
 /**
  * action creators
@@ -162,6 +167,10 @@ export const replacePredicates = (sheetId, tableId, predicates) => ({
 
 export const replaceIndices = (sheetId, tableId, indices) => ({
   type: REPLACE_INDICES, sheetId, tableId, indices,
+});
+
+export const updateCellValue = (sheetId, column, row, value) => ({
+  type: UPDATE_CELL_VALUE, sheetId, column, row, value,
 });
 
 
@@ -221,3 +230,19 @@ export default (
 /**
  * epics
  */
+export const updateCellValueEpic = (store) => (action$) =>
+  action$.pipe(
+    filterStream(({ type }) => type === UPDATE_CELL_VALUE),
+    mapStream((action) => {
+      return [{ type: 'NO_OP1' }, { type: 'NO_OP2' }];
+    })
+  );
+
+export const sampleEpic = (store) => (action$) =>
+  action$.pipe(
+    filterStream(({ type }) => type === UPDATE_CELL_VALUE),
+    mapStream((action) => {
+      return [{ type: 'NO_OP3' }, { type: 'NO_OP4' }];
+    })
+  );
+

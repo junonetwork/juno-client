@@ -6,6 +6,12 @@ import {
   withState,
 }                          from 'recompose';
 import withHotKeys         from '../../hoc/withHotKeys';
+import {
+  actionStreamDispatch,
+}                          from '../../redux/store';
+import {
+  updateCellValue,
+}                          from '../../redux/modules/tables';
 import Cell                from '../../components/Cell';
 import {
   shouldRenderPredicateInput,
