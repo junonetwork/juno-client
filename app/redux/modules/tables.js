@@ -1,9 +1,6 @@
 import {
   nthArg,
-  compose,
   equals,
-  prop,
-  filter,
   omit,
 }                                    from 'ramda';
 import {
@@ -40,7 +37,7 @@ import {
 // }                                    from '../../redux/modules/falcor';
 import model                         from '../../falcor/model';
 import {
-  getSheetMatrix, getSheet,
+  getSheet,
 }                                    from './sheets';
 import {
   formatTableId, setInArray,
@@ -304,7 +301,7 @@ const editValueCellEpic = (store) => (action$) => (
         // delete row
         const { collectionAddress, indices, } = getTable(store.getState(), tableId);
         const indexOfDeleteRow = row - destructureAddress(collectionAddress).row - 1;
-        // TODO - do I have to collapse indicesKeySet?
+        // TODO - collapse indicesKeySet
         const newIndices = expandIndicesKeySet(indices)
           .filter((_, idx) => idx !== indexOfDeleteRow);
 
@@ -313,9 +310,16 @@ const editValueCellEpic = (store) => (action$) => (
         // update row
         const { collectionAddress, indices, } = getTable(store.getState(), tableId);
         const indexOfReplaceRow = row - destructureAddress(collectionAddress).row - 1;
-        // TODO - do I have to collapse indicesKeySet?
-        const newIndices = expandIndicesKeySet(indices)
-          .map((index, idx) => (idx === indexOfReplaceRow ? value : index));
+        if (Number.isNaN(parseInt(value, 10))) {
+          return of();
+        }
+
+        // TODO - collapse indicesKeySet
+        const newIndices = setInArray(
+          indexOfReplaceRow,
+          parseInt(value, 10),
+          expandIndicesKeySet(indices)
+        );
 
         return of(replaceIndices(tableId, newIndices));
       }
@@ -343,7 +347,11 @@ const editEmptyCellEpic = (store) => (action$) => (
         )
       ) {
         const { indices, } = getTable(store.getState(), upCell.tableId);
-        return of(replaceIndices(upCell.tableId, [...indices, value]));
+        if (Number.isNaN(parseInt(value, 10))) {
+          return of();
+        }
+
+        return of(replaceIndices(upCell.tableId, [...indices, parseInt(value, 10)]));
       }
 
       // create new column
