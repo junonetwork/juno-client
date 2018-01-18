@@ -61,18 +61,19 @@ const withHotKeys = (
         this.node = node;
       },
       onBlur: (e) => {
-        if (!focus(this.props)) {
-          onBlur(this.props)(e);
-        }
-        // if (!focus(this.props)) {
-        //   console.log('do blur')
-        //   onBlur(this.props)(e);
-        // } else {
-        //   console.log('dont blur')
-        //   e.stopPropagation();
-        //   e.preventDefault();
-        //   this.node.focus();
-        // }
+        onBlur(this.props)(e);
+        // TODO - doesn't work consistently
+        // setImmediate(() => {
+        //   if (!focus(this.props)) {
+        //     onBlur(this.props)(e);
+        //   }
+        //   // } else {
+        //   //   console.log('dont blur');
+        //   //   e.stopPropagation();
+        //   //   e.preventDefault();
+        //   //   this.node.focus();
+        //   // }
+        // });
       },
     }
 

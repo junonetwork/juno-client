@@ -177,14 +177,22 @@ export default compose(
       },
     },
     {
-      onBlur: ({ focusView, enhanceView, type, leftCellType, cellInput, setCellInput, }) => () => {
+      onBlur: ({
+        focusView, enhanceView, type, leftCellType, cellInput, setCellInput,
+      }) => () => {
         if (
           !shouldRenderPredicateEnhancedInput(enhanceView, type, leftCellType) &&
-          !shouldRenderPredicateInput(focusView, cellInput, type)
+          !shouldRenderPredicateInput(focusView, cellInput, type) &&
+          cellInput !== ''
         ) {
-          console.log('blur cell container');
           setCellInput('');
         }
+        // TODO - though this is cleaner, it doesn't clean up index cell input after navigating away
+        // if (
+        //   shouldFocus(focusView, enhanceView, type, cellInput, leftCellType, upCellType)
+        // ) {
+        //   setCellInput('');
+        // }
       },
     }
   )

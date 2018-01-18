@@ -17,7 +17,7 @@ export const shouldRenderPredicateEnhancedInput = (enhanceView, type, leftCellTy
 );
 
 export const shouldRenderPredicateInput = (focusView, cellInput, type) => (
-  focusView && cellInput && type === 'predicate'
+  !!(focusView && cellInput && type === 'predicate')
 );
 
 export const shouldRenderIndexInput = (enhanceView, type, upCellType) => (
