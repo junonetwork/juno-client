@@ -7,10 +7,9 @@ import {
 
 
 export const createSearchCollectionTable = (
-  sheetId, tableId, collectionAddress, search, predicates, indices
+  tableId, collectionAddress, search, predicates, indices
 ) => ({
   collectionType: 'searchCollection',
-  sheetId,
   tableId,
   collectionAddress,
   search,

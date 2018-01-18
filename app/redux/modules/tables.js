@@ -40,7 +40,7 @@ import {
 // }                                    from '../../redux/modules/falcor';
 import model                         from '../../falcor/model';
 import {
-  getSheetMatrix,
+  getSheetMatrix, getSheet,
 }                                    from './sheets';
 import {
   formatTableId, setInArray,
@@ -50,18 +50,15 @@ import {
 /**
  * utils
  */
-const sheetIdEquals = (val) => compose(equals(val), prop('sheetId'));
+
 
 /**
  * selectors
  */
 export const getTable = (state, tableId) =>
   state.tables[tableId];
-// TODO - this could return referentially equivalent list if sheetId maintains a list of it's tableIds
-export const getTableIds = (state, sheetId) =>
-  Object.keys(
-    filter(sheetIdEquals(sheetId), state.tables)
-  );
+
+export const getTableIds = (state, sheetId) => getSheet(state, sheetId).tables;
 
 
 /**
@@ -205,12 +202,12 @@ export default (
   action
 ) => {
   if (action.type === ADD_SEARCH_COLLECTION_TABLE) {
-    const { sheetId, tableId, collectionAddress, search, predicates, indices, } = action;
+    const { tableId, collectionAddress, search, predicates, indices, } = action;
     // TODO - should createSearchCollectionTable have a sheetId?  given that it could move to other sheets
     return {
       ...state,
       [tableId]: createSearchCollectionTable(
-        sheetId, tableId, collectionAddress, search, predicates, indices
+        tableId, collectionAddress, search, predicates, indices
       ),
     };
   } else if (action.type === REMOVE_TABLE) {
@@ -256,7 +253,7 @@ export default (
  */
 const editValueCellEpic = (store) => (action$) => (
   action$.pipe(
-    mergeMap(({ sheetId, tableId, column, row, type, value, }) => {
+    mergeMap(({ tableId, column, row, type, value, }) => {
       if (type === 'object' && value === '') {
         // delete object
         // TODO - how should object collections of length > 1 behave?
