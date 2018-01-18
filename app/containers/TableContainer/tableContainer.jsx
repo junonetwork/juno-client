@@ -59,14 +59,14 @@ export default compose(
       navigate: throttle((sheetId, column, row, direction, steps) => (
         dispatch(navigate(column, row, sheetId, direction, steps))
       )),
-      dispatchUpdateValue: (sheetId, column, row, value, graphFragment) => (
-        actionStreamDispatch(updateCellValue(sheetId, column, row, value, graphFragment))
+      dispatchUpdateValue: (sheetId, column, row, value, matrix) => (
+        actionStreamDispatch(updateCellValue(sheetId, column, row, value, matrix))
       ),
     })
   ),
   withHandlers({
-    updateValue: ({ graphFragment, dispatchUpdateValue, }) => (sheetId, column, row, value) => (
-      dispatchUpdateValue(sheetId, column, row, value, graphFragment)
+    updateValue: ({ sheetMatrix, dispatchUpdateValue, }) => (sheetId, column, row, value) => (
+      dispatchUpdateValue(sheetId, column, row, value, sheetMatrix)
     ),
   })
 )(Table);
