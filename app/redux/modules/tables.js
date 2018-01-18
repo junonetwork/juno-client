@@ -189,8 +189,8 @@ export const replaceIndices = (tableId, indices) => ({
   type: REPLACE_INDICES, tableId, indices,
 });
 
-export const updateCellValue = (sheetId, column, row, value, graphFragment) => ({
-  type: UPDATE_CELL_VALUE, sheetId, column, row, value, graphFragment,
+export const updateCellValue = (sheetId, column, row, value, matrix) => ({
+  type: UPDATE_CELL_VALUE, sheetId, column, row, value, matrix,
 });
 
 
@@ -253,7 +253,9 @@ export default (
  */
 const editValueCellEpic = (store) => (action$) => (
   action$.pipe(
-    mergeMap(({ tableId, column, row, type, value, }) => {
+    mergeMap(({ column, row, value, matrix, }) => {
+      const { type, tableId, } = matrix[row][column];
+
       if (type === 'object' && value === '') {
         // delete object
         // TODO - how should object collections of length > 1 behave?
@@ -392,22 +394,9 @@ const editEmptyCellEpic = (store) => (action$) => (
 export const editCellEpic = (store) => (action$) => (
   action$.pipe(
     filterStream(ofType(UPDATE_CELL_VALUE)),
-    map(({ sheetId, column, row, value, graphFragment, }) => {
-      const matrix = getSheetMatrix(store.getState(), sheetId, graphFragment);
-
-      return {
-        matrix,
-        type: matrix[row][column].type,
-        sheetId,
-        tableId: matrix[row][column].tableId,
-        column,
-        row,
-        value,
-      };
-    }),
     (editCellAction$) => {
       const [editEmptyCellAction$, editValueCellAction$] = partition(
-        ofType('empty')
+        ({ column, row, matrix, }) => matrix[row][column].type === 'empty'
       )(editCellAction$);
 
       return merge(
