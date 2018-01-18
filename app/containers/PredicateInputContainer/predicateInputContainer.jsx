@@ -30,6 +30,14 @@ import {
 import {
   removeEnhancedCell,
 }                            from '../../redux/modules/enhanced';
+import {
+  clearCellInput,
+}                            from '../../redux/modules/cellInput';
+
+
+const arrowKeyNavHandler = ({ selectedPredicates, addPredicates, }) => () => (
+  addPredicates(selectedPredicates)
+);
 
 
 export default compose(
@@ -40,18 +48,19 @@ export default compose(
 
       return { search, existingPredicates: predicates, };
     },
-    (dispatch, { sheetId, tableId, column, row, setCellInput, }) => ({
+    (dispatch, { sheetId, tableId, column, row, }) => ({
       submit: (predicates) => {
-        // TODO - manage cellInput in redux store
-        setCellInput('');
         dispatch(batchActions([
           removeEnhancedCell(sheetId, column, row),
           replacePredicates(tableId, predicates),
+          clearCellInput(sheetId, column, row),
         ]));
       },
       exit: () => {
-        setCellInput('');
-        dispatch(removeEnhancedCell(sheetId, column, row));
+        dispatch(batchActions([
+          removeEnhancedCell(sheetId, column, row),
+          clearCellInput(sheetId, column, row),
+        ]));
       },
     })
   ),
@@ -136,24 +145,12 @@ export default compose(
         e.stopPropagation();
         forwardSelect();
       },
-      left: ({ selectedPredicates, addPredicates, }) => () => (
-        addPredicates(selectedPredicates)
-      ),
-      right: ({ selectedPredicates, addPredicates, }) => () => (
-        addPredicates(selectedPredicates)
-      ),
-      'alt+left': ({ selectedPredicates, addPredicates, }) => () => (
-        addPredicates(selectedPredicates)
-      ),
-      'alt+right': ({ selectedPredicates, addPredicates, }) => () => (
-        addPredicates(selectedPredicates)
-      ),
-      'alt+up': ({ selectedPredicates, addPredicates, }) => () => (
-        addPredicates(selectedPredicates)
-      ),
-      'alt+down': ({ selectedPredicates, addPredicates, }) => () => (
-        addPredicates(selectedPredicates)
-      ),
+      left: arrowKeyNavHandler,
+      right: arrowKeyNavHandler,
+      'alt+left': arrowKeyNavHandler,
+      'alt+right': arrowKeyNavHandler,
+      'alt+up': arrowKeyNavHandler,
+      'alt+down': arrowKeyNavHandler,
       enter: ({
         selectedPredicates, predicateList, selectionIdx, addPredicates,
       }) => (e) => {

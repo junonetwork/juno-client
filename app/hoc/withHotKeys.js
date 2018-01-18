@@ -62,7 +62,14 @@ const withHotKeys = (
       },
       onBlur: (e) => {
         onBlur(this.props)(e);
-        // TODO - doesn't work consistently
+        /**
+         * TODO - doesn't work consistently
+         * there's a race condition:
+         * - a state change switches focus from component A to B
+         * - if A is rerendered before B: A onBlur triggers w/ new props and it successfully gives up focus
+         * - if B is rerendered before A: A onblur triggers w/ old props and it doesn't give up focus, possibly leading to a cascading update
+         * setImmediate should fix this?
+         */
         // setImmediate(() => {
         //   if (!focus(this.props)) {
         //     onBlur(this.props)(e);

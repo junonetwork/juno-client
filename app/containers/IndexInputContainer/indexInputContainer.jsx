@@ -17,6 +17,9 @@ import {
   replaceIndices,
 }                            from '../../redux/modules/tables';
 import {
+  clearCellInput,
+}                            from '../../redux/modules/cellInput';
+import {
   indicesKeySet2String,
 }                            from '../../utils/sheet';
 import {
@@ -46,10 +49,14 @@ export default compose(
         dispatch(batchActions([
           removeEnhancedCell(sheetId, column, row),
           replaceIndices(tableId, indicesKeySet),
+          clearCellInput(sheetId, column, row),
         ]));
       },
       exit() {
-        dispatch(removeEnhancedCell(sheetId, column, row));
+        dispatch(batchActions([
+          removeEnhancedCell(sheetId, column, row),
+          clearCellInput(sheetId, column, row),
+        ]));
       },
     })
   ),

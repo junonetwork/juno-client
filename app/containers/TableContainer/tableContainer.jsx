@@ -31,6 +31,10 @@ import {
   updateCellValue,
 }                          from '../../redux/modules/tables';
 import {
+  setCellInput,
+  clearCellInput,
+}                          from '../../redux/modules/cellInput';
+import {
   actionStreamDispatch,
 }                          from '../../redux/store';
 import throttle            from '../../utils/throttleAnimationFrame';
@@ -59,6 +63,12 @@ export default compose(
       navigate: throttle((sheetId, column, row, direction, steps) => (
         dispatch(navigate(sheetId, column, row, direction, steps))
       )),
+      setCellInput: (sheetId, column, row, value) => (
+        dispatch(setCellInput(sheetId, column, row, value))
+      ),
+      clearCellInput: (sheetId, column, row) => (
+        dispatch(clearCellInput(sheetId, column, row))
+      ),
       dispatchUpdateValue: (sheetId, column, row, value, matrix) => (
         actionStreamDispatch(updateCellValue(sheetId, column, row, value, matrix))
       ),

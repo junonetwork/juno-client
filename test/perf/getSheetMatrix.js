@@ -9,7 +9,9 @@ import {
 }                             from 'redux-batched-actions';
 import reducer                from '../../app/redux/reducer';
 import {
-  addSheet, increaseSheetMaxColumn, increaseSheetMaxRow,
+  addSheet,
+  increaseSheetMaxColumn,
+  increaseSheetMaxRow,
 }                             from '../../app/redux/modules/sheets';
 import {
   addSearchCollectionTable,
@@ -23,6 +25,9 @@ import {
 import {
   addEnhancedCell,
 }                             from '../../app/redux/modules/enhanced';
+import {
+  setCellInput,
+}                             from '../../app/redux/modules/cellInput';
 import {
   formatAddress,
 }                             from '../../app/utils/cell';
@@ -65,20 +70,20 @@ const initStore = () => {
 runPerfTests([
   {
     title: 'Initial Select        ',
-    pre: () => {
+    init: () => {
       const store = initStore();
       delete require.cache[require.resolve('../../app/redux/modules/sheets')];
       const { getSheetMatrix, } = require('../../app/redux/modules/sheets');
 
       return { state: store.getState(), getSheetMatrix, };
     },
-    perf: ({ state, getSheetMatrix, }) => {
+    run: ({ state, getSheetMatrix, }) => {
       getSheetMatrix(state, '0', graphFragment.json);
     },
   },
   {
     title: 'Reselect             ',
-    pre: () => {
+    init: () => {
       const store = initStore();
       delete require.cache[require.resolve('../../app/redux/modules/sheets')];
       const { getSheetMatrix, } = require('../../app/redux/modules/sheets');
@@ -87,14 +92,14 @@ runPerfTests([
 
       return { state: store.getState(), getSheetMatrix, };
     },
-    perf: ({ state, getSheetMatrix, }) => {
+    run: ({ state, getSheetMatrix, }) => {
       getSheetMatrix(state, '0', graphFragment.json);
     },
   },
   // TODO
   // {
   //   title: 'Update Table',
-  //   pre: () => {
+  //   init: () => {
   //     const store = initStore();
   //     delete require.cache[require.resolve('../../app/redux/modules/sheets')];
   //     const { getSheetMatrix, } = require('../../app/redux/modules/sheets');
@@ -103,13 +108,13 @@ runPerfTests([
 
   //     return { state: store.getState(), getSheetMatrix, };
   //   },
-  //   perf: ({ state, getSheetMatrix, }) => {
+  //   run: ({ state, getSheetMatrix, }) => {
   //     getSheetMatrix(state, '0', graphFragment.json);
   //   },
   // },
   {
     title: 'Update MaxColumn  ',
-    pre: () => {
+    init: () => {
       const store = initStore();
       delete require.cache[require.resolve('../../app/redux/modules/sheets')];
       const { getSheetMatrix, } = require('../../app/redux/modules/sheets');
@@ -120,13 +125,13 @@ runPerfTests([
 
       return { state: store.getState(), getSheetMatrix, };
     },
-    perf: ({ state, getSheetMatrix, }) => {
+    run: ({ state, getSheetMatrix, }) => {
       getSheetMatrix(state, '0', graphFragment.json);
     },
   },
   {
     title: 'Update MaxRow    ',
-    pre: () => {
+    init: () => {
       const store = initStore();
       delete require.cache[require.resolve('../../app/redux/modules/sheets')];
       const { getSheetMatrix, } = require('../../app/redux/modules/sheets');
@@ -137,13 +142,13 @@ runPerfTests([
 
       return { state: store.getState(), getSheetMatrix, };
     },
-    perf: ({ state, getSheetMatrix, }) => {
+    run: ({ state, getSheetMatrix, }) => {
       getSheetMatrix(state, '0', graphFragment.json);
     },
   },
   {
     title: 'Update GraphFragment',
-    pre: () => {
+    init: () => {
       const store = initStore();
       delete require.cache[require.resolve('../../app/redux/modules/sheets')];
       const { getSheetMatrix, } = require('../../app/redux/modules/sheets');
@@ -152,13 +157,13 @@ runPerfTests([
 
       return { state: store.getState(), getSheetMatrix, jsonGraph: { ...graphFragment.json, }, };
     },
-    perf: ({ state, getSheetMatrix, jsonGraph, }) => {
+    run: ({ state, getSheetMatrix, jsonGraph, }) => {
       getSheetMatrix(state, '0', jsonGraph);
     },
   },
   {
     title: 'Update CellFocus    ',
-    pre: () => {
+    init: () => {
       const store = initStore();
       delete require.cache[require.resolve('../../app/redux/modules/sheets')];
       const { getSheetMatrix, } = require('../../app/redux/modules/sheets');
@@ -170,13 +175,13 @@ runPerfTests([
 
       return { state: store.getState(), getSheetMatrix, };
     },
-    perf: ({ state, getSheetMatrix, }) => {
+    run: ({ state, getSheetMatrix, }) => {
       getSheetMatrix(state, '0', graphFragment.json);
     },
   },
   {
     title: 'Update CellTeaser   ',
-    pre: () => {
+    init: () => {
       const store = initStore();
       delete require.cache[require.resolve('../../app/redux/modules/sheets')];
       const { getSheetMatrix, } = require('../../app/redux/modules/sheets');
@@ -188,13 +193,13 @@ runPerfTests([
 
       return { state: store.getState(), getSheetMatrix, };
     },
-    perf: ({ state, getSheetMatrix, }) => {
+    run: ({ state, getSheetMatrix, }) => {
       getSheetMatrix(state, '0', graphFragment.json);
     },
   },
   {
     title: 'Update CellEnhanced   ',
-    pre: () => {
+    init: () => {
       const store = initStore();
       delete require.cache[require.resolve('../../app/redux/modules/sheets')];
       const { getSheetMatrix, } = require('../../app/redux/modules/sheets');
@@ -205,7 +210,24 @@ runPerfTests([
 
       return { state: store.getState(), getSheetMatrix, };
     },
-    perf: ({ state, getSheetMatrix, }) => {
+    run: ({ state, getSheetMatrix, }) => {
+      getSheetMatrix(state, '0', graphFragment.json);
+    },
+  },
+  {
+    title: 'Update CellInput    ',
+    init: () => {
+      const store = initStore();
+      delete require.cache[require.resolve('../../app/redux/modules/sheets')];
+      const { getSheetMatrix, } = require('../../app/redux/modules/sheets');
+
+      getSheetMatrix(store.getState(), '0', graphFragment.json);
+
+      store.dispatch(setCellInput('0', 0, 0, '!'));
+
+      return { state: store.getState(), getSheetMatrix, };
+    },
+    run: ({ state, getSheetMatrix, }) => {
       getSheetMatrix(state, '0', graphFragment.json);
     },
   },

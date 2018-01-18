@@ -42,6 +42,7 @@ import {
 import {
   formatTableId, setInArray,
 }                                    from '../../utils/table';
+import { clearCellInput } from './cellInput';
 
 
 /**
@@ -258,27 +259,30 @@ const editValueCellEpic = (store) => (action$) => (
         // TODO - how should object collections of length > 1 behave?
         // return of(deleteGraphValue(getObjectPath(...)));
         console.log('DELETE OBJECT CELL');
-        return of(null);
+        return of(clearCellInput());
       } else if (type === 'object') {
         // update object
         // return of(updateGraphValue(getObjectPath(...)));
         console.log('UPDATE OBJECT CELL');
-        return of(null);
+        return of(clearCellInput());
       } else if ((type === 'searchCollection' || type === 'objectCollection') && value === '') {
         // delete collection
-        return of(removeTable(tableId));
+        return of([removeTable(tableId), clearCellInput()]);
       } else if (type === 'searchCollection' || type === 'objectCollection') {
         // update collection
-        return of(replaceSearchCollectionSearch(tableId, value));
+        return of([replaceSearchCollectionSearch(tableId, value), clearCellInput()]);
       } else if (type === 'predicate' && value === '') {
         // delete column
         const { collectionAddress, predicates, } = getTable(store.getState(), tableId);
         const indexOfDeleteColumn = column - destructureAddress(collectionAddress).column - 1;
 
-        return of(replacePredicates(
-          tableId,
-          predicates.filter((_, idx) => idx !== indexOfDeleteColumn)
-        ));
+        return of([
+          replacePredicates(
+            tableId,
+            predicates.filter((_, idx) => idx !== indexOfDeleteColumn)
+          ),
+          clearCellInput(),
+        ]);
       } else if (type === 'predicate') {
         // update column
         return from(
@@ -291,10 +295,13 @@ const editValueCellEpic = (store) => (action$) => (
               const indexOfReplaceColumn = column -
                 destructureAddress(collectionAddress).column - 1;
 
-              return replacePredicates(
-                tableId,
-                setInArray(indexOfReplaceColumn, uri.value || value, predicates)
-              );
+              return [
+                replacePredicates(
+                  tableId,
+                  setInArray(indexOfReplaceColumn, uri.value || value, predicates)
+                ),
+                clearCellInput(),
+              ];
             })
           );
       } else if (type === 'index' && value === '') {
@@ -305,13 +312,13 @@ const editValueCellEpic = (store) => (action$) => (
         const newIndices = expandIndicesKeySet(indices)
           .filter((_, idx) => idx !== indexOfDeleteRow);
 
-        return of(replaceIndices(tableId, newIndices));
+        return of([replaceIndices(tableId, newIndices), clearCellInput()]);
       } else if (type === 'index') {
         // update row
         const { collectionAddress, indices, } = getTable(store.getState(), tableId);
         const indexOfReplaceRow = row - destructureAddress(collectionAddress).row - 1;
         if (Number.isNaN(parseInt(value, 10))) {
-          return of();
+          return of(clearCellInput());
         }
 
         // TODO - collapse indicesKeySet
@@ -321,7 +328,7 @@ const editValueCellEpic = (store) => (action$) => (
           expandIndicesKeySet(indices)
         );
 
-        return of(replaceIndices(tableId, newIndices));
+        return of([replaceIndices(tableId, newIndices), clearCellInput()]);
       }
 
       throw new Error('Edited a cell with no editValueCellEpic handler');
@@ -348,10 +355,13 @@ const editEmptyCellEpic = (store) => (action$) => (
       ) {
         const { indices, } = getTable(store.getState(), upCell.tableId);
         if (Number.isNaN(parseInt(value, 10))) {
-          return of();
+          return of(clearCellInput());
         }
 
-        return of(replaceIndices(upCell.tableId, [...indices, parseInt(value, 10)]));
+        return of([
+          replaceIndices(upCell.tableId, [...indices, parseInt(value, 10)]),
+          clearCellInput(),
+        ]);
       }
 
       // create new column
@@ -371,16 +381,19 @@ const editEmptyCellEpic = (store) => (action$) => (
             map((uri = {}) => {
               // TODO - store label, for cases when predicate label doesn't resolve to anything
               const { predicates, } = getTable(store.getState(), leftCell.tableId);
-              return replacePredicates(
-                leftCell.tableId,
-                [...predicates, uri.value || value]
-              );
+              return [
+                replacePredicates(
+                  leftCell.tableId,
+                  [...predicates, uri.value || value]
+                ),
+                clearCellInput(),
+              ];
             }),
           );
       }
 
       // create a new collection
-      return of(
+      return of([
         addSearchCollectionTable(
           sheetId,
           formatTableId(sheetId, column, row),
@@ -388,8 +401,9 @@ const editEmptyCellEpic = (store) => (action$) => (
           `schema:${value}`,
           ['skos:prefLabel'],
           [0]
-        )
-      );
+        ),
+        clearCellInput(),
+      ]);
     }),
     catchError((error, caught) => {
       console.error('EditEmptyCellEpic error', error);
