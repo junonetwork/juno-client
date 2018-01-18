@@ -38,7 +38,7 @@ export const focusCell = (sheetId, column, row) => ({
 });
 
 
-export const navigate = (column, row, sheetId, direction, steps) => (dispatch, getState) => {
+export const navigate = (sheetId, column, row, direction, steps) => (dispatch, getState) => {
   const state = getState();
   const maxColumn = getSheetMaxColumn(state, sheetId);
   const maxRow = getSheetMaxRow(state, sheetId);

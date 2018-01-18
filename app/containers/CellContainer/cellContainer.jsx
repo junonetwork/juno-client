@@ -8,12 +8,25 @@ import {
 import withHotKeys         from '../../hoc/withHotKeys';
 import Cell                from '../../components/Cell';
 import {
+  shouldRenderPredicateEnhancedInput,
   shouldRenderPredicateInput,
   shouldRenderIndexInput,
 }                          from '../../components/Cell/cell';
 
 
 const FAST_STEP = 2;
+
+// TODO - perhaps all of this should be stored in focus module, so focus logic is
+// centralized in the store.  For cases where focus logic should be calculated on
+// read, focus descriptor could be generated in a selector on the fly, combining
+// active w/ other store modules
+const shouldFocus = (focusView, enhanceView, type, cellInput, leftCellType, upCellType) => (
+  focusView &&
+  !shouldRenderPredicateEnhancedInput(enhanceView, type, leftCellType) &&
+  !shouldRenderPredicateInput(focusView, cellInput, type) &&
+  !shouldRenderIndexInput(enhanceView, type, upCellType)
+);
+
 
 export default compose(
   setDisplayName('CellContainer'),
@@ -37,10 +50,8 @@ export default compose(
     },
   }),
   withHotKeys(
-    ({ focusView, enhanceView, type, leftCellType, upCellType, }) => (
-      focusView &&
-      !shouldRenderPredicateInput(enhanceView, type, leftCellType) &&
-      !shouldRenderIndexInput(enhanceView, type, upCellType)
+    ({ focusView, enhanceView, type, cellInput, leftCellType, upCellType, }) => (
+      shouldFocus(focusView, enhanceView, type, cellInput, leftCellType, upCellType)
     ),
     {
       up: ({ sheetId, column, row, cellInput, navigate, updateValue, }) => (e) => {
@@ -166,7 +177,15 @@ export default compose(
       },
     },
     {
-      onBlur: ({ setCellInput, }) => () => setCellInput(''),
+      onBlur: ({ focusView, enhanceView, type, leftCellType, cellInput, setCellInput, }) => () => {
+        if (
+          !shouldRenderPredicateEnhancedInput(enhanceView, type, leftCellType) &&
+          !shouldRenderPredicateInput(focusView, cellInput, type)
+        ) {
+          console.log('blur cell container');
+          setCellInput('');
+        }
+      },
     }
   )
 )(Cell);

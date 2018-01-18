@@ -26,10 +26,13 @@ const event2HandlerKey = ({ which, metaKey, altKey, shiftKey, }) =>
 const withHotKeys = (
   focus = () => true,
   hotKeyHandlers = {},
-  {
-    onBlur,
-  } = {}
+  options = {},
 ) => (BaseComponent) => {
+  const {
+    onBlur,
+  } = Object.assign({
+    onBlur: () => () => {},
+  }, options);
   const factory = createFactory(BaseComponent);
 
   return class WithHotKeys extends Component {
@@ -58,9 +61,18 @@ const withHotKeys = (
         this.node = node;
       },
       onBlur: (e) => {
-        if (onBlur) {
+        if (!focus(this.props)) {
           onBlur(this.props)(e);
         }
+        // if (!focus(this.props)) {
+        //   console.log('do blur')
+        //   onBlur(this.props)(e);
+        // } else {
+        //   console.log('dont blur')
+        //   e.stopPropagation();
+        //   e.preventDefault();
+        //   this.node.focus();
+        // }
       },
     }
 
