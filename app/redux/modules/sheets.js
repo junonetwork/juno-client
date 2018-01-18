@@ -33,7 +33,7 @@ import {
   arraySingleDepthEqualitySelector,
 }                                    from '../../utils/selectors';
 import {
-  getEnhancedCells
+  getEnhancedCells,
 }                                     from './enhanced';
 
 
@@ -57,12 +57,18 @@ export const getSheetMaxRow = (state, sheetId) => state.sheets[sheetId].maxRow;
  * @param {String} sheetId
  */
 export const getSheetPathSets = createCachedSelector(
-  (state, sheetId) => (
-    getTableIds(state, sheetId).reduce((pathSets, tableId) => {
-      pathSets.push(...getTablePathSets(state, tableId));
-      return pathSets;
-    }, [])
-  ),
+  (state, sheetId) => {
+    const tableIds = getTableIds(state, sheetId);
+
+    if (tableIds.length > 0) {
+      return tableIds.reduce((pathSets, tableId) => {
+        pathSets.push(...getTablePathSets(state, tableId));
+        return pathSets;
+      }, []);
+    }
+
+    return [[]];
+  },
   (pathSets) => pathSets
 )(
   nthArg(1),
