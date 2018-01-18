@@ -26,6 +26,12 @@ import {
   addEnhancedCell,
   removeEnhancedCell,
 }                          from '../../redux/modules/enhanced';
+import {
+  updateCellValue,
+}                          from '../../redux/modules/tables';
+import {
+  actionStreamDispatch,
+}                          from '../../redux/store';
 import throttle            from '../../utils/throttleAnimationFrame';
 
 
@@ -46,10 +52,15 @@ export default compose(
       focusCell: (sheetId, column, row) => dispatch(focusCell(sheetId, column, row)),
       teaseCell: throttle((sheetId, column, row) => dispatch(teaseCell(sheetId, column, row))),
       enhanceCell: (sheetId, column, row) => dispatch(addEnhancedCell(sheetId, column, row)),
-      removeEnhanceCell: (sheetId, column, row) => dispatch(removeEnhancedCell(sheetId, column, row)),
+      removeEnhanceCell: (sheetId, column, row) => (
+        dispatch(removeEnhancedCell(sheetId, column, row))
+      ),
       navigate: throttle((sheetId, column, row, direction, steps) => (
         dispatch(navigate(column, row, sheetId, direction, steps))
       )),
+      updateValue: (sheetId, tableId, column, row, cellType, value) => (
+        actionStreamDispatch(updateCellValue(sheetId, tableId, column, row, cellType, value))
+      ),
     })
   )
 )(Table);
