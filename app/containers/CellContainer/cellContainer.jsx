@@ -3,7 +3,6 @@ import {
   pure,
   setDisplayName,
   withHandlers,
-  withState,
 }                          from 'recompose';
 import withHotKeys         from '../../hoc/withHotKeys';
 import Cell                from '../../components/Cell';
@@ -16,6 +15,7 @@ import {
 
 const FAST_STEP = 2;
 
+
 // TODO - perhaps all of this should be stored in focus module, so focus logic is
 // centralized in the store.  For cases where focus logic should be calculated on
 // read, focus descriptor could be generated in a selector on the fly, combining
@@ -27,11 +27,23 @@ const shouldFocus = (focusView, enhanceView, type, cellInput, leftCellType, upCe
   !shouldRenderIndexInput(enhanceView, type, upCellType)
 );
 
+const arrowKeyNavHandler = (direction, steps) =>
+  ({ sheetId, column, row, cellInput, updateValue, navigate, }) => (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (cellInput) {
+      updateValue(sheetId, column, row, cellInput);
+      navigate(sheetId, column, row, direction, steps);
+    } else {
+      navigate(sheetId, column, row, direction, steps);
+    }
+  };
+
 
 export default compose(
   setDisplayName('CellContainer'),
   pure,
-  withState('cellInput', 'setCellInput', ''),
   withHandlers({
     onClick: ({ sheetId, column, row, focusCell, }) => (e) => {
       e.preventDefault();
@@ -42,11 +54,11 @@ export default compose(
     onMouseEnter: ({ sheetId, column, row, teaseCell, }) => () => {
       teaseCell(sheetId, column, row);
     },
-    onKeyPress: ({ cellInput, setCellInput, }) => (e) => {
+    onKeyPress: ({ sheetId, column, row, cellInput, setCellInput, }) => (e) => {
       e.preventDefault();
       e.stopPropagation();
 
-      setCellInput(cellInput + String.fromCharCode(e.which));
+      setCellInput(sheetId, column, row, cellInput + String.fromCharCode(e.which));
     },
   }),
   withHotKeys(
@@ -54,86 +66,14 @@ export default compose(
       shouldFocus(focusView, enhanceView, type, cellInput, leftCellType, upCellType)
     ),
     {
-      up: ({ sheetId, column, row, cellInput, navigate, updateValue, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        navigate(sheetId, column, row, 'up', 1);
-
-        if (cellInput) {
-          updateValue(sheetId, column, row, cellInput);
-        }
-      },
-      'alt+up': ({ sheetId, column, row, cellInput, navigate, updateValue, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        navigate(sheetId, column, row, 'up', FAST_STEP);
-
-        if (cellInput) {
-          updateValue(sheetId, column, row, cellInput);
-        }
-      },
-      down: ({ sheetId, column, row, cellInput, navigate, updateValue, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        navigate(sheetId, column, row, 'down', 1);
-
-        if (cellInput) {
-          updateValue(sheetId, column, row, cellInput);
-        }
-      },
-      'alt+down': ({ sheetId, column, row, cellInput, navigate, updateValue, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        navigate(sheetId, column, row, 'down', FAST_STEP);
-
-        if (cellInput) {
-          updateValue(sheetId, column, row, cellInput);
-        }
-      },
-      left: ({ sheetId, column, row, cellInput, navigate, updateValue, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        navigate(sheetId, column, row, 'left', 1);
-
-        if (cellInput) {
-          updateValue(sheetId, column, row, cellInput);
-        }
-      },
-      'alt+left': ({ sheetId, column, row, cellInput, navigate, updateValue, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        navigate(sheetId, column, row, 'left', FAST_STEP);
-
-        if (cellInput) {
-          updateValue(sheetId, column, row, cellInput);
-        }
-      },
-      right: ({ sheetId, column, row, cellInput, navigate, updateValue, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        navigate(sheetId, column, row, 'right', 1);
-
-        if (cellInput) {
-          updateValue(sheetId, column, row, cellInput);
-        }
-      },
-      'alt+right': ({ sheetId, column, row, cellInput, navigate, updateValue, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        navigate(sheetId, column, row, 'right', FAST_STEP);
-
-        if (cellInput) {
-          updateValue(sheetId, column, row, cellInput);
-        }
-      },
+      up: arrowKeyNavHandler('up', 1),
+      'alt+up': arrowKeyNavHandler('up', FAST_STEP),
+      down: arrowKeyNavHandler('down', 1),
+      'alt+down': arrowKeyNavHandler('down', FAST_STEP),
+      left: arrowKeyNavHandler('left', 1),
+      'alt+left': arrowKeyNavHandler('left', FAST_STEP),
+      right: arrowKeyNavHandler('right', 1),
+      'alt+right': arrowKeyNavHandler('right', FAST_STEP),
       delete: ({
         sheetId, column, row, cellInput, setCellInput, updateValue,
       }) => (e) => {
@@ -141,19 +81,19 @@ export default compose(
         e.stopPropagation();
 
         if (cellInput) {
-          setCellInput(cellInput.slice(0, -1));
+          setCellInput(sheetId, column, row, cellInput.slice(0, -1));
         } else {
-          updateValue(sheetId, column, row, cellInput);
+          updateValue(sheetId, column, row, '');
         }
       },
       enter: ({
         sheetId, column, row, enhanceView, enhanceCell, cellInput,
-        removeEnhanceCell, setCellInput, updateValue,
+        removeEnhanceCell, clearCellInput, updateValue,
       }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
-        setCellInput('');
+        clearCellInput(sheetId, column, row);
 
         if (enhanceView) {
           removeEnhanceCell(sheetId, column, row);
@@ -164,35 +104,16 @@ export default compose(
         }
       },
       esc: ({
-        sheetId, column, row, enhanceView, removeEnhanceCell, setCellInput,
+        sheetId, column, row, enhanceView, removeEnhanceCell, clearCellInput,
       }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
-        setCellInput('');
+        clearCellInput(sheetId, column, row);
 
         if (enhanceView) {
           removeEnhanceCell(sheetId, column, row);
         }
-      },
-    },
-    {
-      onBlur: ({
-        focusView, enhanceView, type, leftCellType, cellInput, setCellInput,
-      }) => () => {
-        if (
-          !shouldRenderPredicateEnhancedInput(enhanceView, type, leftCellType) &&
-          !shouldRenderPredicateInput(focusView, cellInput, type) &&
-          cellInput !== ''
-        ) {
-          setCellInput('');
-        }
-        // TODO - though this is cleaner, it doesn't clean up index cell input after navigating away
-        // if (
-        //   shouldFocus(focusView, enhanceView, type, cellInput, leftCellType, upCellType)
-        // ) {
-        //   setCellInput('');
-        // }
       },
     }
   )

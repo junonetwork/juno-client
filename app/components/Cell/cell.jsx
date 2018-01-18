@@ -51,7 +51,6 @@ const Cell = ({
           column={column}
           row={row}
           predicateIdx={predicateIdx}
-          setCellInput={setCellInput}
         /> :
       shouldRenderPredicateInput(focusView, cellInput, type) ?
         <PredicateInput
@@ -61,7 +60,6 @@ const Cell = ({
           column={column}
           row={row}
           predicateIdx={predicateIdx}
-          setCellInput={setCellInput}
         /> :
       shouldRenderIndexInput(enhanceView, type, upCellType) ?
         <IndexInput

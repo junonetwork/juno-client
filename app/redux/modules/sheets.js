@@ -5,6 +5,10 @@ import {
   range,
   assoc,
   pipe,
+  map,
+  contains,
+  reject,
+  equals,
 }                                    from 'ramda';
 import createCachedSelector          from 're-reselect';
 import {
@@ -20,6 +24,9 @@ import {
 import {
   getCellTeaserDescriptor,
 }                                    from './teaser';
+import {
+  getCellInput,
+}                                    from './cellInput';
 import {
   materializeSearchCollection,
   materializeIndex,
@@ -215,6 +222,36 @@ export const materializeSheetMatrix = createCachedSelector(
  * @param {Object} state
  * @param {String} sheetId
  * @param {Object} sheetMatrix
+ */
+export const withCellInput = createCachedSelector(
+  nthArg(1),
+  nthArg(2),
+  getCellInput,
+  (
+    sheetId,
+    matrix,
+    { column, row, value, },
+  ) => {
+    if (value === undefined) {
+      return matrix;
+    }
+
+    return updateInMatrix(
+      column,
+      row,
+      assoc('cellInput', value),
+      matrix
+    );
+  }
+)(
+  nthArg(1)
+);
+
+
+/**
+ * @param {Object} state
+ * @param {String} sheetId
+ * @param {Object} sheetMatrix
  * @param {Object} graphPathMap
  */
 export const withFocus = createCachedSelector(
@@ -315,6 +352,7 @@ export const withEnhanced = createCachedSelector(
     matrix,
     enhancedCells,
   ) => {
+    // TODO - if sheetId doesn't match, just skip
     return enhancedCells
       .reduce((matrixWithEnhancedCells, { sheetId: enhancedSheetId, column, row, }) => (
         enhancedSheetId === sheetId ?
@@ -361,9 +399,12 @@ export const getSheetMatrix = pipe(
     sheetId,
     sheetMatrix: withTeaser(state, sheetId, sheetMatrix, graphPathMap),
   }),
-  ({ state, sheetId, sheetMatrix, }) => (
-    withEnhanced(state, sheetId, sheetMatrix)
-  )
+  ({ state, sheetId, sheetMatrix, }) => ({
+    state,
+    sheetId,
+    sheetMatrix: withEnhanced(state, sheetId, sheetMatrix),
+  }),
+  ({ state, sheetId, sheetMatrix, }) => withCellInput(state, sheetId, sheetMatrix)
 );
 
 
@@ -404,8 +445,6 @@ export default (
       [action.sheetId]: createSheet(maxColumn, maxRow),
     };
   } else if (action.type === REMOVE_SHEET) {
-    // TODO - remove nested sheets
-
     return omit([action.sheetId], state);
   } else if (action.type === INCREASE_SHEET_MAX_COLUMN) {
     return {
@@ -432,13 +471,13 @@ export default (
       },
     };
   } else if (action.type === REMOVE_TABLE) {
-    return {
-      ...state,
-      [action.sheetId]: {
-        ...state[action.sheetId],
-        tables: state[action.sheetId].filter((tableId) => tableId === action.tableId),
-      },
-    };
+    // TODO - remove nested tables
+    return map((sheet) => ({
+      ...sheet,
+      tables: contains(action.tableId, sheet.tables) ?
+        reject(equals(action.tableId), sheet.tables) :
+        sheet.tables,
+    }), state);
   }
 
   return state;

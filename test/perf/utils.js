@@ -10,20 +10,27 @@ const nsTime = exports.nsTime = (hrtime) => (hrtime[0] * 1e9) + hrtime[1];
 exports.runPerfTests = (tests) => (
   tests.forEach(({
     title,
-    count = 50,
-    pre = () => {},
-    perf,
+    count = 20,
+    init = () => {},
+    run,
   }) => {
     const totalTime = range(0, count)
       .reduce((runningSum) => {
-        const preArg = pre();
+        const initArg = init();
 
         const t1 = nsTime(process.hrtime());
-        perf(preArg);
+        run(initArg);
         const t2 = nsTime(process.hrtime());
+
 
         return runningSum + (t2 - t1);
       }, 0);
+
+    // NOTE - this still throws an out of memory error w/ too many iterations,
+    // meaning memoized selects aren't getting garbage collected...
+    if (global.gc) {
+      global.gc();
+    }
 
     console.log(`${title}\t- Average Time: ${Math.round((totalTime / count) / 1000) / 1000}ms - ${count} iterations`);
   })

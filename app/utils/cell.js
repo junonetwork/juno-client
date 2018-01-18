@@ -32,7 +32,7 @@ export const createSearchCollection = (
   column,
   row,
   search,
-  focusView: false,
+  cellInput: '',
 });
 
 /**
@@ -56,7 +56,7 @@ export const createObject = (
   collectionAddress,
   indexAddress,
   predicateAddress,
-  focusView: false,
+  cellInput: '',
 });
 
 
@@ -79,7 +79,7 @@ export const createIndex = (
   row,
   index,
   collectionAddress,
-  focusView: false,
+  cellInput: '',
 });
 
 
@@ -102,7 +102,7 @@ export const createPredicate = (
   uri,
   collectionAddress,
   predicateIdx: column - destructureAddress(collectionAddress).column - 1,
-  focusView: false,
+  cellInput: '',
 });
 
 
@@ -119,7 +119,7 @@ export const createEmpty = (
   address: formatAddress(sheetId, column, row),
   column,
   row,
-  focusView: false,
+  cellInput: '',
 });
 
 
