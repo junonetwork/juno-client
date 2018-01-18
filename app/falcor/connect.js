@@ -13,7 +13,6 @@ import 'rxjs/add/operator/take';
 import 'rxjs/add/operator/last';
 import 'rxjs/add/operator/merge';
 import 'rxjs/add/operator/concat';
-import 'rxjs/add/operator/throttleTime';
 import 'rxjs/add/operator/repeatWhen';
 import 'rxjs/add/operator/let';
 import 'rxjs/add/operator/switchMap';

@@ -43,104 +43,88 @@ export default compose(
       !shouldRenderIndexInput(enhanceView, type, upCellType)
     ),
     {
-      up: ({
-        sheetId, tableId, type, column, row, cellInput, navigate, updateValue,
-      }) => (e) => {
+      up: ({ sheetId, column, row, cellInput, navigate, updateValue, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
         navigate(sheetId, column, row, 'up', 1);
 
         if (cellInput) {
-          updateValue(sheetId, tableId, column, row, type, cellInput);
+          updateValue(sheetId, column, row, cellInput);
         }
       },
-      'alt+up': ({
-        sheetId, tableId, type, column, row, cellInput, navigate, updateValue,
-      }) => (e) => {
+      'alt+up': ({ sheetId, column, row, cellInput, navigate, updateValue, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
         navigate(sheetId, column, row, 'up', FAST_STEP);
 
         if (cellInput) {
-          updateValue(sheetId, tableId, column, row, type, cellInput);
+          updateValue(sheetId, column, row, cellInput);
         }
       },
-      down: ({
-        sheetId, tableId, type, column, row, cellInput, navigate, updateValue,
-      }) => (e) => {
+      down: ({ sheetId, column, row, cellInput, navigate, updateValue, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
         navigate(sheetId, column, row, 'down', 1);
 
         if (cellInput) {
-          updateValue(sheetId, tableId, column, row, type, cellInput);
+          updateValue(sheetId, column, row, cellInput);
         }
       },
-      'alt+down': ({
-        sheetId, tableId, type, column, row, cellInput, navigate, updateValue,
-      }) => (e) => {
+      'alt+down': ({ sheetId, column, row, cellInput, navigate, updateValue, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
         navigate(sheetId, column, row, 'down', FAST_STEP);
 
         if (cellInput) {
-          updateValue(sheetId, tableId, column, row, type, cellInput);
+          updateValue(sheetId, column, row, cellInput);
         }
       },
-      left: ({
-        sheetId, tableId, type, column, row, cellInput, navigate, updateValue,
-      }) => (e) => {
+      left: ({ sheetId, column, row, cellInput, navigate, updateValue, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
         navigate(sheetId, column, row, 'left', 1);
 
         if (cellInput) {
-          updateValue(sheetId, tableId, column, row, type, cellInput);
+          updateValue(sheetId, column, row, cellInput);
         }
       },
-      'alt+left': ({
-        sheetId, tableId, type, column, row, cellInput, navigate, updateValue,
-      }) => (e) => {
+      'alt+left': ({ sheetId, column, row, cellInput, navigate, updateValue, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
         navigate(sheetId, column, row, 'left', FAST_STEP);
 
         if (cellInput) {
-          updateValue(sheetId, tableId, column, row, type, cellInput);
+          updateValue(sheetId, column, row, cellInput);
         }
       },
-      right: ({
-        sheetId, tableId, type, column, row, cellInput, navigate, updateValue,
-      }) => (e) => {
+      right: ({ sheetId, column, row, cellInput, navigate, updateValue, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
         navigate(sheetId, column, row, 'right', 1);
 
         if (cellInput) {
-          updateValue(sheetId, tableId, column, row, type, cellInput);
+          updateValue(sheetId, column, row, cellInput);
         }
       },
-      'alt+right': ({
-        sheetId, tableId, type, column, row, cellInput, navigate, updateValue,
-      }) => (e) => {
+      'alt+right': ({ sheetId, column, row, cellInput, navigate, updateValue, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
         navigate(sheetId, column, row, 'right', FAST_STEP);
 
         if (cellInput) {
-          updateValue(sheetId, tableId, column, row, type, cellInput);
+          updateValue(sheetId, column, row, cellInput);
         }
       },
       delete: ({
-        sheetId, tableId, column, row, type, cellInput, setCellInput, updateValue,
+        sheetId, column, row, cellInput, setCellInput, updateValue,
       }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -148,11 +132,11 @@ export default compose(
         if (cellInput) {
           setCellInput(cellInput.slice(0, -1));
         } else {
-          updateValue(sheetId, tableId, column, row, type, cellInput);
+          updateValue(sheetId, column, row, cellInput);
         }
       },
       enter: ({
-        sheetId, tableId, column, row, type, enhanceView, enhanceCell, cellInput,
+        sheetId, column, row, enhanceView, enhanceCell, cellInput,
         removeEnhanceCell, setCellInput, updateValue,
       }) => (e) => {
         e.preventDefault();
@@ -163,7 +147,7 @@ export default compose(
         if (enhanceView) {
           removeEnhanceCell(sheetId, column, row);
         } else if (cellInput) {
-          updateValue(sheetId, tableId, column, row, type, cellInput);
+          updateValue(sheetId, column, row, cellInput);
         } else {
           enhanceCell(sheetId, column, row);
         }

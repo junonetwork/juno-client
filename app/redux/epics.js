@@ -1,5 +1,5 @@
 import {
-  editValueCellEpic,
+  editCellEpic,
 }                        from './modules/tables';
 import {
   updateGraphValueEpic,
@@ -8,7 +8,7 @@ import {
 
 
 export default [
-  editValueCellEpic,
+  editCellEpic,
   updateGraphValueEpic,
   deleteGraphValueEpic,
 ];

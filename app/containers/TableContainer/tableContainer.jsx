@@ -4,6 +4,7 @@ import {
 import {
   compose,
   setDisplayName,
+  withHandlers,
 }                          from 'recompose';
 import {
   connect,
@@ -58,9 +59,14 @@ export default compose(
       navigate: throttle((sheetId, column, row, direction, steps) => (
         dispatch(navigate(column, row, sheetId, direction, steps))
       )),
-      updateValue: (sheetId, tableId, column, row, cellType, value) => (
-        actionStreamDispatch(updateCellValue(sheetId, tableId, column, row, cellType, value))
+      dispatchUpdateValue: (sheetId, column, row, value, graphFragment) => (
+        actionStreamDispatch(updateCellValue(sheetId, column, row, value, graphFragment))
       ),
     })
-  )
+  ),
+  withHandlers({
+    updateValue: ({ graphFragment, dispatchUpdateValue, }) => (sheetId, column, row, value) => (
+      dispatchUpdateValue(sheetId, column, row, value, graphFragment)
+    ),
+  })
 )(Table);
