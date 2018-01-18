@@ -176,20 +176,20 @@ export const addSearchCollectionTable = (
   indices,
 });
 
-export const removeTable = (sheetId, tableId) => ({
-  type: REMOVE_TABLE, sheetId, tableId,
+export const removeTable = (tableId) => ({
+  type: REMOVE_TABLE, tableId,
 });
 
-export const replaceSearchCollectionSearch = (sheetId, tableId, search) => ({
-  type: REPLACE_SEARCH_COLLECTION_SEARCH, sheetId, tableId, search,
+export const replaceSearchCollectionSearch = (tableId, search) => ({
+  type: REPLACE_SEARCH_COLLECTION_SEARCH, tableId, search,
 });
 
-export const replacePredicates = (sheetId, tableId, predicates) => ({
-  type: REPLACE_PREDICATES, sheetId, tableId, predicates,
+export const replacePredicates = (tableId, predicates) => ({
+  type: REPLACE_PREDICATES, tableId, predicates,
 });
 
-export const replaceIndices = (sheetId, tableId, indices) => ({
-  type: REPLACE_INDICES, sheetId, tableId, indices,
+export const replaceIndices = (tableId, indices) => ({
+  type: REPLACE_INDICES, tableId, indices,
 });
 
 export const updateCellValue = (sheetId, column, row, value, graphFragment) => ({
@@ -206,6 +206,7 @@ export default (
 ) => {
   if (action.type === ADD_SEARCH_COLLECTION_TABLE) {
     const { sheetId, tableId, collectionAddress, search, predicates, indices, } = action;
+    // TODO - should createSearchCollectionTable have a sheetId?  given that it could move to other sheets
     return {
       ...state,
       [tableId]: createSearchCollectionTable(
@@ -269,17 +270,16 @@ const editValueCellEpic = (store) => (action$) => (
         return of(null);
       } else if ((type === 'searchCollection' || type === 'objectCollection') && value === '') {
         // delete collection
-        return of(removeTable(sheetId, tableId));
+        return of(removeTable(tableId));
       } else if (type === 'searchCollection' || type === 'objectCollection') {
         // update collection
-        return of(replaceSearchCollectionSearch(sheetId, tableId, value));
+        return of(replaceSearchCollectionSearch(tableId, value));
       } else if (type === 'predicate' && value === '') {
         // delete column
         const { collectionAddress, predicates, } = getTable(store.getState(), tableId);
         const indexOfDeleteColumn = column - destructureAddress(collectionAddress).column - 1;
 
         return of(replacePredicates(
-          sheetId,
           tableId,
           predicates.filter((_, idx) => idx !== indexOfDeleteColumn)
         ));
@@ -296,7 +296,6 @@ const editValueCellEpic = (store) => (action$) => (
                 destructureAddress(collectionAddress).column - 1;
 
               return replacePredicates(
-                sheetId,
                 tableId,
                 setInArray(indexOfReplaceColumn, uri.value || value, predicates)
               );
@@ -310,7 +309,7 @@ const editValueCellEpic = (store) => (action$) => (
         const newIndices = expandIndicesKeySet(indices)
           .filter((_, idx) => idx !== indexOfDeleteRow);
 
-        return of(replaceIndices(sheetId, tableId, newIndices));
+        return of(replaceIndices(tableId, newIndices));
       } else if (type === 'index') {
         // update row
         const { collectionAddress, indices, } = getTable(store.getState(), tableId);
@@ -319,7 +318,7 @@ const editValueCellEpic = (store) => (action$) => (
         const newIndices = expandIndicesKeySet(indices)
           .map((index, idx) => (idx === indexOfReplaceRow ? value : index));
 
-        return of(replaceIndices(sheetId, tableId, newIndices));
+        return of(replaceIndices(tableId, newIndices));
       }
 
       throw new Error('Edited a cell with no editValueCellEpic handler');
@@ -345,7 +344,7 @@ const editEmptyCellEpic = (store) => (action$) => (
         )
       ) {
         const { indices, } = getTable(store.getState(), upCell.tableId);
-        return of(replaceIndices(sheetId, upCell.tableId, [...indices, value]));
+        return of(replaceIndices(upCell.tableId, [...indices, value]));
       }
 
       // create new column
@@ -366,7 +365,6 @@ const editEmptyCellEpic = (store) => (action$) => (
               // TODO - store label, for cases when predicate label doesn't resolve to anything
               const { predicates, } = getTable(store.getState(), leftCell.tableId);
               return replacePredicates(
-                sheetId,
                 leftCell.tableId,
                 [...predicates, uri.value || value]
               );
