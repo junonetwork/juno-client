@@ -53,6 +53,7 @@ export default compose(
       },
     })
   ),
+  // TODO - it should be possible to store this in cellInput
   withState('indicesRangeString', 'setIndicesRangeString', R.prop('indicesRangeString')),
   withProps(({ indicesRangeString, }) => {
     const parsedIndicesRangeString = grammar.match(indicesRangeString);
@@ -83,10 +84,9 @@ export default compose(
         e.stopPropagation();
         submitHandler({ inputIsValid, indicesFromInput, submit, exit, })();
       },
-      esc: ({ inputIsValid, indicesFromInput, submit, exit, }) => (e) => {
+      esc: ({ exit, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
-          // submitHandler({ inputIsValid, indicesFromInput, submit, exit, })();
         exit();
       },
       delete: ({ indicesRangeString, setIndicesRangeString, }) => (e) => {

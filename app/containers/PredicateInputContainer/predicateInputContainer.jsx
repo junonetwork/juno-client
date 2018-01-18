@@ -49,7 +49,10 @@ export default compose(
           replacePredicates(tableId, predicates),
         ]));
       },
-      exit: () => dispatch(removeEnhancedCell(sheetId, column, row)),
+      exit: () => {
+        setCellInput('');
+        dispatch(removeEnhancedCell(sheetId, column, row));
+      },
     })
   ),
   mapPropsStream(connectFalcor(({ search, }) => ([
@@ -74,17 +77,19 @@ export default compose(
     predicateList: pipe(
       pathOr([], ['json', 'collection', `schema:${search}`, 'ontology', 'list', 'value']),
       map(({ uri, label, }) => ({ uri, label, selected: contains(uri, selectedPredicates), })),
-      filter(({ uri, label, }) => {
-        return label &&
-               uri &&
-               not(contains(uri, existingPredicates)) &&
-               RegExp(value, 'i').test(label);
-      })
+      filter(({ uri, label, }) => (
+        label &&
+        uri &&
+        not(contains(uri, existingPredicates)) &&
+        RegExp(value, 'i').test(label)
+      ))
     )(graphFragment),
   })),
   withHandlers({
     addPredicates: ({ existingPredicates, predicateIdx, submit, }) => (newPredicates) => {
-      if (typeof predicateIdx === 'number') {
+      if (newPredicates.length === 0) {
+        // do nothing
+      } else if (typeof predicateIdx === 'number') {
         const [firstPredicate, ...restPredicates] = newPredicates;
         // cell is predicate type - replace existing predicate w/ first new predicate and append rest
         submit([...update(predicateIdx, firstPredicate, existingPredicates), ...restPredicates]);

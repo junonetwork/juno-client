@@ -45,21 +45,24 @@ const PredicateInput = ({
     <div
       className="predicate-input-content"
     >
-      <ul
-        className="unselected-predicates"
-      >
-        {predicateList.map(({ uri, label, selected, }, idx) => (
-          <PredicateInputItem
-            key={uri}
-            uri={uri}
-            label={label}
-            idx={idx}
-            selectionIdx={selectionIdx}
-            selected={selected}
-            addPredicates={addPredicates}
-          />
-        ))}
-      </ul>
+      {predicateList.length > 0 ?
+        <ul
+          className="unselected-predicates"
+        >
+          {predicateList.map(({ uri, label, selected, }, idx) => (
+            <PredicateInputItem
+              key={uri}
+              uri={uri}
+              label={label}
+              idx={idx}
+              selectionIdx={selectionIdx}
+              selected={selected}
+              addPredicates={addPredicates}
+            />
+          ))}
+        </ul> :
+        <ul className="empty-predicate-list">none</ul>
+      }
     </div>
 
   </div>
