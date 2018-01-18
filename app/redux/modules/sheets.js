@@ -11,6 +11,8 @@ import {
   getTablePathSets,
   getTableIds,
   getTableCells,
+  ADD_SEARCH_COLLECTION_TABLE,
+  REMOVE_TABLE,
 }                                    from './tables';
 import {
   getCellFocusDescriptor,
@@ -41,7 +43,7 @@ import {
  * utils
  */
 const createSheet = (maxColumn, maxRow) =>
-  ({ maxColumn, maxRow, });
+  ({ maxColumn, maxRow, tables: [], });
 
 
 /**
@@ -419,6 +421,22 @@ export default (
       [action.sheetId]: {
         ...state[action.sheetId],
         maxRow: state[action.sheetId].maxRow + 1,
+      },
+    };
+  } else if (action.type === ADD_SEARCH_COLLECTION_TABLE) {
+    return {
+      ...state,
+      [action.sheetId]: {
+        ...state[action.sheetId],
+        tables: [...state[action.sheetId].tables, action.tableId],
+      },
+    };
+  } else if (action.type === REMOVE_TABLE) {
+    return {
+      ...state,
+      [action.sheetId]: {
+        ...state[action.sheetId],
+        tables: state[action.sheetId].filter((tableId) => tableId === action.tableId),
       },
     };
   }
