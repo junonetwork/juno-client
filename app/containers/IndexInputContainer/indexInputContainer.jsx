@@ -45,7 +45,7 @@ export default compose(
       submit(indicesKeySet) {
         dispatch(batchActions([
           removeEnhancedCell(sheetId, column, row),
-          replaceIndices(sheetId, tableId, indicesKeySet),
+          replaceIndices(tableId, indicesKeySet),
         ]));
       },
       exit() {
