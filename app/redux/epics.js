@@ -1,9 +1,14 @@
-// import { combineEpics } from 'redux-observable';
 import {
-  updateCellValueEpic,
-  sampleEpic,
+  editValueCellEpic,
 }                        from './modules/tables';
+import {
+  updateGraphValueEpic,
+  deleteGraphValueEpic,
+}                        from './modules/falcor';
 
-// export default combineEpics();
 
-export default [updateCellValueEpic, sampleEpic];
+export default [
+  editValueCellEpic,
+  updateGraphValueEpic,
+  deleteGraphValueEpic,
+];
