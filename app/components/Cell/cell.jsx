@@ -2,7 +2,6 @@
 import React                   from 'react';
 import {}                      from 'prop-types';
 import CellValue               from '../CellValue';
-import Input                   from '../Input';
 import PredicateInput          from '../../containers/PredicateInputContainer';
 import IndexInput              from '../../containers/IndexInputContainer';
 import                              './style.scss';
@@ -10,11 +9,15 @@ import                              './style.scss';
 
 const camel2Kebab = (str) => str.replace(/([A-Z])/g, (g) => `-${g[0].toLowerCase()}`);
 
-export const shouldRenderPredicateInput = (enhanceView, type, leftCellType) => (
+export const shouldRenderPredicateEnhancedInput = (enhanceView, type, leftCellType) => (
   enhanceView && (
     type === 'predicate' || leftCellType === 'predicate' ||
     leftCellType === 'searchCollection' || leftCellType === 'objectCollection'
   )
+);
+
+export const shouldRenderPredicateInput = (focusView, cellInput, type) => (
+  focusView && cellInput && type === 'predicate'
 );
 
 export const shouldRenderIndexInput = (enhanceView, type, upCellType) => (
@@ -40,11 +43,21 @@ const Cell = ({
     {...hotKeys}
   >
     {
-      shouldRenderPredicateInput(enhanceView, type, leftCellType) ?
+      shouldRenderPredicateEnhancedInput(enhanceView, type, leftCellType) ?
         <PredicateInput
           value={cellInput}
           sheetId={sheetId}
           tableId={type === 'predicate' ? tableId : leftCellTableId}
+          column={column}
+          row={row}
+          predicateIdx={predicateIdx}
+          setCellInput={setCellInput}
+        /> :
+      shouldRenderPredicateInput(focusView, cellInput, type) ?
+        <PredicateInput
+          value={cellInput}
+          sheetId={sheetId}
+          tableId={tableId}
           column={column}
           row={row}
           predicateIdx={predicateIdx}
@@ -59,9 +72,7 @@ const Cell = ({
         /> :
       cellInput ?
         <div className="cell-body">
-          <Input
-            value={cellInput}
-          />
+          {cellInput}
         </div> :
         <div className="cell-body">
           <CellValue

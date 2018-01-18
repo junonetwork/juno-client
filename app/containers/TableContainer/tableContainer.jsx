@@ -57,7 +57,7 @@ export default compose(
         dispatch(removeEnhancedCell(sheetId, column, row))
       ),
       navigate: throttle((sheetId, column, row, direction, steps) => (
-        dispatch(navigate(column, row, sheetId, direction, steps))
+        dispatch(navigate(sheetId, column, row, direction, steps))
       )),
       dispatchUpdateValue: (sheetId, column, row, value, matrix) => (
         actionStreamDispatch(updateCellValue(sheetId, column, row, value, matrix))
