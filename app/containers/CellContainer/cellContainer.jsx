@@ -23,7 +23,7 @@ const FAST_STEP = 2;
 const shouldFocus = (focusView, enhanceView, type, cellInput, leftCellType, upCellType) => (
   focusView &&
   !shouldRenderPredicateEnhancedInput(enhanceView, type, leftCellType) &&
-  !shouldRenderPredicateInput(focusView, cellInput, type) &&
+  !shouldRenderPredicateInput(focusView, cellInput, type, leftCellType) &&
   !shouldRenderIndexInput(enhanceView, type, upCellType)
 );
 
@@ -88,17 +88,15 @@ export default compose(
       },
       enter: ({
         sheetId, column, row, enhanceView, enhanceCell, cellInput,
-        removeEnhanceCell, clearCellInput, updateValue,
+        removeEnhanceCell, updateValue,
       }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
-        clearCellInput(sheetId, column, row);
-
-        if (enhanceView) {
-          removeEnhanceCell(sheetId, column, row);
-        } else if (cellInput) {
+        if (cellInput) {
           updateValue(sheetId, column, row, cellInput);
+        } else if (enhanceView) {
+          removeEnhanceCell(sheetId, column, row);
         } else {
           enhanceCell(sheetId, column, row);
         }

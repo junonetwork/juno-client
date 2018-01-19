@@ -53,15 +53,18 @@ export default compose(
         dispatch(batchActions([
           removeEnhancedCell(sheetId, column, row),
           replacePredicates(tableId, predicates),
-          clearCellInput(sheetId, column, row),
+          clearCellInput(),
         ]));
       },
       exit: () => {
         dispatch(batchActions([
           removeEnhancedCell(sheetId, column, row),
-          clearCellInput(sheetId, column, row),
+          clearCellInput(),
         ]));
       },
+      removeEnhancedView: () => (
+        dispatch(removeEnhancedCell(sheetId, column, row))
+      ),
     })
   ),
   mapPropsStream(connectFalcor(({ search, }) => ([
@@ -95,10 +98,8 @@ export default compose(
     )(graphFragment),
   })),
   withHandlers({
-    addPredicates: ({ existingPredicates, predicateIdx, submit, }) => (newPredicates) => {
-      if (newPredicates.length === 0) {
-        // do nothing
-      } else if (typeof predicateIdx === 'number') {
+    addPredicates: ({ existingPredicates, type, predicateIdx, submit, }) => (newPredicates) => {
+      if (type === 'predicate') {
         const [firstPredicate, ...restPredicates] = newPredicates;
         // cell is predicate type - replace existing predicate w/ first new predicate and append rest
         submit([...update(predicateIdx, firstPredicate, existingPredicates), ...restPredicates]);
@@ -152,30 +153,49 @@ export default compose(
       'alt+up': arrowKeyNavHandler,
       'alt+down': arrowKeyNavHandler,
       enter: ({
-        selectedPredicates, predicateList, selectionIdx, addPredicates,
+        sheetId, column, row, value, selectedPredicates, predicateList, selectionIdx,
+        exit, updateValue, addPredicates, removeEnhancedView,
       }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
-        if (selectionIdx === -1) {
+        if (selectionIdx === -1 && selectedPredicates.length === 0 && value === '') {
+          // user hits enter w/o selecting anything or inputing anything -> exit
+          exit();
+        } else if (selectionIdx === -1 && selectedPredicates.length === 0) {
+          // user hits enter without selecting anything -> submit manual input value
+          removeEnhancedView();
+          updateValue(sheetId, column, row, value);
+        } else if (selectionIdx === -1) {
+          // user selects values and hits enter while on input -> submit selection
           addPredicates(selectedPredicates);
         } else {
+          // user hits enter while on predicate => submit selection w/ new predicate
           addPredicates(uniq([...selectedPredicates, predicateList[selectionIdx].uri]));
         }
       },
-      // TODO - allow for multiple selections at the same time
       'shift+enter': ({
-        selectedPredicates, predicateList, selectionIdx,
-        addPredicates, selectPredicate, unselectPredicate,
+        sheetId, column, row, value, selectedPredicates, predicateList, selectionIdx,
+        exit, updateValue, addPredicates, selectPredicate, unselectPredicate, removeEnhancedView,
       }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
-        if (selectionIdx === -1) {
+        if (selectionIdx === -1 && selectedPredicates.length === 0 && value === '') {
+          // user hits enter w/o selecting anything or inputing anything -> exit
+          exit();
+        } else if (selectionIdx === -1 && selectedPredicates.length === 0) {
+          // user hits enter without selecting anything -> submit manual input value
+          removeEnhancedView();
+          updateValue(sheetId, column, row, value);
+        } else if (selectionIdx === -1) {
+          // user selects values and hits enter while on input -> submit selection
           addPredicates(selectedPredicates);
         } else if (predicateList[selectionIdx].selected) {
+          // user unselects predicate
           unselectPredicate(predicateList[selectionIdx]);
         } else {
+          // user adds predicate to selection
           selectPredicate(predicateList[selectionIdx]);
         }
       },
