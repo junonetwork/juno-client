@@ -62,9 +62,6 @@ export default compose(
           clearCellInput(),
         ]));
       },
-      removeEnhancedView: () => (
-        dispatch(removeEnhancedCell(sheetId, column, row))
-      ),
     })
   ),
   mapPropsStream(connectFalcor(({ search, }) => ([
@@ -153,8 +150,8 @@ export default compose(
       'alt+up': arrowKeyNavHandler,
       'alt+down': arrowKeyNavHandler,
       enter: ({
-        sheetId, column, row, value, selectedPredicates, predicateList, selectionIdx,
-        exit, updateValue, addPredicates, removeEnhancedView,
+        value, selectedPredicates, predicateList, selectionIdx,
+        exit, addPredicates,
       }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -164,8 +161,10 @@ export default compose(
           exit();
         } else if (selectionIdx === -1 && selectedPredicates.length === 0) {
           // user hits enter without selecting anything -> submit manual input value
-          removeEnhancedView();
-          updateValue(sheetId, column, row, value);
+          exit();
+          // TODO - handle creating new predicate
+          // removeEnhancedView();
+          // updateValue(sheetId, column, row, value);
         } else if (selectionIdx === -1) {
           // user selects values and hits enter while on input -> submit selection
           addPredicates(selectedPredicates);
@@ -175,8 +174,8 @@ export default compose(
         }
       },
       'shift+enter': ({
-        sheetId, column, row, value, selectedPredicates, predicateList, selectionIdx,
-        exit, updateValue, addPredicates, selectPredicate, unselectPredicate, removeEnhancedView,
+        value, selectedPredicates, predicateList, selectionIdx,
+        exit, addPredicates, selectPredicate, unselectPredicate,
       }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -186,8 +185,10 @@ export default compose(
           exit();
         } else if (selectionIdx === -1 && selectedPredicates.length === 0) {
           // user hits enter without selecting anything -> submit manual input value
-          removeEnhancedView();
-          updateValue(sheetId, column, row, value);
+          exit();
+          // TODO - handle creating new predicate
+          // removeEnhancedView();
+          // updateValue(sheetId, column, row, value);
         } else if (selectionIdx === -1) {
           // user selects values and hits enter while on input -> submit selection
           addPredicates(selectedPredicates);
