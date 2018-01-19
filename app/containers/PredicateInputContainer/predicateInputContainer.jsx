@@ -54,13 +54,13 @@ export default compose(
           removeEnhancedCell(sheetId, column, row),
           replacePredicates(tableId, predicates),
           clearCellInput(),
-        ]));
+        ], 'SUBMIT_PREDICATE_INPUT'));
       },
       exit: () => {
         dispatch(batchActions([
           removeEnhancedCell(sheetId, column, row),
           clearCellInput(),
-        ]));
+        ], 'EXIT_PREDICATE_INPUT'));
       },
     })
   ),

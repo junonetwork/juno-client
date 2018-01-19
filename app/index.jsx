@@ -34,22 +34,29 @@ if (process.env.NODE_ENV === 'development') {
 // store.subscribe(() => console.log('store emit'));
 
 const sheetId = '0';
-const tableId = formatTableId(sheetId, 0, 0);
-const collectionAddress = formatAddress(sheetId, 0, 0);
 
 store.dispatch(
   batchActions([
-    addSheet(sheetId, 20, 20),
+    addSheet(sheetId, 40, 40),
     addSearchCollectionTable(
       sheetId,
-      tableId,
-      collectionAddress,
+      formatTableId(sheetId, 0, 0),
+      formatAddress(sheetId, 0, 0),
       'Person',
-      // ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling', 'schema:sibling'],
       ['schema:name', 'schema:sibling'],
       [{ from: 1, to: 3, }, 0, 1, 0, 10]
     ),
     focusCell(sheetId, 0, 0),
+    // second sheet
+    addSheet('1', 40, 40),
+    addSearchCollectionTable(
+      '1',
+      formatTableId('1', 0, 0),
+      formatAddress('1', 0, 0),
+      'Person',
+      ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling', 'schema:sibling'],
+      [{ from: 0, to: 2, }]
+    ),
   ], 'INIT_SHEET')
 );
 

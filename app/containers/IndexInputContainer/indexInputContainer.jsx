@@ -50,13 +50,13 @@ export default compose(
           removeEnhancedCell(sheetId, column, row),
           replaceIndices(tableId, indicesKeySet),
           clearCellInput(sheetId, column, row),
-        ]));
+        ], 'SUBMIT_INDEX_INPUT'));
       },
       exit() {
         dispatch(batchActions([
           removeEnhancedCell(sheetId, column, row),
           clearCellInput(sheetId, column, row),
-        ]));
+        ], 'EXIT_INDEX_INPUT'));
       },
     })
   ),
