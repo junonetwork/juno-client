@@ -289,7 +289,7 @@ const editValueCellEpic = (store) => (action$) => (
           model.getValue(['inverse', `"${value}"`, 'skos:prefLabel', 'uri'])
         )
           .pipe(
-            // TODO - error handling
+            // TODO - handle case of adding non-existent uri
             map((uri = {}) => {
               const { collectionAddress, predicates, } = getTable(store.getState(), tableId);
               const indexOfReplaceColumn = column -
@@ -377,7 +377,7 @@ const editEmptyCellEpic = (store) => (action$) => (
           model.getValue(['inverse', `"${value}"`, 'skos:prefLabel', 'uri'])
         )
           .pipe(
-            // TODO - error handling
+            // TODO - handle case of adding non-existent uri
             map((uri = {}) => {
               // TODO - store label, for cases when predicate label doesn't resolve to anything
               const { predicates, } = getTable(store.getState(), leftCell.tableId);

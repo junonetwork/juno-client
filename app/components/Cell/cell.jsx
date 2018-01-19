@@ -35,7 +35,7 @@ const Cell = ({
   type, sheetId, tableId, column, row, value, cellLength, cellInput,
   leftCellType, leftCellTableId, upCellType, upCellTableId, predicateIdx,
   hotKeys, focusView, enhanceView, focusNodeView, teaserNodeView,
-  onClick, onMouseEnter, onKeyPress, updateValue
+  onClick, onMouseEnter, onKeyPress, updateValue,
 }) => (
   <td
     className={`cell ${camel2Kebab(type)} ${focusView ? 'focus' : ''} ${focusNodeView ? 'node-focus' : ''} ${teaserNodeView ? 'node-tease' : ''} ${enhanceView ? 'node-enhance' : ''}`}
