@@ -31,7 +31,7 @@ export default (store, epics) => {
     .subscribe({
       next: (action) => {
         if (Array.isArray(action)) {
-          store.dispatch(batchActions(action));
+          store.dispatch(batchActions(action, 'ACTION_STREAM'));
         } else if (action !== null && action !== undefined) {
           store.dispatch(action);
         }

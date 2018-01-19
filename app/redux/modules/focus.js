@@ -49,7 +49,7 @@ export const navigate = (sheetId, column, row, direction, steps) => (dispatch, g
       return dispatch(batchActions([
         increaseSheetMaxColumn(sheetId),
         focusCell(sheetId, column, row),
-      ]));
+      ], 'CREATE_SHEET_COLUMN'));
     } else if (column + steps > maxColumn) {
       // navigated off table when stepping by > 1, navigate to edge of table
       column = maxColumn; // eslint-disable-line no-param-reassign
@@ -62,7 +62,7 @@ export const navigate = (sheetId, column, row, direction, steps) => (dispatch, g
       return dispatch(batchActions([
         increaseSheetMaxRow(sheetId),
         focusCell(sheetId, column, row),
-      ]));
+      ], 'CREATE_SHEET_ROW'));
     } else if (row + steps > maxRow) {
       // navigated off table when stepping by > 1, navigate to edge of table
       row = maxRow; // eslint-disable-line no-param-reassign

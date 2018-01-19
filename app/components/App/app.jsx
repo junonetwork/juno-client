@@ -27,11 +27,11 @@ export default ({ panelCount = 2, }) => (
             </div>
           */}
 
-          <Table sheetId="0" />
+          <Table sheetId="1" />
 
           <Table sheetId="0" />
         </SplitPane> :
-        <Table sheetId="1" />
+        <Table sheetId="0" />
       }
     </div>
   </div>
