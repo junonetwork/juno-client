@@ -50,7 +50,7 @@ store.dispatch(
       [{ from: 1, to: 3, }, 0, 1, 0, 10]
     ),
     focusCell(sheetId, 0, 0),
-  ])
+  ], 'INIT_SHEET')
 );
 
 

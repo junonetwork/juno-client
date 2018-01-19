@@ -1,3 +1,19 @@
-.table {
-  height: 100%;
+@import '../../styles/palette';
+$table-border: $b_black;
+$panel-padding: 8px;
+
+
+.table-window{
+  position: absolute;
+  top: $panel-padding;
+  bottom: $panel-padding;
+  left: $panel-padding;
+  right: $panel-padding;
+  max-width: 100%;
+  max-height: 100%;
+  border: 1px solid $table-border;
+
+  .table {
+    height: 100%;
+  }
 }

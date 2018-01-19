@@ -1,0 +1,60 @@
+@import './palette';
+$table-border: $b_black;
+
+$stroke-width: 1px;
+$buffer-width: 4px;
+
+$panel-padding: 8px;
+
+
+.Resizer {
+  background-color: $b_black;
+  opacity: 1;
+  z-index: 1;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding;
+  background-clip: padding-box;
+}
+
+ .Resizer:hover {
+  -webkit-transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+ .Resizer.horizontal {
+  height: $stroke-width + $buffer-width + $buffer-width;
+  margin: ($buffer-width * -1) 0;
+  border-top: $buffer-width solid transparent; // transparentize($b_white, 0.95);
+  border-bottom: $buffer-width solid transparent; // transparentize($b_white, 0.95);
+  cursor: row-resize;
+  width: 100%;
+}
+
+.Resizer.horizontal:hover {
+  border-top: $buffer-width solid transparentize($white, 0.8);
+  border-bottom: $buffer-width solid transparentize($white, 0.8);
+  background-color: $white;
+}
+
+.Resizer.vertical {
+  width: $stroke-width + $buffer-width + $buffer-width;
+  margin: 0 ($buffer-width * -1);
+  border-left: $buffer-width solid transparent; // transparentize($b_white, 0.95);
+  border-right: $buffer-width solid transparent; // transparentize($b_white, 0.95);
+  cursor: col-resize;
+}
+
+.Resizer.vertical:hover {
+  border-left: 2px solid transparentize($white, 0.8);
+  border-right: 2px solid transparentize($white, 0.8);
+  background-color: $white;
+}
+.Resizer.disabled {
+  cursor: not-allowed;
+}
+.Resizer.disabled:hover {
+  border-color: transparent;
+}
