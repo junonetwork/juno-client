@@ -16,8 +16,11 @@ export const shouldRenderPredicateEnhancedInput = (enhanceView, type, leftCellTy
   )
 );
 
-export const shouldRenderPredicateInput = (focusView, cellInput, type) => (
-  !!(focusView && cellInput && type === 'predicate')
+export const shouldRenderPredicateInput = (focusView, cellInput, type, leftCellType) => (
+  focusView && cellInput && (
+    type === 'predicate' || leftCellType === 'predicate' ||
+    leftCellType === 'searchCollection' || leftCellType === 'objectCollection'
+  )
 );
 
 export const shouldRenderIndexInput = (enhanceView, type, upCellType) => (
@@ -32,7 +35,7 @@ const Cell = ({
   type, sheetId, tableId, column, row, value, cellLength, cellInput,
   leftCellType, leftCellTableId, upCellType, upCellTableId, predicateIdx,
   hotKeys, focusView, enhanceView, focusNodeView, teaserNodeView,
-  onClick, onMouseEnter, onKeyPress, setCellInput,
+  onClick, onMouseEnter, onKeyPress, updateValue
 }) => (
   <td
     className={`cell ${camel2Kebab(type)} ${focusView ? 'focus' : ''} ${focusNodeView ? 'node-focus' : ''} ${teaserNodeView ? 'node-tease' : ''} ${enhanceView ? 'node-enhance' : ''}`}
@@ -47,19 +50,23 @@ const Cell = ({
         <PredicateInput
           value={cellInput}
           sheetId={sheetId}
+          type={type}
           tableId={type === 'predicate' ? tableId : leftCellTableId}
           column={column}
           row={row}
           predicateIdx={predicateIdx}
+          updateValue={updateValue}
         /> :
-      shouldRenderPredicateInput(focusView, cellInput, type) ?
+      shouldRenderPredicateInput(focusView, cellInput, type, leftCellType) ?
         <PredicateInput
           value={cellInput}
           sheetId={sheetId}
-          tableId={tableId}
+          type={type}
+          tableId={type === 'predicate' ? tableId : leftCellTableId}
           column={column}
           row={row}
           predicateIdx={predicateIdx}
+          updateValue={updateValue}
         /> :
       shouldRenderIndexInput(enhanceView, type, upCellType) ?
         <IndexInput
