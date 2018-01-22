@@ -32,9 +32,10 @@ const renderWindow = ({ id, type, matrix, }) => {
 };
 
 
-export default ({ windows, }) => (
+export default ({ windows, hotKeys, }) => (
   <div
     className="app-window"
+    {...hotKeys}
   >
     <div className="pane-window">
       {windows.length === 2 ?

@@ -16,7 +16,17 @@ const keyMap = {
   38: 'up',
   39: 'right',
   40: 'down',
-  // TODO - add letters, numbers, symbols
+  48: '0',
+  49: '1',
+  50: '2',
+  51: '3',
+  52: '4',
+  53: '5',
+  54: '6',
+  55: '7',
+  56: '8',
+  57: '9',
+  // TODO - add letters, symbols
 };
 
 const event2HandlerKey = ({ which, metaKey, altKey, shiftKey, }) =>
