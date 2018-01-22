@@ -13,7 +13,6 @@ import {
 import createCachedSelector          from 're-reselect';
 import {
   getTablePathSets,
-  getTableIds,
   getTableCells,
   ADD_SEARCH_COLLECTION_TABLE,
   REMOVE_TABLE,
@@ -61,6 +60,7 @@ const path2Key = (path) => path.join();
 export const getSheet = (state, sheetId) => state.sheets[sheetId];
 export const getSheetMaxColumn = (state, sheetId) => state.sheets[sheetId].maxColumn;
 export const getSheetMaxRow = (state, sheetId) => state.sheets[sheetId].maxRow;
+export const getSheetTableIds = (state, sheetId) => state.sheets[sheetId].tables;
 
 
 /**
@@ -69,7 +69,7 @@ export const getSheetMaxRow = (state, sheetId) => state.sheets[sheetId].maxRow;
  */
 export const getSheetPathSets = createCachedSelector(
   (state, sheetId) => {
-    const tableIds = getTableIds(state, sheetId);
+    const tableIds = getSheetTableIds(state, sheetId);
 
     if (tableIds.length > 0) {
       return tableIds.reduce((pathSets, tableId) => {
@@ -118,7 +118,7 @@ export const createEmptySheet = createCachedSelector(
  */
 export const getSheetTables = createCachedSelector(
   (state, sheetId) => (
-    getTableIds(state, sheetId)
+    getSheetTableIds(state, sheetId)
       .map((tableId) => getTableCells(state, sheetId, tableId))
   ),
   (tables) => {
