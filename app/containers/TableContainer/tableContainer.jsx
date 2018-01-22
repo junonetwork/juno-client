@@ -1,21 +1,9 @@
 import {
-  prop,
-}                          from 'ramda';
-import {
   compose,
   setDisplayName,
   withHandlers,
 }                          from 'recompose';
-import {
-  connect,
-}                          from 'react-redux';
-import mapPropsStream      from '../../falcor/mapPropsStream';
-import connectFalcor       from '../../falcor/connect';
 import Table               from '../../components/Table';
-import {
-  getSheetPathSets,
-  getSheetMatrix,
-}                          from '../../redux/modules/sheets';
 import {
   focusCell,
   navigate,
@@ -34,49 +22,40 @@ import {
   setCellInput,
   clearCellInput,
 }                          from '../../redux/modules/cellInput';
-import {
+import store, {
   actionStreamDispatch,
 }                          from '../../redux/store';
 import throttle            from '../../utils/throttleAnimationFrame';
 
+const { dispatch, } = store;
+
+
+const throttledTeaseCell = throttle((sheetId, column, row) => (
+  dispatch(teaseCell(sheetId, column, row))
+));
+const throttledNavigate = throttle(((sheetId, column, row, direction, steps) => (
+  dispatch(navigate(sheetId, column, row, direction, steps))
+)));
+
 
 export default compose(
   setDisplayName('TableContainer'),
-  connect(
-    (state, { sheetId, }) => ({
-      sheetPaths: getSheetPathSets(state, sheetId),
-    }),
-  ),
-  mapPropsStream(connectFalcor(prop('sheetPaths'))),
-  connect(
-    (state, { sheetId, graphFragment, }) => ({
-      // TODO - just pass graphFragment
-      sheetMatrix: getSheetMatrix(state, sheetId, graphFragment.json || {}) || [],
-    }),
-    (dispatch) => ({
-      focusCell: (sheetId, column, row) => dispatch(focusCell(sheetId, column, row)),
-      teaseCell: throttle((sheetId, column, row) => dispatch(teaseCell(sheetId, column, row))),
-      enhanceCell: (sheetId, column, row) => dispatch(addEnhancedCell(sheetId, column, row)),
-      removeEnhanceCell: (sheetId, column, row) => (
-        dispatch(removeEnhancedCell(sheetId, column, row))
-      ),
-      navigate: throttle((sheetId, column, row, direction, steps) => (
-        dispatch(navigate(sheetId, column, row, direction, steps))
-      )),
-      setCellInput: (sheetId, column, row, value) => (
-        dispatch(setCellInput(sheetId, column, row, value))
-      ),
-      clearCellInput: (sheetId, column, row) => (
-        dispatch(clearCellInput(sheetId, column, row))
-      ),
-      dispatchUpdateValue: (sheetId, column, row, value, matrix) => (
-        actionStreamDispatch(updateCellValue(sheetId, column, row, value, matrix))
-      ),
-    })
-  ),
   withHandlers({
-    updateValue: ({ sheetMatrix, dispatchUpdateValue, }) => (sheetId, column, row, value) => (
-      dispatchUpdateValue(sheetId, column, row, value, sheetMatrix)
+    teaseCell: () => throttledTeaseCell,
+    navigate: () => throttledNavigate,
+    focusCell: () => (sheetId, column, row) => dispatch(focusCell(sheetId, column, row)),
+    enhanceCell: () => (sheetId, column, row) => dispatch(addEnhancedCell(sheetId, column, row)),
+    removeEnhanceCell: () => (sheetId, column, row) => (
+      dispatch(removeEnhancedCell(sheetId, column, row))
+    ),
+    setCellInput: () => (sheetId, column, row, value) => (
+      dispatch(setCellInput(sheetId, column, row, value))
+    ),
+    clearCellInput: () => (sheetId, column, row) => (
+      dispatch(clearCellInput(sheetId, column, row))
+    ),
+    updateValue: ({ sheetMatrix, }) => (sheetId, column, row, value) => (
+      actionStreamDispatch(updateCellValue(sheetId, column, row, value, sheetMatrix))
     ),
   })
 )(Table);

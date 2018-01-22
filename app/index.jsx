@@ -7,7 +7,7 @@ import {
   batchActions,
 }                             from 'redux-batched-actions';
 import store                  from './redux/store';
-import App                    from './components/App';
+import App                    from './containers/AppContainer';
 import {
   addSheet,
 }                             from './redux/modules/sheets';
@@ -37,7 +37,7 @@ const sheetId = '0';
 
 store.dispatch(
   batchActions([
-    addSheet(sheetId, 40, 40),
+    addSheet(sheetId, 20, 20),
     addSearchCollectionTable(
       sheetId,
       formatTableId(sheetId, 0, 0),
@@ -48,7 +48,7 @@ store.dispatch(
     ),
     focusCell(sheetId, 0, 0),
     // second sheet
-    addSheet('1', 40, 40),
+    addSheet('1', 20, 20),
     addSearchCollectionTable(
       '1',
       formatTableId('1', 0, 0),

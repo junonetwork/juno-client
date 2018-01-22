@@ -19,11 +19,6 @@ $panel-padding: 8px;
   background-clip: padding-box;
 }
 
- .Resizer:hover {
-  -webkit-transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
-  transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
-}
-
  .Resizer.horizontal {
   height: $stroke-width + $buffer-width + $buffer-width;
   margin: ($buffer-width * -1) 0;

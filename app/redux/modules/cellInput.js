@@ -40,7 +40,12 @@ export default (
       return {};
     }
 
-    return { column: action.column, row: action.row, value: action.value, };
+    return {
+      sheetId: action.sheetId,
+      column: action.column,
+      row: action.row,
+      value: action.value,
+    };
   } else if (action.type === CLEAR_CELL_INPUT) {
     return {};
   } else if (action.type === SET_FOCUS) {

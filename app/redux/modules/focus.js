@@ -10,6 +10,7 @@ import {
   increaseSheetMaxColumn,
   increaseSheetMaxRow,
 }                             from './sheets';
+import throttle               from '../../utils/throttleAnimationFrame';
 
 
 /**
@@ -38,6 +39,7 @@ export const focusCell = (sheetId, column, row) => ({
 });
 
 
+// TODO - convert to epic (does rxjs have throttleTime(raf)?)
 export const navigate = (sheetId, column, row, direction, steps) => (dispatch, getState) => {
   const state = getState();
   const maxColumn = getSheetMaxColumn(state, sheetId);
@@ -105,3 +107,8 @@ export default (state = {}, action) => {
 
   return state;
 };
+
+
+/**
+ * epics
+ */
