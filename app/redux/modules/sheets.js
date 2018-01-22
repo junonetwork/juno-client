@@ -171,7 +171,7 @@ export const tables2SheetMatrix = createCachedSelector(
 export const materializeSheetMatrix = createCachedSelector(
   nthArg(1),
   nthArg(2),
-  (graphFragment, sheetMatrix) => {
+  ({ json: graphJSON, }, sheetMatrix) => {
     // console.log('materializeSheetMatrix');
 
     // TODO - use a Set
@@ -180,13 +180,13 @@ export const materializeSheetMatrix = createCachedSelector(
       .map((row) => (
         row.map((cell) => {
           if (cell.type === 'searchCollection') {
-            return materializeSearchCollection(cell, graphFragment, sheetMatrix);
+            return materializeSearchCollection(cell, graphJSON, sheetMatrix);
           } else if (cell.type === 'index') {
-            return materializeIndex(cell, graphFragment, sheetMatrix);
+            return materializeIndex(cell, graphJSON, sheetMatrix);
           } else if (cell.type === 'predicate') {
-            return materializePredicate(cell, graphFragment, sheetMatrix);
+            return materializePredicate(cell, graphJSON, sheetMatrix);
           } else if (cell.type === 'object') {
-            const materializedCell = materializeObject(cell, graphFragment, sheetMatrix);
+            const materializedCell = materializeObject(cell, graphJSON, sheetMatrix);
 
             if (!materializedCell.absolutePath) {
               return materializedCell;
