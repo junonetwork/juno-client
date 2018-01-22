@@ -19,8 +19,8 @@ import {
   REMOVE_TABLE,
 }                                    from './tables';
 import {
-  getCellFocusDescriptor,
-}                                    from './focus';
+  getCellActiveDescriptor,
+}                                    from './active';
 import {
   getCellTeaserDescriptor,
 }                                    from './teaser';
@@ -257,31 +257,31 @@ export const withCellInput = createCachedSelector(
  * @param {Object} hints
  * @param {Object} sheetMatrix
  */
-export const withFocus = createCachedSelector(
+export const withActive = createCachedSelector(
   nthArg(1),
   nthArg(2),
   nthArg(3),
-  getCellFocusDescriptor,
+  getCellActiveDescriptor,
   (
     sheetId,
     hints,
     matrix,
-    cellFocusDescriptor
+    cellActiveDescriptor
   ) => {
     if (
-      !cellFocusDescriptor ||
-      cellFocusDescriptor.sheetId !== sheetId
+      !cellActiveDescriptor ||
+      cellActiveDescriptor.sheetId !== sheetId
     ) {
       return { matrix, hints, };
     }
 
-    const { column: focusColumn, row: focusRow, } = cellFocusDescriptor;
+    const { column: activeColumn, row: activeRow, } = cellActiveDescriptor;
 
     return {
-      matrix: updateInMatrix(focusColumn, focusRow, assoc('focusView', true), matrix),
+      matrix: updateInMatrix(activeColumn, activeRow, assoc('activeView', true), matrix),
       hints: {
         ...hints,
-        focusCellAbsolutePath: matrix[focusRow][focusColumn].absolutePath,
+        activeCellAbsolutePath: matrix[activeRow][activeColumn].absolutePath,
       },
     };
   }
@@ -384,7 +384,7 @@ export const getSheetMatrix = pipe(
     state,
     sheetId,
     graphPathMap,
-    ...withFocus(state, sheetId, hints, matrix),
+    ...withActive(state, sheetId, hints, matrix),
   }),
   ({ state, sheetId, graphPathMap, hints, matrix, }) => ({
     state,
@@ -409,24 +409,24 @@ export const getSheetMatrix = pipe(
 
 /**
  * @param {String} sheetId
- * @param {String} focusCellAbsolutePath
+ * @param {String} activeCellAbsolutePath
  * @param {Object} graphPathMap
  * @param {Object} sheetMatrix
  */
-export const withFocusHint = createCachedSelector(
+export const withActiveHint = createCachedSelector(
   nthArg(0),
   nthArg(1),
   nthArg(2),
   nthArg(3),
-  (sheetId, focusCellAbsolutePath, graphPathMap, matrix) => {
-    if (!focusCellAbsolutePath) {
+  (sheetId, activeCellAbsolutePath, graphPathMap, matrix) => {
+    if (!activeCellAbsolutePath) {
       return matrix;
     }
 
     // TODO - use pathOr
-    return (graphPathMap[path2Key(focusCellAbsolutePath)] || [])
+    return (graphPathMap[path2Key(activeCellAbsolutePath)] || [])
       .reduce((_matrix, [column, row]) => (
-        updateInMatrix(column, row, assoc('focusNodeView', true), _matrix)
+        updateInMatrix(column, row, assoc('activeHint', true), _matrix)
       ), matrix);
   }
 )(
@@ -453,7 +453,7 @@ export const withTeaserHint = createCachedSelector(
     // TODO use pathOr
     return (graphPathMap[path2Key(teaserCellAbsolutePath)] || [])
       .reduce((_matrix, [column, row]) => (
-        updateInMatrix(column, row, assoc('teaserNodeView', true), _matrix)
+        updateInMatrix(column, row, assoc('teaserHint', true), _matrix)
       ), matrix);
   }
 )(
@@ -464,10 +464,10 @@ export const withTeaserHint = createCachedSelector(
 export const withHints = (
   sheetId,
   graphPathMap,
-  { focusCellAbsolutePath, teaserCellAbsolutePath, },
+  { activeCellAbsolutePath, teaserCellAbsolutePath, },
   matrix
 ) => pipe(
-  (_matrix) => withFocusHint(sheetId, focusCellAbsolutePath, graphPathMap, _matrix),
+  (_matrix) => withActiveHint(sheetId, activeCellAbsolutePath, graphPathMap, _matrix),
   (_matrix) => withTeaserHint(sheetId, teaserCellAbsolutePath, graphPathMap, _matrix)
 )(matrix);
 

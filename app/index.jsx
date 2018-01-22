@@ -15,8 +15,8 @@ import {
   addSearchCollectionTable,
 }                             from './redux/modules/tables';
 import {
-  focusCell,
-}                             from './redux/modules/focus';
+  makeCellActive,
+}                             from './redux/modules/active';
 import {
   formatAddress,
 }                             from './utils/cell';
@@ -46,7 +46,7 @@ store.dispatch(
       ['schema:name', 'schema:sibling'],
       [{ from: 1, to: 3, }, 0, 1, 0, 10]
     ),
-    focusCell(sheetId, 0, 0),
+    makeCellActive(sheetId, 0, 0),
     // second sheet
     addSheet('1', 20, 20),
     addSearchCollectionTable(
