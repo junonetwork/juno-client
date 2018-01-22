@@ -15,10 +15,7 @@ import {
 /**
  * selectors
  */
-export const getWindows = () => ([
-  { id: '0', type: 'sheet', },
-  { id: '1', type: 'sheet', },
-]);
+export const getWindows = (state) => state.windows;
 
 
 /**
@@ -104,3 +101,42 @@ export const getMaterializedWindows = arraySingleDepthEqualitySelector(
   ),
   (windows) => windows
 );
+
+
+/**
+ * constants
+ */
+export const CREATE_WINDOW = 'CREATE_WINDOW';
+
+export const DELETE_WINDOW = 'DELETE_WINDOW';
+
+
+/**
+ * action creators
+ */
+export const createWindow = () => ({
+  type: CREATE_WINDOW,
+});
+
+export const deleteWindow = () => ({
+  type: DELETE_WINDOW,
+});
+
+
+/**
+ * reducer
+ */
+export default (
+  state = [
+    { id: '0', type: 'sheet', },
+  ],
+  action
+) => {
+  if (action.type === CREATE_WINDOW) {
+    return [...state, { id: '1', type: 'sheet', }];
+  } else if (action.type === DELETE_WINDOW) {
+    return [state[0]];
+  }
+
+  return state;
+};

@@ -12,9 +12,12 @@ import App                 from '../../components/App';
 import {
   getPathSets,
   getMaterializedWindows,
+  createWindow,
+  deleteWindow,
 }                          from '../../redux/modules/windows';
 import mapPropsStream      from '../../falcor/mapPropsStream';
 import connectFalcor       from '../../falcor/connect';
+import withHotKeys         from '../../hoc/withHotKeys';
 
 
 export default compose(
@@ -28,6 +31,29 @@ export default compose(
   connect(
     (state, { graphFragment, }) => ({
       windows: getMaterializedWindows(state, graphFragment),
+    }),
+    (dispatch) => ({
+      createWindowAction() {
+        dispatch(createWindow());
+      },
+      deleteWindowAction() {
+        dispatch(deleteWindow());
+      },
+    })
+  ),
+  withHotKeys(
+    () => false,
+    ({
+      'cmd+1': ({ deleteWindowAction, }) => (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        deleteWindowAction();
+      },
+      'cmd+2': ({ createWindowAction, }) => (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        createWindowAction();
+      },
     })
   )
 )(App);
