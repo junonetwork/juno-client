@@ -47,10 +47,9 @@ export const getPathSets = arraySingleDepthEqualitySelector(
 export const getDataForWindows = (state, graphFragment, windows) =>
   reduce((windowData, { id, type, }) => {
     if (type === 'sheet') {
-      // TODO - just pass graphFragment
       const {
         graphPathMap, hints, matrix,
-      } = getSheetMatrix(state, id, graphFragment.json || {});
+      } = getSheetMatrix(state, id, graphFragment);
 
       windowData.windows.push({ id, type, graphPathMap, matrix, });
       Object.assign(windowData.hints, hints);

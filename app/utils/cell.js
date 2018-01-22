@@ -208,14 +208,14 @@ export const getObjectPath = (collectionAddress, indexAddress, predicateAddress,
 };
 
 
-export const materializeSearchCollection = (cell, graphFragment) => {
+export const materializeSearchCollection = (cell, graphJSON) => {
   const relativePath = getSearchCollectionPath(cell.search);
 
   // TODO - mapping search to URIs should move to falcor router
   return {
     ...cell,
-    cellLength: path(['collection', `schema:${cell.search}`, 'length', 'value'], graphFragment),
-    ...path(relativePath, graphFragment),
+    cellLength: path(['collection', `schema:${cell.search}`, 'length', 'value'], graphJSON),
+    ...path(relativePath, graphJSON),
   };
 };
 
@@ -226,33 +226,33 @@ export const materializeIndex = (cell) => ({
 });
 
 
-export const materializePredicate = (cell, graphFragment) => {
+export const materializePredicate = (cell, graphJSON) => {
   const relativePath = getPredicatePath(cell.uri);
 
   return {
     ...cell,
-    ...path(relativePath, graphFragment),
+    ...path(relativePath, graphJSON),
   };
 };
 
 
-export const materializeObject = (cell, graphFragment, sheetMatrix) => {
+export const materializeObject = (cell, graphJSON, sheetMatrix) => {
   const relativePath = getObjectPath(
     cell.collectionAddress, cell.indexAddress, cell.predicateAddress, sheetMatrix
   );
-  const cellLength = path([...relativePath, 'length', 'value'], graphFragment);
+  const cellLength = path([...relativePath, 'length', 'value'], graphJSON);
 
   let absolutePath;
 
-  if (cellLength === 1 && path([...relativePath, 0, '$__path'], graphFragment)) {
-    absolutePath = path([...relativePath, 0, '$__path'], graphFragment);
-  } else if (path([...relativePath, '$__path'], graphFragment)) {
-    absolutePath = path([...relativePath, '$__path'], graphFragment);
+  if (cellLength === 1 && path([...relativePath, 0, '$__path'], graphJSON)) {
+    absolutePath = path([...relativePath, 0, '$__path'], graphJSON);
+  } else if (path([...relativePath, '$__path'], graphJSON)) {
+    absolutePath = path([...relativePath, '$__path'], graphJSON);
   } else {
     absolutePath = null;
   }
 
-  let boxValue = path(relativePath, graphFragment);
+  let boxValue = path(relativePath, graphJSON);
 
   // if boxValue is multivalue (not singleton), get first value
   if (boxValue && boxValue['0']) {
