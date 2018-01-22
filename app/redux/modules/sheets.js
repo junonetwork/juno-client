@@ -52,6 +52,8 @@ import {
 const createSheet = (maxColumn, maxRow) =>
   ({ maxColumn, maxRow, tables: [], });
 
+const path2Key = (path) => path.join();
+
 
 /**
  * selectors
@@ -95,7 +97,8 @@ export const createEmptySheet = createCachedSelector(
   nthArg(1),
   getSheetMaxColumn,
   getSheetMaxRow,
-  (sheetId, maxColumn, maxRow) => (
+  (sheetId, maxColumn = 0, maxRow = 0) => (
+    // TODO - b/c is 0-indexed, should be maxRow, not maxRow + 1
     range(0, maxRow + 1)
       .map((row) =>
         range(0, maxColumn + 1)
@@ -187,8 +190,8 @@ export const materializeSheetMatrix = createCachedSelector(
 
             if (!materializedCell.absolutePath) {
               return materializedCell;
-            } else if (graphPathMap[materializedCell.absolutePath.join()]) {
-              graphPathMap[materializedCell.absolutePath.join()]
+            } else if (graphPathMap[path2Key(materializedCell.absolutePath)]) {
+              graphPathMap[path2Key(materializedCell.absolutePath)]
                 .push([
                   materializedCell.column,
                   materializedCell.row,
@@ -197,7 +200,7 @@ export const materializeSheetMatrix = createCachedSelector(
               return materializedCell;
             }
 
-            graphPathMap[materializedCell.absolutePath.join()] = [[
+            graphPathMap[path2Key(materializedCell.absolutePath)] = [[
               materializedCell.column,
               materializedCell.row,
             ]];
@@ -211,7 +214,7 @@ export const materializeSheetMatrix = createCachedSelector(
         })
       ));
 
-    return { graphPathMap, sheetMatrix: materializedSheetMatrix, };
+    return { graphPathMap, matrix: materializedSheetMatrix, hints: {}, };
   }
 )(
   nthArg(0)
@@ -230,9 +233,9 @@ export const withCellInput = createCachedSelector(
   (
     sheetId,
     matrix,
-    { column, row, value, },
+    { sheetId: inputSheetId, column, row, value, },
   ) => {
-    if (value === undefined) {
+    if (value === undefined || sheetId !== inputSheetId) {
       return matrix;
     }
 
@@ -251,8 +254,8 @@ export const withCellInput = createCachedSelector(
 /**
  * @param {Object} state
  * @param {String} sheetId
+ * @param {Object} hints
  * @param {Object} sheetMatrix
- * @param {Object} graphPathMap
  */
 export const withFocus = createCachedSelector(
   nthArg(1),
@@ -261,39 +264,26 @@ export const withFocus = createCachedSelector(
   getCellFocusDescriptor,
   (
     sheetId,
+    hints,
     matrix,
-    graphPathMap,
     cellFocusDescriptor
   ) => {
     if (
-      !cellFocusDescriptor
+      !cellFocusDescriptor ||
+      cellFocusDescriptor.sheetId !== sheetId
     ) {
-      return matrix;
+      return { matrix, hints, };
     }
 
     const { column: focusColumn, row: focusRow, } = cellFocusDescriptor;
 
-    return pipe(
-      (_matrix) => {
-        if (cellFocusDescriptor.sheetId === sheetId) {
-          return updateInMatrix(focusColumn, focusRow, assoc('focusView', true), _matrix);
-        }
-
-        return _matrix;
+    return {
+      matrix: updateInMatrix(focusColumn, focusRow, assoc('focusView', true), matrix),
+      hints: {
+        ...hints,
+        focusCellAbsolutePath: matrix[focusRow][focusColumn].absolutePath,
       },
-      (_matrix) => {
-        const focusCellAbsolutePath = matrix[focusRow][focusColumn].absolutePath;
-
-        if (!focusCellAbsolutePath) {
-          return _matrix;
-        }
-
-        return (graphPathMap[focusCellAbsolutePath.join()] || [])
-          .reduce((__matrix, [column, row]) => (
-            updateInMatrix(column, row, assoc('focusNodeView', true), __matrix)
-          ), _matrix);
-      }
-    )(matrix);
+    };
   }
 )(
   nthArg(1)
@@ -303,8 +293,8 @@ export const withFocus = createCachedSelector(
 /**
  * @param {Object} state
  * @param {String} sheetId
+ * @param {Object} hints
  * @param {Object} sheetMatrix
- * @param {Object} graphPathMap
  */
 export const withTeaser = createCachedSelector(
   nthArg(1),
@@ -313,25 +303,26 @@ export const withTeaser = createCachedSelector(
   getCellTeaserDescriptor,
   (
     sheetId,
+    hints,
     matrix,
-    graphPathMap,
     cellTeaserDescriptor
   ) => {
     if (
       !cellTeaserDescriptor ||
-      !matrix[cellTeaserDescriptor.row][cellTeaserDescriptor.column].absolutePath
+      cellTeaserDescriptor.sheetId !== sheetId
     ) {
-      return matrix;
+      return { matrix, hints, };
     }
 
     const { column: teaserColumn, row: teaserRow, } = cellTeaserDescriptor;
 
-    const teaserCellAbsolutePath = matrix[teaserRow][teaserColumn].absolutePath;
-
-    return (graphPathMap[teaserCellAbsolutePath.join()] || [])
-      .reduce((_matrix, [column, row]) => {
-        return updateInMatrix(column, row, assoc('teaserNodeView', true), _matrix);
-      }, matrix);
+    return {
+      matrix: updateInMatrix(teaserColumn, teaserRow, assoc('teaserView', true), matrix),
+      hints: {
+        ...hints,
+        teaserCellAbsolutePath: matrix[teaserRow][teaserColumn].absolutePath,
+      },
+    };
   }
 )(
   nthArg(1)
@@ -369,6 +360,7 @@ export const withEnhanced = createCachedSelector(
  * @param {Object} state
  * @param {String} sheetId
  * @param {Object} graphFragment
+ * TODO - use a closure rather than pipe all args through
  */
 export const getSheetMatrix = pipe(
   (state, sheetId, graphFragment) => ({
@@ -381,31 +373,103 @@ export const getSheetMatrix = pipe(
     state,
     sheetId,
     graphFragment,
-    sheetMatrix: tables2SheetMatrix(state, sheetId, tables),
+    matrix: tables2SheetMatrix(state, sheetId, tables),
   }),
-  ({ state, sheetId, graphFragment, sheetMatrix, }) => ({
+  ({ state, sheetId, graphFragment, matrix, }) => ({
     state,
     sheetId,
-    ...materializeSheetMatrix(sheetId, graphFragment, sheetMatrix),
+    ...materializeSheetMatrix(sheetId, graphFragment, matrix),
   }),
-  ({ state, sheetId, graphPathMap, sheetMatrix, }) => ({
+  ({ state, sheetId, graphPathMap, hints, matrix, }) => ({
     state,
     sheetId,
     graphPathMap,
-    sheetMatrix: withFocus(state, sheetId, sheetMatrix, graphPathMap),
+    ...withFocus(state, sheetId, hints, matrix),
   }),
-  ({ state, sheetId, graphPathMap, sheetMatrix, }) => ({
+  ({ state, sheetId, graphPathMap, hints, matrix, }) => ({
     state,
     sheetId,
-    sheetMatrix: withTeaser(state, sheetId, sheetMatrix, graphPathMap),
+    graphPathMap,
+    ...withTeaser(state, sheetId, hints, matrix),
   }),
-  ({ state, sheetId, sheetMatrix, }) => ({
+  ({ state, sheetId, graphPathMap, hints, matrix, }) => ({
     state,
     sheetId,
-    sheetMatrix: withEnhanced(state, sheetId, sheetMatrix),
+    graphPathMap,
+    hints,
+    matrix: withEnhanced(state, sheetId, matrix),
   }),
-  ({ state, sheetId, sheetMatrix, }) => withCellInput(state, sheetId, sheetMatrix)
+  ({ state, sheetId, graphPathMap, hints, matrix, }) => ({
+    graphPathMap,
+    hints,
+    matrix: withCellInput(state, sheetId, matrix),
+  })
 );
+
+
+/**
+ * @param {String} sheetId
+ * @param {String} focusCellAbsolutePath
+ * @param {Object} graphPathMap
+ * @param {Object} sheetMatrix
+ */
+export const withFocusHint = createCachedSelector(
+  nthArg(0),
+  nthArg(1),
+  nthArg(2),
+  nthArg(3),
+  (sheetId, focusCellAbsolutePath, graphPathMap, matrix) => {
+    if (!focusCellAbsolutePath) {
+      return matrix;
+    }
+
+    // TODO - use pathOr
+    return (graphPathMap[path2Key(focusCellAbsolutePath)] || [])
+      .reduce((_matrix, [column, row]) => (
+        updateInMatrix(column, row, assoc('focusNodeView', true), _matrix)
+      ), matrix);
+  }
+)(
+  nthArg(0)
+);
+
+
+/**
+ * @param {String} sheetId
+ * @param {String} teaserCellAbsolutePath
+ * @param {Object} graphPathMap
+ * @param {Object} sheetMatrix
+ */
+export const withTeaserHint = createCachedSelector(
+  nthArg(0),
+  nthArg(1),
+  nthArg(2),
+  nthArg(3),
+  (sheetId, teaserCellAbsolutePath, graphPathMap, matrix) => {
+    if (!teaserCellAbsolutePath) {
+      return matrix;
+    }
+
+    // TODO use pathOr
+    return (graphPathMap[path2Key(teaserCellAbsolutePath)] || [])
+      .reduce((_matrix, [column, row]) => (
+        updateInMatrix(column, row, assoc('teaserNodeView', true), _matrix)
+      ), matrix);
+  }
+)(
+  nthArg(0)
+);
+
+
+export const withHints = (
+  sheetId,
+  graphPathMap,
+  { focusCellAbsolutePath, teaserCellAbsolutePath, },
+  matrix
+) => pipe(
+  (_matrix) => withFocusHint(sheetId, focusCellAbsolutePath, graphPathMap, _matrix),
+  (_matrix) => withTeaserHint(sheetId, teaserCellAbsolutePath, graphPathMap, _matrix)
+)(matrix);
 
 
 /**

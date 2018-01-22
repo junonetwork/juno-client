@@ -215,7 +215,7 @@ export const materializeSearchCollection = (cell, graphFragment) => {
   return {
     ...cell,
     cellLength: path(['collection', `schema:${cell.search}`, 'length', 'value'], graphFragment),
-    value: path([...relativePath, 'value'], graphFragment),
+    ...path(relativePath, graphFragment),
   };
 };
 
@@ -231,7 +231,7 @@ export const materializePredicate = (cell, graphFragment) => {
 
   return {
     ...cell,
-    value: path([...relativePath, 'value'], graphFragment),
+    ...path(relativePath, graphFragment),
   };
 };
 
@@ -268,6 +268,6 @@ export const materializeObject = (cell, graphFragment, sheetMatrix) => {
     ...cell,
     cellLength: cellLength === undefined ? 1 : cellLength,
     absolutePath,
-    value: boxValue && boxValue.value,
+    ...(boxValue || {}),
   };
 };

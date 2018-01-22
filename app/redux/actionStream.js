@@ -21,6 +21,7 @@ export default (store, epics) => {
     toESObservable: identity,
   })();
 
+  // TODO - should take store.getState.bind(store), similar to redux-thunk signature
   merge(
     ...epics.map((epic) => stream.pipe(epic(store)))
   )

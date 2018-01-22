@@ -32,11 +32,12 @@ export const shouldRenderIndexInput = (enhanceView, type, upCellType) => (
 
 
 const Cell = ({
-  type, sheetId, tableId, column, row, value, cellLength, cellInput,
+  type, sheetId, tableId, column, row, value, $type, cellLength, cellInput,
   leftCellType, leftCellTableId, upCellType, upCellTableId, predicateIdx,
   hotKeys, focusView, enhanceView, focusNodeView, teaserNodeView,
   onClick, onMouseEnter, onKeyPress, updateValue,
 }) => (
+  // console.log('render') ||
   <td
     className={`cell ${camel2Kebab(type)} ${focusView ? 'focus' : ''} ${focusNodeView ? 'node-focus' : ''} ${teaserNodeView ? 'node-tease' : ''} ${enhanceView ? 'node-enhance' : ''}`}
     role="gridcell"
@@ -81,10 +82,9 @@ const Cell = ({
         </div> :
         <div className="cell-body">
           <CellValue
-            type="atom"
+            $type={$type}
             value={value}
             cellLength={cellLength}
-            pending={false}
           />
         </div>
     }

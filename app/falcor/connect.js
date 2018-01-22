@@ -41,6 +41,8 @@ const connect = (falcorModel, _graphChange$) => (
     // .map(props => Object.assign(props, { path: typeof paths === 'function' ? paths(props) : paths}))
     // .distinctUntilChanged(({ path }, { path: nextPath }) => shallowEquals(path, nextPath))
     .switchMap((props) => {
+      // console.log('query Falcor');
+
       const _paths = typeof paths === 'function' ? paths(props) : paths;
 
       if (!_paths) {
