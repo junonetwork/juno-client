@@ -5,9 +5,9 @@ import {
 }                          from 'recompose';
 import Table               from '../../components/Table';
 import {
-  focusCell,
+  makeCellActive,
   navigate,
-}                          from '../../redux/modules/focus';
+}                          from '../../redux/modules/active';
 import {
   teaseCell,
 }                          from '../../redux/modules/teaser';
@@ -43,7 +43,7 @@ export default compose(
   withHandlers({
     teaseCell: () => throttledTeaseCell,
     navigate: () => throttledNavigate,
-    focusCell: () => (sheetId, column, row) => dispatch(focusCell(sheetId, column, row)),
+    makeCellActive: () => (sheetId, column, row) => dispatch(makeCellActive(sheetId, column, row)),
     enhanceCell: () => (sheetId, column, row) => dispatch(addEnhancedCell(sheetId, column, row)),
     removeEnhanceCell: () => (sheetId, column, row) => (
       dispatch(removeEnhancedCell(sheetId, column, row))

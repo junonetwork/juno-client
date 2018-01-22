@@ -17,16 +17,16 @@ $cell-height: 26px;
   // &.teaser {
   //   box-shadow: 0px 0px 0px 1px transparentize($table-teaser, .2) inset;
   // }
-  &.node-tease {
+  &.teaser-hint {
     box-shadow: 0px 0px 0px 1px transparentize($table-teaser, .5) inset;
   }
   &:hover {
     box-shadow: 0px 0px 0px 1px $table-teaser inset;
   }
-  &.node-focus {
-    box-shadow: 0px 0px 0px 1px transparentize($table-active, .3) inset;
+  &.active-hint {
+    box-shadow: 0px 0px 0px 1px transparentize($table-active, .4) inset;
   }
-  &.focus {
+  &.active {
     box-shadow: 0px 0px 0px 1px $table-active inset;
   }
   // &.active {

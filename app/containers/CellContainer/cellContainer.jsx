@@ -20,10 +20,10 @@ const FAST_STEP = 2;
 // centralized in the store.  For cases where focus logic should be calculated on
 // read, focus descriptor could be generated in a selector on the fly, combining
 // active w/ other store modules
-const shouldFocus = (focusView, enhanceView, type, cellInput, leftCellType, upCellType) => (
-  focusView &&
+const shouldFocus = (activeView, enhanceView, type, cellInput, leftCellType, upCellType) => (
+  activeView &&
   !shouldRenderPredicateEnhancedInput(enhanceView, type, leftCellType) &&
-  !shouldRenderPredicateInput(focusView, cellInput, type, leftCellType) &&
+  !shouldRenderPredicateInput(activeView, cellInput, type, leftCellType) &&
   !shouldRenderIndexInput(enhanceView, type, upCellType)
 );
 
@@ -45,11 +45,11 @@ export default compose(
   setDisplayName('CellContainer'),
   pure,
   withHandlers({
-    onClick: ({ sheetId, column, row, focusCell, }) => (e) => {
+    onClick: ({ sheetId, column, row, makeCellActive, }) => (e) => {
       e.preventDefault();
       e.stopPropagation();
 
-      focusCell(sheetId, column, row);
+      makeCellActive(sheetId, column, row);
     },
     onMouseEnter: ({ sheetId, column, row, teaseCell, }) => () => {
       teaseCell(sheetId, column, row);
@@ -62,8 +62,8 @@ export default compose(
     },
   }),
   withHotKeys(
-    ({ focusView, enhanceView, type, cellInput, leftCellType, upCellType, }) => (
-      shouldFocus(focusView, enhanceView, type, cellInput, leftCellType, upCellType)
+    ({ activeView, enhanceView, type, cellInput, leftCellType, upCellType, }) => (
+      shouldFocus(activeView, enhanceView, type, cellInput, leftCellType, upCellType)
     ),
     {
       up: arrowKeyNavHandler('up', 1),

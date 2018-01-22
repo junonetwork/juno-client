@@ -10,32 +10,31 @@ import {
   increaseSheetMaxColumn,
   increaseSheetMaxRow,
 }                             from './sheets';
-import throttle               from '../../utils/throttleAnimationFrame';
 
 
 /**
  * selectors
  */
-export const getFocusDescriptor = (state) => state.focus;
-export const getCellFocusDescriptor = (state) =>
-  path(['focus', 'sheet'], state);
-export const cellIsFocused = (state, sheetId, address) =>
-  path(['focus', 'sheet', 'sheetId'], state) === sheetId &&
-  path(['focus', 'sheet', 'address'], state) === address;
+export const getActiveDescriptor = (state) => state.active;
+export const getCellActiveDescriptor = (state) =>
+  path(['active', 'sheet'], state);
+export const cellIsActive = (state, sheetId, address) =>
+  path(['active', 'sheet', 'sheetId'], state) === sheetId &&
+  path(['active', 'sheet', 'address'], state) === address;
 
 
 /**
  * constants
  */
-const SET_FOCUS = 'SET_FOCUS';
+const SET_ACTIVE = 'SET_ACTIVE';
 
 
 /**
  * actions
  */
-export const setFocus = (focusDescriptor) => ({ type: SET_FOCUS, focusDescriptor, });
-export const focusCell = (sheetId, column, row) => ({
-  type: SET_FOCUS, focusDescriptor: { sheet: { sheetId, column, row, }, },
+export const setActive = (activeDescriptor) => ({ type: SET_ACTIVE, activeDescriptor, });
+export const makeCellActive = (sheetId, column, row) => ({
+  type: SET_ACTIVE, activeDescriptor: { sheet: { sheetId, column, row, }, },
 });
 
 
@@ -50,7 +49,7 @@ export const navigate = (sheetId, column, row, direction, steps) => (dispatch, g
       // navigated off right of table, create new column
       return dispatch(batchActions([
         increaseSheetMaxColumn(sheetId),
-        focusCell(sheetId, column, row),
+        makeCellActive(sheetId, column, row),
       ], 'CREATE_SHEET_COLUMN'));
     } else if (column + steps > maxColumn) {
       // navigated off table when stepping by > 1, navigate to edge of table
@@ -63,7 +62,7 @@ export const navigate = (sheetId, column, row, direction, steps) => (dispatch, g
       // navigated off bottom of table, create new row
       return dispatch(batchActions([
         increaseSheetMaxRow(sheetId),
-        focusCell(sheetId, column, row),
+        makeCellActive(sheetId, column, row),
       ], 'CREATE_SHEET_ROW'));
     } else if (row + steps > maxRow) {
       // navigated off table when stepping by > 1, navigate to edge of table
@@ -93,7 +92,7 @@ export const navigate = (sheetId, column, row, direction, steps) => (dispatch, g
     }
   }
 
-  return dispatch(focusCell(sheetId, column, row));
+  return dispatch(makeCellActive(sheetId, column, row));
 };
 
 
@@ -101,8 +100,8 @@ export const navigate = (sheetId, column, row, direction, steps) => (dispatch, g
  * reducer
  */
 export default (state = {}, action) => {
-  if (action.type === SET_FOCUS) {
-    return action.focusDescriptor;
+  if (action.type === SET_ACTIVE) {
+    return action.activeDescriptor;
   }
 
   return state;

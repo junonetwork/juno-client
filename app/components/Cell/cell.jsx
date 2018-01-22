@@ -16,8 +16,8 @@ export const shouldRenderPredicateEnhancedInput = (enhanceView, type, leftCellTy
   )
 );
 
-export const shouldRenderPredicateInput = (focusView, cellInput, type, leftCellType) => (
-  focusView && cellInput && (
+export const shouldRenderPredicateInput = (activeView, cellInput, type, leftCellType) => (
+  activeView && cellInput && (
     type === 'predicate' || leftCellType === 'predicate' ||
     leftCellType === 'searchCollection' || leftCellType === 'objectCollection'
   )
@@ -34,12 +34,12 @@ export const shouldRenderIndexInput = (enhanceView, type, upCellType) => (
 const Cell = ({
   type, sheetId, tableId, column, row, value, $type, cellLength, cellInput,
   leftCellType, leftCellTableId, upCellType, upCellTableId, predicateIdx,
-  hotKeys, focusView, enhanceView, focusNodeView, teaserNodeView,
+  hotKeys, activeView, enhanceView, activeHint, teaserHint,
   onClick, onMouseEnter, onKeyPress, updateValue,
 }) => (
   // console.log('render') ||
   <td
-    className={`cell ${camel2Kebab(type)} ${focusView ? 'focus' : ''} ${focusNodeView ? 'node-focus' : ''} ${teaserNodeView ? 'node-tease' : ''} ${enhanceView ? 'node-enhance' : ''}`}
+    className={`cell ${camel2Kebab(type)} ${activeView ? 'active' : ''} ${activeHint ? 'active-hint' : ''} ${teaserHint ? 'teaser-hint' : ''} ${enhanceView ? 'node-enhance' : ''}`}
     role="gridcell"
     onClick={onClick}
     onMouseEnter={onMouseEnter}
@@ -58,7 +58,7 @@ const Cell = ({
           predicateIdx={predicateIdx}
           updateValue={updateValue}
         /> :
-      shouldRenderPredicateInput(focusView, cellInput, type, leftCellType) ?
+      shouldRenderPredicateInput(activeView, cellInput, type, leftCellType) ?
         <PredicateInput
           value={cellInput}
           sheetId={sheetId}
