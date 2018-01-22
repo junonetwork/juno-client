@@ -37,9 +37,6 @@ import {
 // }                                    from '../../redux/modules/falcor';
 import model                         from '../../falcor/model';
 import {
-  getSheet,
-}                                    from './sheets';
-import {
   formatTableId, setInArray,
 }                                    from '../../utils/table';
 import { clearCellInput } from './cellInput';
@@ -55,8 +52,6 @@ import { clearCellInput } from './cellInput';
  */
 export const getTable = (state, tableId) =>
   state.tables[tableId];
-
-export const getTableIds = (state, sheetId) => getSheet(state, sheetId).tables;
 
 
 /**
