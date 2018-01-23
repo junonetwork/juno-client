@@ -3,16 +3,17 @@ import {
   reduce,
 }                                    from 'ramda';
 import {
-  getSheetPathSets,
   getSheetMatrix,
   withHints as sheetMatrixWithHints,
+  getSheetTableIds,
 }                                    from './sheets';
 import {
-  getGraphJGF,
+  getGraphJGF, getGraphTableIds,
 }                                    from './graphs';
 import {
   arraySingleDepthEqualitySelector,
 }                                    from '../../utils/selectors';
+import { getTablePathSets } from './tables';
 
 
 /**
@@ -27,15 +28,20 @@ export const getWindows = (state) => state.windows;
 export const getPathSets = arraySingleDepthEqualitySelector(
   (state) => (
     getWindows(state)
-      .reduce((pathSets, { id, type, }) => {
+      .reduce((tableIds, { id, type, }) => {
         if (type === 'sheet') {
-          pathSets.push(...getSheetPathSets(state, id));
-          return pathSets;
+          tableIds.push(...getSheetTableIds(state, id));
+          return tableIds;
         } else if (type === 'graph') {
-          return pathSets;
+          tableIds.push(...getGraphTableIds(state, id));
+          return tableIds;
         }
 
         throw new Error(`Unknown window type ${type}`);
+      }, [])
+      .reduce((pathSets, tableId) => {
+        pathSets.push(...getTablePathSets(state, tableId));
+        return pathSets;
       }, [])
   ),
   (windowPathSets) => windowPathSets

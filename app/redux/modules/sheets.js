@@ -12,7 +12,6 @@ import {
 }                                    from 'ramda';
 import createCachedSelector          from 're-reselect';
 import {
-  getTablePathSets,
   getTableCells,
   ADD_SEARCH_COLLECTION_TABLE,
   REMOVE_TABLE,
@@ -62,32 +61,6 @@ export const getSheet = (state, sheetId) => state.sheets[sheetId];
 export const getSheetMaxColumn = (state, sheetId) => state.sheets[sheetId].maxColumn;
 export const getSheetMaxRow = (state, sheetId) => state.sheets[sheetId].maxRow;
 export const getSheetTableIds = (state, sheetId) => state.sheets[sheetId].tables;
-
-
-/**
- * @param {Object} state
- * @param {String} sheetId
- */
-export const getSheetPathSets = createCachedSelector(
-  (state, sheetId) => {
-    const tableIds = getSheetTableIds(state, sheetId);
-
-    if (tableIds.length > 0) {
-      return tableIds.reduce((pathSets, tableId) => {
-        pathSets.push(...getTablePathSets(state, tableId));
-        return pathSets;
-      }, []);
-    }
-
-    return [[]];
-  },
-  (pathSets) => pathSets
-)(
-  nthArg(1),
-  {
-    selectorCreator: arraySingleDepthEqualitySelector,
-  }
-);
 
 
 /**

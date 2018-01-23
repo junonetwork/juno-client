@@ -54,8 +54,8 @@ store.dispatch(
       formatTableId('1', 0, 0),
       formatAddress('1', 0, 0),
       'Person',
-      ['schema:name', 'schema:sibling'],
-      [{ from: 0, to: 2, }]
+      ['schema:name'],
+      [{ from: 0, to: 1, }]
     ),
   ], 'INIT_SHEET')
 );
