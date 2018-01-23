@@ -50,8 +50,9 @@ import {
  */
 const createSheet = (maxColumn, maxRow) =>
   ({ maxColumn, maxRow, tables: [], });
-
-const path2Key = (path) => path.join();
+// TODO - what is a safe way to serialize path?  keys can have any url safe character, including '/' and curie special character ':'
+// https://perishablepress.com/stop-using-unsafe-characters-in-urls/
+export const path2Key = (path) => path.join('|');
 
 
 /**
@@ -174,7 +175,6 @@ export const materializeSheetMatrix = createCachedSelector(
   ({ json: graphJSON, }, sheetMatrix) => {
     // console.log('materializeSheetMatrix');
 
-    // TODO - use a Set
     const graphPathMap = {};
     const materializedSheetMatrix = sheetMatrix
       .map((row) => (
