@@ -114,46 +114,41 @@ class Graph extends Component {
     } = this.props;
 
     return (
-      <div
-        className="graph-window"
-        tabIndex="0"
+      <svg
+        id="graph"
+        style={{ width, height, }}
+        onMouseMove={this.onMouseMove}
       >
-        <svg
-          id="graph"
-          style={{ width, height, }}
-          onMouseMove={this.onMouseMove}
-        >
-          <g className="edges">
-            {graph.edges.map((edge) => (
-              <line
-                key={`${edge.source.id}::${edge.target.id}`}
-                strokeWidth="1"
-                stroke="#707880"
-                x1={edge.source.x}
-                y1={edge.source.y}
-                x2={edge.target.x}
-                y2={edge.target.y}
-              />
-            ))}
-          </g>
+        <g className="edges">
+          {graph.edges.map((edge) => (
+            <line
+              key={`${edge.source.id}::${edge.target.id}`}
+              strokeWidth="1"
+              stroke="#707880"
+              x1={edge.source.x}
+              y1={edge.source.y}
+              x2={edge.target.x}
+              y2={edge.target.y}
+            />
+          ))}
+        </g>
 
-          <g className="nodes">
-            {graph.nodes.map((node) => (
-              <Node
-                key={node.id}
-                id={node.id}
-                group={node.group}
-                x={node.x}
-                y={node.y}
-                onDragStart={this.onDragStart}
-                onDragEnd={this.onDragEnd}
-                onMouseEnter={onNodeMouseEnter}
-                onMouseLeave={onNodeMouseLeave}
-              />
-            ))}
-          </g>
-        </svg>
-      </div>
+        <g className="nodes">
+          {graph.nodes.map((node) => (
+            <Node
+              key={node.id}
+              id={node.id}
+              group={node.group}
+              x={node.x}
+              y={node.y}
+              onDragStart={this.onDragStart}
+              onDragEnd={this.onDragEnd}
+              onMouseEnter={onNodeMouseEnter}
+              onMouseLeave={onNodeMouseLeave}
+            />
+          ))}
+        </g>
+      </svg>
     );
   }
 }
