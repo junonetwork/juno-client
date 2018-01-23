@@ -5,8 +5,11 @@ import {
 import {
   getSheetPathSets,
   getSheetMatrix,
-  withHints,
+  withHints as sheetMatrixWithHints,
 }                                    from './sheets';
+import {
+  getGraphJGF,
+}                                    from './graphs';
 import {
   arraySingleDepthEqualitySelector,
 }                                    from '../../utils/selectors';
@@ -29,7 +32,7 @@ export const getPathSets = arraySingleDepthEqualitySelector(
           pathSets.push(...getSheetPathSets(state, id));
           return pathSets;
         } else if (type === 'graph') {
-          throw new Error('Not Implemented');
+          return pathSets;
         }
 
         throw new Error(`Unknown window type ${type}`);
@@ -51,12 +54,24 @@ export const getDataForWindows = (state, graphFragment, windows) =>
         graphPathMap, hints, matrix,
       } = getSheetMatrix(state, id, graphFragment);
 
-      windowData.windows.push({ id, type, graphPathMap, matrix, });
+      windowData.windows.push({
+        id,
+        type,
+        graphPathMap,
+        data: matrix,
+      });
       Object.assign(windowData.hints, hints);
 
       return windowData;
     } else if (type === 'graph') {
-      throw new Error('Not Implemented');
+      windowData.windows.push({
+        id,
+        type,
+        graphPathMap: {},
+        data: getGraphJGF(state, id, graphFragment),
+      });
+
+      return windowData;
     }
 
     throw new Error(`Unknown window type ${type}`);
@@ -64,15 +79,19 @@ export const getDataForWindows = (state, graphFragment, windows) =>
 
 
 export const windowsWithHints = (windows, hints) => (
-  windows.map(({ id, type, graphPathMap, matrix, }) => {
+  windows.map(({ id, type, graphPathMap, data, }) => {
     if (type === 'sheet') {
       return {
         id,
         type,
-        matrix: withHints(id, graphPathMap, hints, matrix),
+        data: sheetMatrixWithHints(id, graphPathMap, hints, data),
       };
     } else if (type === 'graph') {
-      throw new Error('Not Implemented');
+      return {
+        id,
+        type,
+        data,
+      };
     }
 
     throw new Error(`Unknown window type ${type}`);
@@ -127,14 +146,15 @@ export const deleteWindow = () => ({
  */
 export default (
   state = [
+    { id: '1', type: 'graph', },
     { id: '0', type: 'sheet', },
   ],
   action
 ) => {
   if (action.type === CREATE_WINDOW) {
-    return [...state, { id: '1', type: 'sheet', }];
+    return [{ id: '1', type: 'graph', }, ...state];
   } else if (action.type === DELETE_WINDOW) {
-    return [state[0]];
+    return [state[1]];
   }
 
   return state;

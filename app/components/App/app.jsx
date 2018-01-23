@@ -2,30 +2,27 @@
 import React                from 'react';
 import SplitPane            from 'react-split-pane';
 import Table                from '../../containers/TableContainer';
+import Graph                from '../../containers/GraphContainer';
 import                           './style.scss';
 
 
-const renderWindow = ({ id, type, matrix, }) => {
+const renderWindow = ({ id, type, data, }) => {
   if (type === 'sheet') {
     return (
       <Table
         key={id}
         sheetId={id}
-        sheetMatrix={matrix}
+        sheetMatrix={data}
       />
     );
   } else if (type === 'graph') {
-    throw new Error('not implemented');
-    // return (
-    //   <div
-    //     className="graph-window"
-    //     tabIndex="0"
-    //     >
-    //     <ContainerDimensions>
-    //     <GraphContainer sheetId="1" />
-    //     </ContainerDimensions>
-    //   </div>
-    // );
+    return (
+      <Graph
+        key={id}
+        sheetId={id}
+        graph={data}
+      />
+    );
   }
 
   throw new Error(`Unknown window type ${type}`);
