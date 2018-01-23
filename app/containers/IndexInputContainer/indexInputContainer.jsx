@@ -1,5 +1,7 @@
-import R                     from 'ramda';
 import { connect }           from 'react-redux';
+import {
+  prop,
+}                            from 'ramda';
 import {
   compose,
   withState,
@@ -61,7 +63,7 @@ export default compose(
     })
   ),
   // TODO - it should be possible to store this in cellInput
-  withState('indicesRangeString', 'setIndicesRangeString', R.prop('indicesRangeString')),
+  withState('indicesRangeString', 'setIndicesRangeString', prop('indicesRangeString')),
   withProps(({ indicesRangeString, }) => {
     const parsedIndicesRangeString = grammar.match(indicesRangeString);
 

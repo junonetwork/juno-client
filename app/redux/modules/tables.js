@@ -37,9 +37,12 @@ import {
 // }                                    from '../../redux/modules/falcor';
 import model                         from '../../falcor/model';
 import {
-  formatTableId, setInArray,
+  formatTableId,
+  setInArray,
 }                                    from '../../utils/table';
-import { clearCellInput } from './cellInput';
+import {
+  clearCellInput,
+}                                    from './cellInput';
 
 
 /**
