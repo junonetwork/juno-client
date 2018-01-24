@@ -1,0 +1,17 @@
+version: '2'
+services:
+
+  airplane-glue:
+    image: airplane-glue:latest
+    depends_on:
+        - middlepacco
+    ports:
+      - "80:80"
+
+  middlepacco:
+    image: middlepacco:latest
+    environment:
+      NODE_ENV: production
+    volumes:
+      - ./seed.n3:/usr/src/seed.n3
+    restart: always
