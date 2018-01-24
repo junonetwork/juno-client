@@ -27,12 +27,19 @@ import {
   REMOVE_TABLE,
   getTable,
 }                                    from './tables';
-import { expandIndicesKeySet } from '../../utils/sheet';
+import {
+  expandIndicesKeySet,
+}                                    from '../../utils/sheet';
+import {
+  getGraphTeaserDescriptor,
+}                                    from './teaser';
 
 
 /**
  * utils
  */
+const makeNode = (id, metadata) => ({ id, metadata, });
+const makeEdge = (source, target, metadata) => ({ source, target, metadata, });
 
 
 /**
@@ -40,6 +47,23 @@ import { expandIndicesKeySet } from '../../utils/sheet';
  */
 export const getGraph = (state, graphId) => state.graphs[graphId];
 export const getGraphTableIds = (state, graphId) => state.graphs[graphId].tables;
+
+
+export const getGraphTeaserHint = (state, graphId) => {
+  const graphTeaserDescriptor = getGraphTeaserDescriptor(state);
+
+  if (
+    !graphTeaserDescriptor ||
+    graphTeaserDescriptor.graphId !== graphId
+  ) {
+    return {};
+  }
+
+  return {
+    teaserAbsolutePath: graphTeaserDescriptor.path,
+  };
+};
+
 
 /**
  * @param {Object} state
@@ -69,16 +93,19 @@ export const getPathsThroughGraph = createCachedSelector(
   nthArg(1),
 );
 
-const makeNode = (id, metadata) => ({ id, metadata, });
-const makeEdge = (source, target, metadata) => ({ source, target, metadata, });
-// TODO - get graph from cache and follow pathSets to create JGF
-// reduce over paths, producing subject + predicate + object [literal/relationship]
+
+/**
+ * @param {Array} path
+ * @param {Object} graphJSON
+ * @param {Object} jgfMap
+ */
 export const getJGFMapFromPath = (
   [collectionIndex, predicate, predicateIndex, ...restPath],
   graphJSON,
   jgfMap
 ) => {
   if (
+    !graphJSON[collectionIndex] ||
     graphJSON[collectionIndex].value === null ||
     graphJSON[collectionIndex].$type === 'error'
   ) {
@@ -87,7 +114,7 @@ export const getJGFMapFromPath = (
 
   const nodeId = path2Key(graphJSON[collectionIndex].$__path);
   // TODO - merge, rather than overwrite, if nodeId already exists
-  jgfMap.nodes[nodeId] = makeNode(
+  jgfMap.nodes[nodeId] = makeNode( // eslint-disable-line no-param-reassign
     nodeId,
     { absolutePath: graphJSON[collectionIndex].$__path, }
   );
@@ -106,13 +133,13 @@ export const getJGFMapFromPath = (
     jgfMap.nodes[nodeId].metadata[predicate].push(predicateValue.value);
     return jgfMap;
   } else if (predicateValue.$type === 'atom') {
-    jgfMap.nodes[nodeId].metadata[predicate] = [predicateValue.value];
+    jgfMap.nodes[nodeId].metadata[predicate] = [predicateValue.value]; // eslint-disable-line no-param-reassign
     return jgfMap;
   }
 
   // TODO - mark bidirectional edges, rather than adding two edges
   const targetId = path2Key(predicateValue.$__path);
-  jgfMap.edges[`${nodeId}||${targetId}`] = makeEdge(nodeId, targetId, { predicateURI: predicate, });
+  jgfMap.edges[`${nodeId}||${targetId}`] = makeEdge(nodeId, targetId, { predicateURI: predicate, }); // eslint-disable-line no-param-reassign
 
   return getJGFMapFromPath(
     [predicateIndex, ...restPath],
@@ -134,8 +161,8 @@ export const getTableJGFMap = createCachedSelector(
   (graphJSON, searchCollectionPath, paths) => {
     // console.log('getTableJGFMap');
     return paths
-      .reduce((jgfMap, path) => (
-        getJGFMapFromPath(path, pathOr({}, searchCollectionPath, graphJSON), jgfMap)
+      .reduce((jgfMap, pathThroughGraph) => (
+        getJGFMapFromPath(pathThroughGraph, pathOr({}, searchCollectionPath, graphJSON), jgfMap)
       ), { nodes: {}, edges: {}, });
   }
 )(
@@ -195,6 +222,87 @@ export const getGraphJGF = createCachedSelector(
     selectorCreator: arraySingleDepthEqualitySelector,
   }
 );
+
+
+/**
+ * @param {String} graphId
+ * @param {Array} teaserAbsolutePath
+ * @param {Object} jgf
+ */
+export const withTeaserHint = createCachedSelector(
+  nthArg(0),
+  nthArg(1),
+  nthArg(2),
+  (graphId, teaserAbsolutePath, jgf) => {
+    // console.log('withTeaserHint');
+    return {
+      nodes: jgf.nodes.map((node) => {
+        if (equals(node.metadata.absolutePath, teaserAbsolutePath)) {
+          // NOTE - d3 mutates jgf and requires that that reference be stable
+          // immutably updating node breaks d3's layout algorithm
+          node.teaserHint = true;
+          return node;
+        } else if (node.teaserHint === true) {
+          node.teaserHint = undefined;
+          return node;
+        }
+
+        return node;
+      }),
+      edges: jgf.edges,
+    };
+  }
+)(
+  nthArg(0)
+);
+
+
+/**
+ * @param {String} graphId
+ * @param {Array} activeAbsolutePath
+ * @param {Object} jgf
+ */
+export const withActiveHint = createCachedSelector(
+  nthArg(0),
+  nthArg(1),
+  nthArg(2),
+  (graphId, activeAbsolutePath, jgf) => {
+    // console.log('withActiveHint');
+    return {
+      nodes: jgf.nodes.map((node) => {
+        if (equals(node.metadata.absolutePath, activeAbsolutePath)) {
+          // NOTE - d3 mutates jgf and requires that that reference be stable
+          // immutably updating node breaks d3's layout algorithm
+          node.activeHint = true;
+          return node;
+        } else if (node.activeHint === true) {
+          node.activeHint = undefined;
+          return node;
+        }
+
+        return node;
+      }),
+      edges: jgf.edges,
+    };
+  }
+)(
+  nthArg(0)
+);
+
+
+/**
+ * @param {String} graphId
+ * @param {Object} hints
+ * @param {Object} jgf
+ */
+export const graphWithHints = (
+  graphId,
+  { activeAbsolutePath, teaserAbsolutePath, },
+  jgf
+) => pipe(
+  (_jgf) => withActiveHint(graphId, activeAbsolutePath, _jgf),
+  (_jgf) => withTeaserHint(graphId, teaserAbsolutePath, _jgf)
+)(jgf);
 
 
 /**

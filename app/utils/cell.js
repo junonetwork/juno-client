@@ -173,8 +173,22 @@ export const cell2PathFragment = (cell, sheetMatrix) => {
 // TODO - mapping search to URIs should move to falcor router
 export const getSearchCollectionPath = (search) => ['resource', `schema:${search}`, 'skos:prefLabel'];
 
-
 export const getPredicatePath = (uri) => ['resource', uri, 'skos:prefLabel'];
+
+export const getIndexPath = (collectionAddress, index, sheetMatrix) => {
+  const {
+    column: collectionColumn,
+    row: collectionRow,
+  } = destructureAddress(collectionAddress);
+
+  return [
+    ...cell2PathFragment(
+      sheetMatrix[collectionRow][collectionColumn],
+      sheetMatrix
+    ),
+    index,
+  ];
+};
 
 
 export const getObjectPath = (collectionAddress, indexAddress, predicateAddress, sheetMatrix) => {
@@ -220,10 +234,15 @@ export const materializeSearchCollection = (cell, graphJSON) => {
 };
 
 
-export const materializeIndex = (cell) => ({
-  ...cell,
-  value: cell.index,
-});
+export const materializeIndex = (cell, graphJSON, sheetMatrix) => {
+  const relativePath = getIndexPath(cell.collectionAddress, cell.index, sheetMatrix);
+
+  return {
+    ...cell,
+    value: cell.index,
+    absolutePath: path([...relativePath, '$__path'], graphJSON),
+  };
+};
 
 
 export const materializePredicate = (cell, graphJSON) => {

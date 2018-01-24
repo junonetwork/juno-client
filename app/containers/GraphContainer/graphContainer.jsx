@@ -11,7 +11,21 @@ import mapPropsStream             from '../../falcor/mapPropsStream';
 import {
   withGraphLayoutStream,
 }                                 from '../../hoc/withGraphLayout';
+import store                      from '../../redux/store';
+import throttle                   from '../../utils/throttleAnimationFrame';
+import {
+  teaseGraphNode,
+  clearTeaser,
+}                                 from '../../redux/modules/teaser';
 import                                 './style.scss';
+
+const { dispatch, } = store;
+const throttledTeaseGraphNode = throttle((graphId, absolutePath) => (
+  dispatch(teaseGraphNode(graphId, absolutePath))
+));
+const throttledClearTeaser = throttle(() => (
+  dispatch(clearTeaser())
+));
 
 
 export default compose(
@@ -39,12 +53,8 @@ export default compose(
     </div>
   ),
   withHandlers({
-    onNodeMouseEnter: () => (id) => {
-      console.log('enter', id);
-    },
-    onNodeMouseLeave: () => (id) => {
-      console.log('leave', id);
-    },
+    onNodeMouseEnter: () => throttledTeaseGraphNode,
+    onNodeMouseLeave: () => throttledClearTeaser,
   }),
   mapPropsStream(withGraphLayoutStream)
 )(Graph);

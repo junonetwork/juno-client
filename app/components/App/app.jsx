@@ -19,7 +19,7 @@ const renderWindow = ({ id, type, data, }) => {
     return (
       <Graph
         key={id}
-        sheetId={id}
+        graphId={id}
         graph={data}
       />
     );

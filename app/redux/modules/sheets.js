@@ -9,6 +9,7 @@ import {
   contains,
   reject,
   equals,
+  pathOr,
 }                                    from 'ramda';
 import createCachedSelector          from 're-reselect';
 import {
@@ -52,6 +53,21 @@ const createSheet = (maxColumn, maxRow) =>
 // TODO - what is a safe way to serialize path?  keys can have any url safe character, including '/' and curie special character ':'
 // https://perishablepress.com/stop-using-unsafe-characters-in-urls/
 export const path2Key = (path) => path.join('|');
+
+const addPathToPathMap = (absolutePath, column, row, graphPathMap) => {
+  if (!absolutePath) {
+    return graphPathMap;
+  } else if (graphPathMap[path2Key(absolutePath)]) {
+    graphPathMap[path2Key(absolutePath)]
+      .push([column, row]);
+
+    return graphPathMap;
+  }
+
+  graphPathMap[path2Key(absolutePath)] = [[column, row]]; // eslint-disable-line no-param-reassign
+
+  return graphPathMap;
+};
 
 
 /**
@@ -148,35 +164,31 @@ export const materializeSheetMatrix = createCachedSelector(
   ({ json: graphJSON, }, sheetMatrix) => {
     // console.log('materializeSheetMatrix');
 
-    const graphPathMap = {};
+    let graphPathMap = {};
     const materializedSheetMatrix = sheetMatrix
       .map((row) => (
         row.map((cell) => {
           if (cell.type === 'searchCollection') {
             return materializeSearchCollection(cell, graphJSON, sheetMatrix);
           } else if (cell.type === 'index') {
-            return materializeIndex(cell, graphJSON, sheetMatrix);
+            const materializedCell = materializeIndex(cell, graphJSON, sheetMatrix);
+            graphPathMap = addPathToPathMap(
+              materializedCell.absolutePath,
+              materializedCell.column,
+              materializedCell.row,
+              graphPathMap
+            );
+            return materializedCell;
           } else if (cell.type === 'predicate') {
             return materializePredicate(cell, graphJSON, sheetMatrix);
           } else if (cell.type === 'object') {
             const materializedCell = materializeObject(cell, graphJSON, sheetMatrix);
-
-            if (!materializedCell.absolutePath) {
-              return materializedCell;
-            } else if (graphPathMap[path2Key(materializedCell.absolutePath)]) {
-              graphPathMap[path2Key(materializedCell.absolutePath)]
-                .push([
-                  materializedCell.column,
-                  materializedCell.row,
-                ]);
-
-              return materializedCell;
-            }
-
-            graphPathMap[path2Key(materializedCell.absolutePath)] = [[
+            graphPathMap = addPathToPathMap(
+              materializedCell.absolutePath,
               materializedCell.column,
               materializedCell.row,
-            ]];
+              graphPathMap
+            );
 
             return materializedCell;
           } else if (cell.type === 'empty') {
@@ -254,7 +266,7 @@ export const withActive = createCachedSelector(
       matrix: updateInMatrix(activeColumn, activeRow, assoc('activeView', true), matrix),
       hints: {
         ...hints,
-        activeCellAbsolutePath: matrix[activeRow][activeColumn].absolutePath,
+        activeAbsolutePath: matrix[activeRow][activeColumn].absolutePath,
       },
     };
   }
@@ -293,7 +305,7 @@ export const withTeaser = createCachedSelector(
       matrix: updateInMatrix(teaserColumn, teaserRow, assoc('teaserView', true), matrix),
       hints: {
         ...hints,
-        teaserCellAbsolutePath: matrix[teaserRow][teaserColumn].absolutePath,
+        teaserAbsolutePath: matrix[teaserRow][teaserColumn].absolutePath,
       },
     };
   }
@@ -382,7 +394,7 @@ export const getSheetMatrix = pipe(
 
 /**
  * @param {String} sheetId
- * @param {String} activeCellAbsolutePath
+ * @param {Array} activeAbsolutePath
  * @param {Object} graphPathMap
  * @param {Object} sheetMatrix
  */
@@ -391,13 +403,12 @@ export const withActiveHint = createCachedSelector(
   nthArg(1),
   nthArg(2),
   nthArg(3),
-  (sheetId, activeCellAbsolutePath, graphPathMap, matrix) => {
-    if (!activeCellAbsolutePath) {
+  (sheetId, activeAbsolutePath, graphPathMap, matrix) => {
+    if (!activeAbsolutePath) {
       return matrix;
     }
 
-    // TODO - use pathOr
-    return (graphPathMap[path2Key(activeCellAbsolutePath)] || [])
+    return pathOr([], [path2Key(activeAbsolutePath)], graphPathMap)
       .reduce((_matrix, [column, row]) => (
         updateInMatrix(column, row, assoc('activeHint', true), _matrix)
       ), matrix);
@@ -409,7 +420,7 @@ export const withActiveHint = createCachedSelector(
 
 /**
  * @param {String} sheetId
- * @param {String} teaserCellAbsolutePath
+ * @param {Array} teaserAbsolutePath
  * @param {Object} graphPathMap
  * @param {Object} sheetMatrix
  */
@@ -418,13 +429,12 @@ export const withTeaserHint = createCachedSelector(
   nthArg(1),
   nthArg(2),
   nthArg(3),
-  (sheetId, teaserCellAbsolutePath, graphPathMap, matrix) => {
-    if (!teaserCellAbsolutePath) {
+  (sheetId, teaserAbsolutePath, graphPathMap, matrix) => {
+    if (!teaserAbsolutePath) {
       return matrix;
     }
 
-    // TODO use pathOr
-    return (graphPathMap[path2Key(teaserCellAbsolutePath)] || [])
+    return pathOr([], [path2Key(teaserAbsolutePath)], graphPathMap)
       .reduce((_matrix, [column, row]) => (
         updateInMatrix(column, row, assoc('teaserHint', true), _matrix)
       ), matrix);
@@ -434,14 +444,20 @@ export const withTeaserHint = createCachedSelector(
 );
 
 
+/**
+ * @param {String} sheetId
+ * @param {Object} graphPathMap
+ * @param {Object} hints
+ * @param {Object} sheetMatrix
+ */
 export const withHints = (
   sheetId,
   graphPathMap,
-  { activeCellAbsolutePath, teaserCellAbsolutePath, },
+  { activeAbsolutePath, teaserAbsolutePath, },
   matrix
 ) => pipe(
-  (_matrix) => withActiveHint(sheetId, activeCellAbsolutePath, graphPathMap, _matrix),
-  (_matrix) => withTeaserHint(sheetId, teaserCellAbsolutePath, graphPathMap, _matrix)
+  (_matrix) => withActiveHint(sheetId, activeAbsolutePath, graphPathMap, _matrix),
+  (_matrix) => withTeaserHint(sheetId, teaserAbsolutePath, graphPathMap, _matrix)
 )(matrix);
 
 
