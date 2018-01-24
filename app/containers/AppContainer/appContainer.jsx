@@ -44,15 +44,19 @@ export default compose(
   withHotKeys(
     () => false,
     ({
-      'cmd+1': ({ deleteWindowAction, }) => (e) => {
+      'cmd+1': ({ windows, deleteWindowAction, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
-        deleteWindowAction();
+        if (windows.length !== 1) {
+          deleteWindowAction();
+        }
       },
-      'cmd+2': ({ createWindowAction, }) => (e) => {
+      'cmd+2': ({ windows, createWindowAction, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
-        createWindowAction();
+        if (windows.length !== 2) {
+          createWindowAction();
+        }
       },
     })
   )

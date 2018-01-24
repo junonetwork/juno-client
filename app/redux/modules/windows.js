@@ -161,7 +161,6 @@ export const deleteWindow = () => ({
  */
 export default (
   state = [
-    { id: '1', type: 'graph', },
     { id: '0', type: 'sheet', },
   ],
   action

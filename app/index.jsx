@@ -48,15 +48,15 @@ store.dispatch(
     ),
     makeCellActive(sheetId, 0, 0),
     // second sheet
-    addSheet('1', 40, 30),
-    addSearchCollectionTable(
-      '1',
-      formatTableId('1', 0, 0),
-      formatAddress('1', 0, 0),
-      'Person',
-      ['schema:name'],
-      [{ from: 0, to: 1, }]
-    ),
+    // addSheet('1', 40, 30),
+    // addSearchCollectionTable(
+    //   '1',
+    //   formatTableId('1', 0, 0),
+    //   formatAddress('1', 0, 0),
+    //   'Person',
+    //   ['schema:name'],
+    //   [{ from: 0, to: 1, }]
+    // ),
   ], 'INIT_SHEET')
 );
 
