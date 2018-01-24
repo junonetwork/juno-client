@@ -8,12 +8,17 @@ import {
   getSheetTableIds,
 }                                    from './sheets';
 import {
-  getGraphJGF, getGraphTableIds,
+  getGraphJGF,
+  getGraphTableIds,
+  getGraphTeaserHint,
+  graphWithHints,
 }                                    from './graphs';
 import {
   arraySingleDepthEqualitySelector,
 }                                    from '../../utils/selectors';
-import { getTablePathSets } from './tables';
+import {
+  getTablePathSets,
+}                                    from './tables';
 
 
 /**
@@ -76,6 +81,10 @@ export const getDataForWindows = (state, graphFragment, windows) =>
         graphPathMap: {},
         data: getGraphJGF(state, id, graphFragment),
       });
+      Object.assign(
+        windowData.hints,
+        getGraphTeaserHint(state, id)
+      );
 
       return windowData;
     }
@@ -96,7 +105,7 @@ export const windowsWithHints = (windows, hints) => (
       return {
         id,
         type,
-        data,
+        data: graphWithHints(id, hints, data),
       };
     }
 

@@ -6,6 +6,7 @@ import {
   string,
   number,
   shape,
+  bool,
   func,
 }                             from 'prop-types';
 import                             './style.scss';
@@ -33,26 +34,27 @@ class Node extends Component {
     this.props.onDragEnd(this.props.id, e);
   }
 
-  onMouseEnter(e) {
+  onMouseEnter() {
     if (!this.isDragging) {
-      this.props.onMouseEnter(this.props.id, e);
+      this.props.onMouseEnter(this.props.graphId, this.props.metadata.absolutePath);
     }
   }
 
-  onMouseLeave(e) {
+  onMouseLeave() {
     if (!this.isDragging) {
-      this.props.onMouseLeave(this.props.id, e);
+      this.props.onMouseLeave(this.props.graphId, this.props.metadata.absolutePath);
     }
   }
 
   render() {
-    const { id, x, y, } = this.props;
+    const { id, x, y, teaserHint, activeHint, } = this.props;
 
     return (
       <circle
         data-id={id}
-        r="5"
+        r={teaserHint || activeHint ? 7 : 5}
         stroke="#aaa"
+        strokeWidth={activeHint ? 2 : 1}
         fill="#85678F"
         cx={x}
         cy={y}
@@ -69,8 +71,12 @@ class Node extends Component {
 
 Node.propTypes = {
   id: string.isRequired,
+  graphId: string.isRequired,
+  metadata: shape().isRequired,
   x: number.isRequired,
   y: number.isRequired,
+  teaserHint: bool,
+  activeHint: bool,
   onDragStart: func.isRequired,
   onDragEnd: func.isRequired,
   onMouseEnter: func.isRequired,
@@ -110,12 +116,11 @@ class Graph extends Component {
 
   render() {
     const {
-      width, height, graph, onNodeMouseEnter, onNodeMouseLeave,
+      graphId, width, height, graph, onNodeMouseEnter, onNodeMouseLeave,
     } = this.props;
 
     return (
       <svg
-        id="graph"
         style={{ width, height, }}
         onMouseMove={this.onMouseMove}
       >
@@ -138,9 +143,12 @@ class Graph extends Component {
             <Node
               key={node.id}
               id={node.id}
-              group={node.group}
+              graphId={graphId}
+              metadata={node.metadata}
               x={node.x}
               y={node.y}
+              teaserHint={node.teaserHint}
+              activeHint={node.activeHint}
               onDragStart={this.onDragStart}
               onDragEnd={this.onDragEnd}
               onMouseEnter={onNodeMouseEnter}
@@ -154,6 +162,7 @@ class Graph extends Component {
 }
 
 Graph.propTypes = {
+  graphId: string.isRequired,
   top: number.isRequired,
   left: number.isRequired,
   width: number.isRequired,
