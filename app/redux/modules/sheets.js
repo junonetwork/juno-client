@@ -44,11 +44,15 @@ import {
   updateInMatrix,
 }                                    from '../../utils/table';
 import {
+  getCellOffsetFromTable,
+  isLegalDrop,
+}                                    from '../../utils/sheet';
+import {
   arraySingleDepthEqualitySelector,
 }                                    from '../../utils/selectors';
 import {
   getEnhancedCells,
-}                                     from './enhanced';
+}                                    from './enhanced';
 
 
 /**
@@ -347,32 +351,6 @@ export const withEnhanced = createCachedSelector(
 );
 
 
-const getCellOffsetFromTable = (column, row, [[{ column: originX, row: originY, }]]) => ([
-  column - originX,
-  row - originY,
-]);
-
-
-const isLegalDrop = (toTableXOrigin, toTableYOrigin, dragTable, tables) => {
-  const dragTableXLength = dragTable[0].length - 1;
-  const dragTableYLength = dragTable.length - 1;
-
-  return tables.reduce((isLegal, { table, }) => {
-    const tableXMin = table[0][0].column;
-    const tableXMax = table[0][0].column + (table[0].length - 1);
-    const tableYMin = table[0][0].row;
-    const tableYMax = table[0][0].row + (table.length - 1);
-
-    return isLegal && (
-      toTableXOrigin + dragTableXLength < tableXMin ||
-      toTableXOrigin > tableXMax ||
-      toTableYOrigin + dragTableYLength < tableYMin ||
-      toTableYOrigin > tableYMax
-    );
-  }, true);
-};
-
-
 /**
  * @param {Object} state
  * @param {String} sheetId
@@ -396,25 +374,25 @@ export const withDropTable = createCachedSelector(
       !dragFrom ||
       dragTo.sheetId !== sheetId
     ) {
-      return matrix;
+      return { matrix, canDrop: false, };
     }
 
-    const dragTable = find(propEq('id', dragFrom.tableId), tables).table;
+    const fromTable = find(propEq('id', dragFrom.tableId), tables).table;
     const { column: fromColumn, row: fromRow, tableId: fromId, } = dragFrom;
-    const [xOffset, yOffset] = getCellOffsetFromTable(fromColumn, fromRow, dragTable);
+    const [xOffset, yOffset] = getCellOffsetFromTable(fromColumn, fromRow, fromTable);
     const toTableXOrigin = Math.max(dragTo.column - xOffset, 0);
     const toTableYOrigin = Math.max(dragTo.row - yOffset, 0);
 
-    const legalDrop = isLegalDrop(
+    const canDrop = isLegalDrop(
       toTableXOrigin,
       toTableYOrigin,
-      dragTable,
+      fromTable,
       reject(propEq('id', fromId), tables)
     );
 
     return pipe(
       (_matrix) => (
-        dragTable
+        fromTable
           .filter((_, rowIdx) => toTableYOrigin + rowIdx < _matrix.length)
           .reduce((matrixWithDropTable, row, rowIdx) => (
             row
@@ -423,7 +401,7 @@ export const withDropTable = createCachedSelector(
                 updateInMatrix(
                   toTableXOrigin + columnIdx,
                   toTableYOrigin + rowIdx,
-                  legalDrop ?
+                  canDrop ?
                     assoc('dropTableView', true) :
                     assoc('illegalDropTableView', true),
                   _matrixWithDropTable
@@ -434,7 +412,7 @@ export const withDropTable = createCachedSelector(
       (_matrix) => updateInMatrix(
         fromColumn,
         fromRow,
-        legalDrop ?
+        canDrop ?
           assoc('dragTableView', true) :
           assoc('illegalDragTableView', true),
         _matrix
@@ -442,11 +420,15 @@ export const withDropTable = createCachedSelector(
       (_matrix) => updateInMatrix(
         toTableXOrigin + xOffset,
         toTableYOrigin + yOffset,
-        legalDrop ?
+        canDrop ?
           assoc('dragTableView', true) :
           assoc('illegalDragTableView', true),
         _matrix
-      )
+      ),
+      (_matrix) => ({
+        matrix: _matrix,
+        canDrop,
+      })
     )(matrix);
   }
 )(
@@ -502,11 +484,12 @@ export const getSheetMatrix = pipe(
     sheetId,
     graphPathMap,
     hints,
-    matrix: withDropTable(state, sheetId, matrix),
+    ...withDropTable(state, sheetId, matrix),
   }),
-  ({ state, sheetId, graphPathMap, hints, matrix, }) => ({
+  ({ state, sheetId, graphPathMap, hints, canDrop, matrix, }) => ({
     graphPathMap,
     hints,
+    canDrop,
     matrix: withCellInput(state, sheetId, matrix),
   })
 );

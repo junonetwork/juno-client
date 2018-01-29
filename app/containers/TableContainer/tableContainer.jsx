@@ -2,6 +2,7 @@ import {
   compose,
   setDisplayName,
   withHandlers,
+  mapProps,
 }                          from 'recompose';
 import Table               from '../../components/Table';
 import {
@@ -25,7 +26,8 @@ import {
 import {
   startDragTable,
   dragTable,
-  endDragTable,
+  dropTable,
+  cancelDragTable,
 }                          from '../../redux/modules/dragTable';
 import store, {
   dispatchStream,
@@ -66,11 +68,16 @@ export default compose(
       dispatch(startDragTable(sheetId, tableId, column, row))
     ),
     dragTable: () => throttleDragTable,
-    endDragTable: () => () => (
-      dispatch(endDragTable())
-    ),
+    endDragTable: ({ canDrop, }) => () => {
+      if (canDrop) {
+        dispatch(dropTable());
+      } else {
+        dispatch(cancelDragTable());
+      }
+    },
     updateValue: ({ sheetMatrix, }) => (sheetId, column, row, value) => (
       dispatchStream(updateCellValue(sheetId, column, row, value, sheetMatrix))
     ),
-  })
+  }),
+  mapProps(({ canDrop, ...rest }) => rest)
 )(Table);

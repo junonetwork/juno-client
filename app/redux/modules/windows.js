@@ -62,7 +62,7 @@ export const getDataForWindows = (state, graphFragment, windows) =>
   reduce((windowData, { id, type, }) => {
     if (type === 'sheet') {
       const {
-        graphPathMap, hints, matrix,
+        graphPathMap, hints, matrix, canDrop,
       } = getSheetMatrix(state, id, graphFragment);
 
       windowData.windows.push({
@@ -70,6 +70,7 @@ export const getDataForWindows = (state, graphFragment, windows) =>
         type,
         graphPathMap,
         data: matrix,
+        canDrop,
       });
       Object.assign(windowData.hints, hints);
 
@@ -94,15 +95,17 @@ export const getDataForWindows = (state, graphFragment, windows) =>
 
 
 export const windowsWithHints = (windows, hints) => (
-  windows.map(({ id, type, graphPathMap, data, }) => {
+  windows.map(({ id, type, graphPathMap, data, canDrop, }) => {
     if (type === 'sheet') {
       return {
         id,
         type,
         data: sheetMatrixWithHints(id, graphPathMap, hints, data),
+        canDrop,
       };
     } else if (type === 'graph') {
       return {
+        // ...rest,
         id,
         type,
         data: graphWithHints(id, hints, data),

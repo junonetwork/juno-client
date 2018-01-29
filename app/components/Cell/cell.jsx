@@ -38,7 +38,6 @@ const Cell = ({
   dragTableView, illegalDragTableView, activeHint, teaserHint,
   onClick, onMouseEnter, onKeyPress, onDragStart, onDragEnd, onDragEnter, updateValue,
 }) => (
-  // console.log('render') ||
   <td
     className={`cell ${camel2Kebab(type)} ${activeView ? 'active' : ''} ${activeHint ? 'active-hint' : ''} ${teaserHint ? 'teaser-hint' : ''} ${enhanceView ? 'enhance' : ''} ${dropTableView ? 'drop-table' : ''} ${illegalDropTableView ? 'illegal-drop-table' : ''} ${dragTableView ? 'drag-table' : ''} ${illegalDragTableView ? 'illegal-drag-table' : ''}`}
     role="gridcell"

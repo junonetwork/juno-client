@@ -56,3 +56,29 @@ export const indicesString2KeySet = (indicesString) => {
       typeof indexOrRangeB === 'number' ? indexOrRangeB : indexOrRangeB.from
     ));
 };
+
+
+export const getCellOffsetFromTable = (column, row, [[{ column: originX, row: originY, }]]) => ([
+  column - originX,
+  row - originY,
+]);
+
+
+export const isLegalDrop = (toTableXOrigin, toTableYOrigin, dragTable, tables) => {
+  const dragTableXLength = dragTable[0].length - 1;
+  const dragTableYLength = dragTable.length - 1;
+
+  return tables.reduce((isLegal, { table, }) => {
+    const tableXMin = table[0][0].column;
+    const tableXMax = table[0][0].column + (table[0].length - 1);
+    const tableYMin = table[0][0].row;
+    const tableYMax = table[0][0].row + (table.length - 1);
+
+    return isLegal && (
+      toTableXOrigin + dragTableXLength < tableXMin ||
+      toTableXOrigin > tableXMax ||
+      toTableYOrigin + dragTableYLength < tableYMin ||
+      toTableYOrigin > tableYMax
+    );
+  }, true);
+};

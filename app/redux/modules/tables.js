@@ -43,6 +43,7 @@ import {
 import {
   clearCellInput,
 }                                    from './cellInput';
+import { DROP_TABLE } from './dragTable';
 
 
 /**
@@ -239,6 +240,14 @@ export default (
           indices: action.indices,
         },
       };
+  } else if (action.type === DROP_TABLE) {
+    return {
+      ...state,
+      [action.tableId]: {
+        ...state[action.tableId],
+        collectionAddress: formatAddress(action.sheetId, action.column, action.row),
+      },
+    };
   }
 
   return state;

@@ -1,3 +1,17 @@
+import {
+  batchActions,
+}                              from 'redux-batched-actions';
+import {
+  getTableCells,
+}                              from './tables';
+import {
+  getCellOffsetFromTable,
+}                              from '../../utils/sheet';
+import {
+  makeCellActive,
+}                              from './active';
+
+
 /**
  * selectors
  */
@@ -11,7 +25,8 @@ export const canDropTable = () => false;
  */
 export const START_DRAG_TABLE = 'START_DRAG_TABLE';
 export const DRAG_TABLE = 'DRAG_TABLE';
-export const END_DRAG_TABLE = 'END_DRAG_TABLE';
+export const DROP_TABLE = 'DROP_TABLE';
+export const CANCEL_DRAG_TABLE = 'CANCEL_DRAG_TABLE';
 
 
 /**
@@ -23,8 +38,33 @@ export const startDragTable = (sheetId, tableId, column, row) => ({
 export const dragTable = (sheetId, column, row) => ({
   type: DRAG_TABLE, sheetId, column, row,
 });
-export const endDragTable = () => ({
-  type: END_DRAG_TABLE,
+export const dropTable = () => (dispatch, getState) => {
+  // TODO - move active cell to drop location
+  const state = getState();
+  const {
+    sheetId: fromSheetId, column: fromColumn, row: fromRow, tableId: fromTableId,
+  } = getDragTableFrom(state);
+  const { sheetId: toSheetId, column: toColumn, row: toRow, } = getDragTableTo(state);
+  const fromTable = getTableCells(state, fromSheetId, fromTableId).table;
+  const [xOffset, yOffset] = getCellOffsetFromTable(fromColumn, fromRow, fromTable);
+  const toTableXOrigin = Math.max(toColumn - xOffset, 0);
+  const toTableYOrigin = Math.max(toRow - yOffset, 0);
+
+  return dispatch(
+    batchActions([
+      {
+        type: DROP_TABLE,
+        sheetId: toSheetId,
+        column: toTableXOrigin,
+        row: toTableYOrigin,
+        tableId: getDragTableFrom(state).tableId,
+      },
+      makeCellActive(toSheetId, toColumn, toRow),
+    ])
+  );
+};
+export const cancelDragTable = () => ({
+  type: CANCEL_DRAG_TABLE,
 });
 
 
@@ -64,7 +104,9 @@ export default (
         row: action.row,
       },
     };
-  } else if (action.type === END_DRAG_TABLE) {
+  } else if (action.type === DROP_TABLE) {
+    return {};
+  } else if (action.type === CANCEL_DRAG_TABLE) {
     return {};
   }
 
