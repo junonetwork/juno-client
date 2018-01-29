@@ -43,7 +43,6 @@ import {
 import {
   clearCellInput,
 }                                    from './cellInput';
-import { DROP_TABLE } from './dragTable';
 
 
 /**
@@ -156,6 +155,9 @@ export const REPLACE_INDICES = 'REPLACE_INDICES';
 
 export const UPDATE_CELL_VALUE = 'UPDATE_CELL_VALUE';
 
+export const MOVE_TABLE = 'MOVE_TABLE';
+
+
 /**
  * action creators
  */
@@ -189,6 +191,10 @@ export const replaceIndices = (tableId, indices) => ({
 
 export const updateCellValue = (sheetId, column, row, value, matrix) => ({
   type: UPDATE_CELL_VALUE, sheetId, column, row, value, matrix,
+});
+
+export const moveTable = (tableId, fromSheetId, toSheetId, toColumn, toRow) => ({
+  type: MOVE_TABLE, tableId, fromSheetId, toSheetId, toColumn, toRow,
 });
 
 
@@ -240,12 +246,12 @@ export default (
           indices: action.indices,
         },
       };
-  } else if (action.type === DROP_TABLE) {
+  } else if (action.type === MOVE_TABLE) {
     return {
       ...state,
       [action.tableId]: {
         ...state[action.tableId],
-        collectionAddress: formatAddress(action.sheetId, action.column, action.row),
+        collectionAddress: formatAddress(action.toSheetId, action.toColumn, action.toRow),
       },
     };
   }

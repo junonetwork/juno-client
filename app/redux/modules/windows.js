@@ -169,7 +169,7 @@ export default (
   action
 ) => {
   if (action.type === CREATE_WINDOW) {
-    return [{ id: '1', type: 'graph', }, ...state];
+    return [{ id: '1', type: 'sheet', }, ...state];
   } else if (action.type === DELETE_WINDOW) {
     return [state[1]];
   }

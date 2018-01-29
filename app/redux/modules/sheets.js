@@ -18,6 +18,7 @@ import {
   getTableCells,
   ADD_SEARCH_COLLECTION_TABLE,
   REMOVE_TABLE,
+  MOVE_TABLE,
 }                                    from './tables';
 import {
   getCellActiveDescriptor,
@@ -356,42 +357,31 @@ export const withEnhanced = createCachedSelector(
  * @param {String} sheetId
  * @param {Object} sheetMatrix
  */
-export const withDropTable = createCachedSelector(
-  nthArg(1),
-  nthArg(2),
-  getSheetTables,
-  getDragTableFrom,
-  getDragTableTo,
-  (
-    sheetId,
-    matrix,
-    tables,
-    dragFrom,
-    dragTo
-  ) => {
-    if (
-      !dragTo ||
-      !dragFrom ||
-      dragTo.sheetId !== sheetId
-    ) {
-      return { matrix, canDrop: false, };
-    }
+export const withDropTable = (state, sheetId, matrix) => {
+  const dragFrom = getDragTableFrom(state);
+  const dragTo = getDragTableTo(state);
 
-    const fromTable = find(propEq('id', dragFrom.tableId), tables).table;
-    const { column: fromColumn, row: fromRow, tableId: fromId, } = dragFrom;
-    const [xOffset, yOffset] = getCellOffsetFromTable(fromColumn, fromRow, fromTable);
-    const toTableXOrigin = Math.max(dragTo.column - xOffset, 0);
-    const toTableYOrigin = Math.max(dragTo.row - yOffset, 0);
+  if (!dragTo || !dragFrom) {
+    return { matrix, canDrop: false, };
+  }
 
-    const canDrop = isLegalDrop(
-      toTableXOrigin,
-      toTableYOrigin,
-      fromTable,
-      reject(propEq('id', fromId), tables)
-    );
+  const fromTable = getTableCells(state, dragFrom.sheetId, dragFrom.tableId).table;
+  const { column: fromColumn, row: fromRow, tableId: fromId, } = dragFrom;
+  const [xOffset, yOffset] = getCellOffsetFromTable(fromColumn, fromRow, fromTable);
+  const toTableXOrigin = Math.max(dragTo.column - xOffset, 0);
+  const toTableYOrigin = Math.max(dragTo.row - yOffset, 0);
 
-    return pipe(
-      (_matrix) => (
+  const canDrop = isLegalDrop(
+    toTableXOrigin,
+    toTableYOrigin,
+    fromTable,
+    reject(propEq('id', fromId), getSheetTables(state, sheetId))
+  );
+
+  return pipe(
+    (_matrix) => (
+      dragTo.sheetId !== sheetId ?
+        _matrix :
         fromTable
           .filter((_, rowIdx) => toTableYOrigin + rowIdx < _matrix.length)
           .reduce((matrixWithDropTable, row, rowIdx) => (
@@ -408,32 +398,37 @@ export const withDropTable = createCachedSelector(
                 )
               ), matrixWithDropTable)
           ), _matrix)
-      ),
-      (_matrix) => updateInMatrix(
-        fromColumn,
-        fromRow,
-        canDrop ?
-          assoc('dragTableView', true) :
-          assoc('illegalDragTableView', true),
-        _matrix
-      ),
-      (_matrix) => updateInMatrix(
-        toTableXOrigin + xOffset,
-        toTableYOrigin + yOffset,
-        canDrop ?
-          assoc('dragTableView', true) :
-          assoc('illegalDragTableView', true),
-        _matrix
-      ),
-      (_matrix) => ({
-        matrix: _matrix,
-        canDrop,
-      })
-    )(matrix);
-  }
-)(
-  nthArg(1)
-);
+    ),
+    (_matrix) => (
+      dragTo.sheetId !== sheetId ?
+        _matrix :
+        updateInMatrix(
+          toTableXOrigin + xOffset,
+          toTableYOrigin + yOffset,
+          canDrop ?
+            assoc('dragTableView', true) :
+            assoc('illegalDragTableView', true),
+          _matrix
+        )
+    ),
+    (_matrix) => (
+      dragFrom.sheetId !== sheetId ?
+        _matrix :
+        updateInMatrix(
+          fromColumn,
+          fromRow,
+          canDrop ?
+            assoc('dragTableView', true) :
+            assoc('illegalDragTableView', true),
+          _matrix
+        )
+    ),
+    (_matrix) => ({
+      matrix: _matrix,
+      canDrop,
+    })
+  )(matrix);
+};
 
 
 /**
@@ -634,6 +629,19 @@ export default (
         reject(equals(action.tableId), sheet.tables) :
         sheet.tables,
     }), state);
+  } else if (action.type === MOVE_TABLE && action.fromSheetId !== action.toSheetId) {
+    // TODO - handle nested tables
+    return {
+      ...state,
+      [action.fromSheetId]: {
+        ...state[action.fromSheetId],
+        tables: reject(equals(action.tableId), state[action.fromSheetId].tables),
+      },
+      [action.toSheetId]: {
+        ...state[action.toSheetId],
+        tables: [...state[action.toSheetId].tables, action.tableId],
+      },
+    };
   }
 
   return state;

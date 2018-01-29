@@ -43,5 +43,5 @@ export default (store, epics) => {
 };
 
 
-// TODO - replace with eqProps
+// TODO - replace with propEq
 export const ofType = (type) => compose(equals(type), prop('type'));

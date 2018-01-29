@@ -2,7 +2,7 @@ import {
   batchActions,
 }                              from 'redux-batched-actions';
 import {
-  getTableCells,
+  getTableCells, moveTable,
 }                              from './tables';
 import {
   getCellOffsetFromTable,
@@ -52,13 +52,8 @@ export const dropTable = () => (dispatch, getState) => {
 
   return dispatch(
     batchActions([
-      {
-        type: DROP_TABLE,
-        sheetId: toSheetId,
-        column: toTableXOrigin,
-        row: toTableYOrigin,
-        tableId: getDragTableFrom(state).tableId,
-      },
+      { type: DROP_TABLE, },
+      moveTable(fromTableId, fromSheetId, toSheetId, toTableXOrigin, toTableYOrigin),
       makeCellActive(toSheetId, toColumn, toRow),
     ])
   );
