@@ -22,8 +22,13 @@ import {
   setCellInput,
   clearCellInput,
 }                          from '../../redux/modules/cellInput';
+import {
+  startDragTable,
+  dragTable,
+  endDragTable,
+}                          from '../../redux/modules/dragTable';
 import store, {
-  actionStreamDispatch,
+  dispatchStream,
 }                          from '../../redux/store';
 import throttle            from '../../utils/throttleAnimationFrame';
 
@@ -33,9 +38,12 @@ const { dispatch, } = store;
 const throttledTeaseCell = throttle((sheetId, column, row) => (
   dispatch(teaseCell(sheetId, column, row))
 ));
-const throttledNavigate = throttle(((sheetId, column, row, direction, steps) => (
+const throttledNavigate = throttle((sheetId, column, row, direction, steps) => (
   dispatch(navigate(sheetId, column, row, direction, steps))
-)));
+));
+const throttleDragTable = throttle((sheetId, column, row) => (
+  dispatch(dragTable(sheetId, column, row))
+));
 
 
 export default compose(
@@ -54,8 +62,15 @@ export default compose(
     clearCellInput: () => (sheetId, column, row) => (
       dispatch(clearCellInput(sheetId, column, row))
     ),
+    startDragTable: () => (sheetId, tableId, column, row) => (
+      dispatch(startDragTable(sheetId, tableId, column, row))
+    ),
+    dragTable: () => throttleDragTable,
+    endDragTable: () => () => (
+      dispatch(endDragTable())
+    ),
     updateValue: ({ sheetMatrix, }) => (sheetId, column, row, value) => (
-      actionStreamDispatch(updateCellValue(sheetId, column, row, value, sheetMatrix))
+      dispatchStream(updateCellValue(sheetId, column, row, value, sheetMatrix))
     ),
   })
 )(Table);

@@ -10,61 +10,12 @@ $cell-height: 26px;
   vertical-align: bottom;
   user-select: none;
 
-  &:focus {
-    outline: none;
-  }
-
-  // &.teaser {
-  //   box-shadow: 0px 0px 0px 1px transparentize($table-teaser, .2) inset;
-  // }
-  &.teaser-hint {
-    box-shadow: 0px 0px 0px 1px transparentize($table-teaser, .5) inset;
-  }
-  &:hover {
-    box-shadow: 0px 0px 0px 1px $table-teaser inset;
-  }
-  &.active-hint {
-    box-shadow: 0px 0px 0px 1px transparentize($table-active, .4) inset;
-  }
-  &.active {
-    box-shadow: 0px 0px 0px 1px $table-active inset;
-  }
-  // &.active {
-  //   box-shadow: 0px 0px 0px 1px transparentize($table-active, .4) inset;
-  // }
-  // &.active.enhanced {
-  //   outline: 1px solid $table-active;
-  // }
-  // &:active {
-  //   box-shadow: 0px 0px 0px 1px $table-click inset;
-  // }
-  &.node-enhance {
-    box-shadow: 0px 0px 0px 2px $b_cyan inset;
-  }
-  &.copied:before {
-    content: ' ';
-    position: absolute;
-    top: -1px;
-    bottom: 0;
-    left: -1px;
-    right: 0;
-    border: 1px dashed $b_blue;
-  }
-  &.copied.active:before {
-    border-color: lighten($b_blue, 10);
-  }
-
-  div:focus, span:focus {
-    outline: none;
-  }
-
   // type
   &.search-collection,
   &.object-collection {
     font-weight: 600;
     text-align: right;
     background-color: lighten($bg, 12);
-    cursor: move;
   }
   &.index {
     font-weight: 200;
@@ -97,6 +48,55 @@ $cell-height: 26px;
   //   outline: none;
   // }
 
+  &.teaser-hint {
+    box-shadow: 0px 0px 0px 1px transparentize($table-teaser, .5) inset;
+  }
+  &:hover {
+    box-shadow: 0px 0px 0px 1px $table-teaser inset;
+  }
+  &.active-hint {
+    box-shadow: 0px 0px 0px 1px transparentize($table-active, .4) inset;
+  }
+  &.active {
+    box-shadow: 0px 0px 0px 1px $table-active inset;
+  }
+  &.enhance {
+    box-shadow: 0px 0px 0px 2px $b_cyan inset;
+  }
+  &.drop-table {
+    background-color: transparentize($blue, .6);
+  }
+  &.illegal-drop-table {
+    background-color: transparentize($b_red, .4);
+    &.search-collection,
+    &.object-collection {
+      background-color: transparentize($b_red, .1);
+    }
+    &.predicate {
+      background-color: transparentize($b_red, .2);
+    }
+  }
+  &.drag-table {
+    background-color: transparentize($b_blue, .3);
+    cursor: move;
+  }
+  &.illegal-drag-table {
+    background-color: transparentize($b_red, 0);
+    cursor: move;
+  }
+  &.copied:before {
+    content: ' ';
+    position: absolute;
+    top: -1px;
+    bottom: 0;
+    left: -1px;
+    right: 0;
+    border: 1px dashed $b_blue;
+  }
+  &.copied.active:before {
+    border-color: lighten($b_blue, 10);
+  }
+
   // body
   .cell-body {
     padding: 6px 18px 2px 8px;
@@ -125,6 +125,10 @@ $cell-height: 26px;
   .edit-value:focus {
     outline: none;
   }
+
+  &:focus,
+  div:focus,
+  span:focus {
+    outline: none;
+  }
 }
-
-

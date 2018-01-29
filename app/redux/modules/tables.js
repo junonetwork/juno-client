@@ -96,6 +96,7 @@ export const getTableCells = createCachedSelector(
     return {
       column: collectionColumn,
       row: collectionRow,
+      id: tableId,
       table: expandIndicesKeySet(indices).reduce((matrix, index, rowIdx) => {
         // remaining rows [[index, object, object, ...], ...]
         matrix.push(predicates.reduce((matrixRow, _, columnIdx) => {

@@ -23,5 +23,5 @@ const store = createStore(
 );
 
 
-export const actionStreamDispatch = createActionStream(store, epics);
+export const dispatchStream = createActionStream(store, epics);
 export default store;

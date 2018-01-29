@@ -43,8 +43,16 @@ store.dispatch(
       formatTableId(sheetId, 0, 0),
       formatAddress(sheetId, 0, 0),
       'Person',
-      ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling', 'schema:sibling'],
-      [{ from: 1, to: 3, }, 0, 1, 0, 10]
+      ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling'],
+      [{ from: 1, to: 3, }, 1, 3, 10]
+    ),
+    addSearchCollectionTable(
+      sheetId,
+      formatTableId(sheetId, 1, 10),
+      formatAddress(sheetId, 1, 10),
+      'Person',
+      ['schema:name', 'schema:birthPlace'],
+      [{ from: 0, to: 2, }]
     ),
     makeCellActive(sheetId, 0, 0),
     // second sheet

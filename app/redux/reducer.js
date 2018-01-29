@@ -5,6 +5,7 @@ import tables              from './modules/tables';
 import active              from './modules/active';
 import teaser              from './modules/teaser';
 import enhanced            from './modules/enhanced';
+import dragTable           from './modules/dragTable';
 import cellInput           from './modules/cellInput';
 import windows             from './modules/windows';
 
@@ -16,6 +17,7 @@ export default combineReducers({
   active,
   teaser,
   enhanced,
+  dragTable,
   cellInput,
   windows,
 });

@@ -45,14 +45,23 @@ export default compose(
   setDisplayName('CellContainer'),
   pure,
   withHandlers({
+    onMouseEnter: ({ sheetId, column, row, teaseCell, }) => () => {
+      teaseCell(sheetId, column, row);
+    },
     onClick: ({ sheetId, column, row, makeCellActive, }) => (e) => {
       e.preventDefault();
       e.stopPropagation();
 
       makeCellActive(sheetId, column, row);
     },
-    onMouseEnter: ({ sheetId, column, row, teaseCell, }) => () => {
-      teaseCell(sheetId, column, row);
+    onDragStart: ({ sheetId, tableId, column, row, startDragTable, }) => () => {
+      startDragTable(sheetId, tableId, column, row);
+    },
+    onDragEnter: ({ sheetId, column, row, dragTable, }) => () => {
+      dragTable(sheetId, column, row);
+    },
+    onDragEnd: ({ endDragTable, }) => () => {
+      endDragTable();
     },
     onKeyPress: ({ sheetId, column, row, cellInput, setCellInput, }) => (e) => {
       e.preventDefault();

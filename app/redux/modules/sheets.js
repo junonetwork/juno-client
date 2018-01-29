@@ -10,6 +10,8 @@ import {
   reject,
   equals,
   pathOr,
+  find,
+  propEq,
 }                                    from 'ramda';
 import createCachedSelector          from 're-reselect';
 import {
@@ -26,6 +28,10 @@ import {
 import {
   getCellInput,
 }                                    from './cellInput';
+import {
+  getDragTableFrom,
+  getDragTableTo,
+}                                    from './dragTable';
 import {
   materializeSearchCollection,
   materializeIndex,
@@ -341,6 +347,113 @@ export const withEnhanced = createCachedSelector(
 );
 
 
+const getCellOffsetFromTable = (column, row, [[{ column: originX, row: originY, }]]) => ([
+  column - originX,
+  row - originY,
+]);
+
+
+const isLegalDrop = (toTableXOrigin, toTableYOrigin, dragTable, tables) => {
+  const dragTableXLength = dragTable[0].length - 1;
+  const dragTableYLength = dragTable.length - 1;
+
+  return tables.reduce((isLegal, { table, }) => {
+    const tableXMin = table[0][0].column;
+    const tableXMax = table[0][0].column + (table[0].length - 1);
+    const tableYMin = table[0][0].row;
+    const tableYMax = table[0][0].row + (table.length - 1);
+
+    return isLegal && (
+      toTableXOrigin + dragTableXLength < tableXMin ||
+      toTableXOrigin > tableXMax ||
+      toTableYOrigin + dragTableYLength < tableYMin ||
+      toTableYOrigin > tableYMax
+    );
+  }, true);
+};
+
+
+/**
+ * @param {Object} state
+ * @param {String} sheetId
+ * @param {Object} sheetMatrix
+ */
+export const withDropTable = createCachedSelector(
+  nthArg(1),
+  nthArg(2),
+  getSheetTables,
+  getDragTableFrom,
+  getDragTableTo,
+  (
+    sheetId,
+    matrix,
+    tables,
+    dragFrom,
+    dragTo
+  ) => {
+    if (
+      !dragTo ||
+      !dragFrom ||
+      dragTo.sheetId !== sheetId
+    ) {
+      return matrix;
+    }
+
+    const dragTable = find(propEq('id', dragFrom.tableId), tables).table;
+    const { column: fromColumn, row: fromRow, tableId: fromId, } = dragFrom;
+    const [xOffset, yOffset] = getCellOffsetFromTable(fromColumn, fromRow, dragTable);
+    const toTableXOrigin = Math.max(dragTo.column - xOffset, 0);
+    const toTableYOrigin = Math.max(dragTo.row - yOffset, 0);
+
+    const legalDrop = isLegalDrop(
+      toTableXOrigin,
+      toTableYOrigin,
+      dragTable,
+      reject(propEq('id', fromId), tables)
+    );
+
+    return pipe(
+      (_matrix) => (
+        dragTable
+          .filter((_, rowIdx) => toTableYOrigin + rowIdx < _matrix.length)
+          .reduce((matrixWithDropTable, row, rowIdx) => (
+            row
+              .filter((_, columnIdx) => toTableXOrigin + columnIdx < _matrix[0].length)
+              .reduce((_matrixWithDropTable, _, columnIdx) => (
+                updateInMatrix(
+                  toTableXOrigin + columnIdx,
+                  toTableYOrigin + rowIdx,
+                  legalDrop ?
+                    assoc('dropTableView', true) :
+                    assoc('illegalDropTableView', true),
+                  _matrixWithDropTable
+                )
+              ), matrixWithDropTable)
+          ), _matrix)
+      ),
+      (_matrix) => updateInMatrix(
+        fromColumn,
+        fromRow,
+        legalDrop ?
+          assoc('dragTableView', true) :
+          assoc('illegalDragTableView', true),
+        _matrix
+      ),
+      (_matrix) => updateInMatrix(
+        toTableXOrigin + xOffset,
+        toTableYOrigin + yOffset,
+        legalDrop ?
+          assoc('dragTableView', true) :
+          assoc('illegalDragTableView', true),
+        _matrix
+      )
+    )(matrix);
+  }
+)(
+  nthArg(1)
+);
+
+
 /**
  * @param {Object} state
  * @param {String} sheetId
@@ -383,6 +496,13 @@ export const getSheetMatrix = pipe(
     graphPathMap,
     hints,
     matrix: withEnhanced(state, sheetId, matrix),
+  }),
+  ({ state, sheetId, graphPathMap, hints, matrix, }) => ({
+    state,
+    sheetId,
+    graphPathMap,
+    hints,
+    matrix: withDropTable(state, sheetId, matrix),
   }),
   ({ state, sheetId, graphPathMap, hints, matrix, }) => ({
     graphPathMap,
