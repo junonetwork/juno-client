@@ -15,6 +15,7 @@ import {
   values,
   reject,
   equals,
+  omit,
 }                                    from 'ramda';
 import createCachedSelector          from 're-reselect';
 import {
@@ -40,6 +41,7 @@ import {
  */
 const makeNode = (id, metadata) => ({ id, metadata, });
 const makeEdge = (source, target, metadata) => ({ source, target, metadata, });
+const createGraph = () => ({ tables: [], });
 
 
 /**
@@ -240,10 +242,10 @@ export const withTeaserHint = createCachedSelector(
         if (equals(node.metadata.absolutePath, teaserAbsolutePath)) {
           // NOTE - d3 mutates jgf and requires that that reference be stable
           // immutably updating node breaks d3's layout algorithm
-          node.teaserHint = true;
+          node.teaserHint = true; // eslint-disable-line no-param-reassign
           return node;
         } else if (node.teaserHint === true) {
-          node.teaserHint = undefined;
+          node.teaserHint = undefined; // eslint-disable-line no-param-reassign
           return node;
         }
 
@@ -273,10 +275,10 @@ export const withActiveHint = createCachedSelector(
         if (equals(node.metadata.absolutePath, activeAbsolutePath)) {
           // NOTE - d3 mutates jgf and requires that that reference be stable
           // immutably updating node breaks d3's layout algorithm
-          node.activeHint = true;
+          node.activeHint = true; // eslint-disable-line no-param-reassign
           return node;
         } else if (node.activeHint === true) {
-          node.activeHint = undefined;
+          node.activeHint = undefined; // eslint-disable-line no-param-reassign
           return node;
         }
 
@@ -306,17 +308,38 @@ export const graphWithHints = (
 
 
 /**
+ * constants
+ */
+export const ADD_GRAPH = 'ADD_GRAPH';
+export const REMOVE_GRAPH = 'REMOVE_GRAPH';
+
+
+/**
+ * action creators
+ */
+export const addGraph = (graphId) => ({
+  type: ADD_GRAPH, graphId,
+});
+export const removeGraph = (graphId) => ({
+  type: REMOVE_GRAPH, graphId,
+});
+
+
+/**
  * reducer
  */
 export default (
-  state = {
-    1: {
-      tables: ['0-0-0'],
-    },
-  },
+  state = {},
   action
 ) => {
-  if (action.type === REMOVE_TABLE) {
+  if (action.type === ADD_GRAPH) {
+    return {
+      ...state,
+      [action.graphId]: createGraph(),
+    };
+  } else if (action.type === REMOVE_GRAPH) {
+    return omit([action.graphId], state);
+  } else if (action.type === REMOVE_TABLE) {
     // TODO - remove nested tables
     return map((graph) => ({
       ...graph,
@@ -325,6 +348,10 @@ export default (
         graph.tables,
     }), state);
   }
+
+  // TODO - add/remove/move tables
+  // there is a lot of duplication between graphs and sheets.  the relationship bt/ tables graphs/sheets
+  // could move to windows modules, standardizing on (windowId), rather than sheetId/graphId
 
   return state;
 };

@@ -12,6 +12,9 @@ import {
   addSheet,
 }                             from './redux/modules/sheets';
 import {
+  addGraph,
+}                             from './redux/modules/graphs';
+import {
   addSearchCollectionTable,
 }                             from './redux/modules/tables';
 import {
@@ -54,8 +57,8 @@ store.dispatch(
       ['schema:name', 'schema:birthPlace'],
       [{ from: 0, to: 2, }]
     ),
-    makeCellActive(sheetId, 0, 0),
-    // second sheet
+    // second window
+    // addGraph('1'),
     addSheet('1', 40, 30),
     addSearchCollectionTable(
       '1',
@@ -65,6 +68,7 @@ store.dispatch(
       ['schema:name'],
       [{ from: 0, to: 1, }]
     ),
+    makeCellActive(sheetId, 0, 0),
   ], 'INIT_SHEET')
 );
 
