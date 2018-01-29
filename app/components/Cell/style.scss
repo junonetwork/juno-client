@@ -78,10 +78,12 @@ $cell-height: 26px;
   }
   &.drag-table {
     background-color: transparentize($b_blue, .3);
+    box-shadow: none;
     cursor: move;
   }
   &.illegal-drag-table {
     background-color: transparentize($b_red, 0);
+    box-shadow: none;
     cursor: move;
   }
   &.copied:before {

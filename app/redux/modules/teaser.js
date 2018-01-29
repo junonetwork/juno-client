@@ -1,6 +1,9 @@
 import {
   path,
 }                             from 'ramda';
+import {
+  START_DRAG_TABLE,
+}                             from './dragTable';
 
 
 /**
@@ -38,6 +41,8 @@ export default (state = {}, action) => {
   if (action.type === SET_TEASER) {
     return action.teaserDescriptor;
   } else if (action.type === CLEAR_TEASER) {
+    return {};
+  } else if (action.type === START_DRAG_TABLE) {
     return {};
   }
 

@@ -32,20 +32,7 @@ export const endDragTable = () => ({
  * reducer
  */
 export default (
-  // state = {},
-  state = {
-    // from: {
-    //   sheetId: "0",
-    //   tableId: "0-0-0",
-    //   column: 3,
-    //   row: 3,
-    // },
-    // to: {
-    //   sheetId: '0',
-    //   column: 1,
-    //   row: 7,
-    // },
-  },
+  state = {},
   action
 ) => {
   if (action.type === START_DRAG_TABLE) {
