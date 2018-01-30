@@ -65,6 +65,13 @@ $cell-height: 26px;
   }
   &.drop-table {
     background-color: transparentize($blue, .6);
+    &.search-collection,
+    &.object-collection {
+      background-color: transparentize($blue, .2);
+    }
+    &.predicate {
+      background-color: transparentize($blue, .3);
+    }
   }
   &.illegal-drop-table {
     background-color: transparentize($b_red, .4);
