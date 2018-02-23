@@ -29,9 +29,10 @@ import {
   dropTable,
   cancelDragTable,
 }                          from '../../redux/modules/dragTable';
-import store, {
-  dispatchStream,
-}                          from '../../redux/store';
+import store               from '../../redux/store';
+import {
+  streamAction,
+}                          from '../../redux/actionStream';
 import throttle            from '../../utils/throttleAnimationFrame';
 
 const { dispatch, } = store;
@@ -76,7 +77,7 @@ export default compose(
       }
     },
     updateValue: ({ sheetMatrix, }) => (sheetId, column, row, value) => (
-      dispatchStream(updateCellValue(sheetId, column, row, value, sheetMatrix))
+      dispatch(streamAction(updateCellValue(sheetId, column, row, value, sheetMatrix)))
     ),
   }),
   mapProps(({ canDrop, ...rest }) => rest)

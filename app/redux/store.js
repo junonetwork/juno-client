@@ -10,18 +10,14 @@ import {
   enableBatching,
 }                             from 'redux-batched-actions';
 import reducer                from './reducer';
-import createActionStream     from './actionStream';
+import actionStream           from './actionStream';
 import epics                  from './epics';
 
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-const store = createStore(
+export default createStore(
   enableBatching(reducer),
   composeEnhancers(
-    applyMiddleware(thunk)
+    applyMiddleware(thunk, actionStream(epics))
   )
 );
-
-
-export const dispatchStream = createActionStream(store, epics);
-export default store;

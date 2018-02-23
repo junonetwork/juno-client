@@ -2,6 +2,7 @@ import {
   nthArg,
   equals,
   omit,
+  propEq,
 }                                    from 'ramda';
 import {
   filter as filterStream,
@@ -28,9 +29,6 @@ import {
   getUpCell,
   getLeftCell,
 }                                    from '../../utils/cell';
-import {
-  ofType,
-}                                    from '../../redux/actionStream';
 // import {
 //   deleteGraphValue,
 //   updateGraphValue,
@@ -263,7 +261,7 @@ export default (
 /**
  * epics
  */
-const editValueCellEpic = (store) => (action$) => (
+const editValueCellEpic = (getState) => (action$) => (
   action$.pipe(
     mergeMap(({ column, row, value, matrix, }) => {
       const { type, tableId, } = matrix[row][column];
@@ -287,7 +285,7 @@ const editValueCellEpic = (store) => (action$) => (
         return of([replaceSearchCollectionSearch(tableId, value), clearCellInput()]);
       } else if (type === 'predicate' && value === '') {
         // delete column
-        const { collectionAddress, predicates, } = getTable(store.getState(), tableId);
+        const { collectionAddress, predicates, } = getTable(getState(), tableId);
         const indexOfDeleteColumn = column - destructureAddress(collectionAddress).column - 1;
 
         return of([
@@ -305,7 +303,7 @@ const editValueCellEpic = (store) => (action$) => (
           .pipe(
             // TODO - handle case of adding non-existent uri
             map((uri = {}) => {
-              const { collectionAddress, predicates, } = getTable(store.getState(), tableId);
+              const { collectionAddress, predicates, } = getTable(getState(), tableId);
               const indexOfReplaceColumn = column -
                 destructureAddress(collectionAddress).column - 1;
 
@@ -320,7 +318,7 @@ const editValueCellEpic = (store) => (action$) => (
           );
       } else if (type === 'index' && value === '') {
         // delete row
-        const { collectionAddress, indices, } = getTable(store.getState(), tableId);
+        const { collectionAddress, indices, } = getTable(getState(), tableId);
         const indexOfDeleteRow = row - destructureAddress(collectionAddress).row - 1;
         // TODO - collapse indicesKeySet
         const newIndices = expandIndicesKeySet(indices)
@@ -329,7 +327,7 @@ const editValueCellEpic = (store) => (action$) => (
         return of([replaceIndices(tableId, newIndices), clearCellInput()]);
       } else if (type === 'index') {
         // update row
-        const { collectionAddress, indices, } = getTable(store.getState(), tableId);
+        const { collectionAddress, indices, } = getTable(getState(), tableId);
         const indexOfReplaceRow = row - destructureAddress(collectionAddress).row - 1;
         if (Number.isNaN(parseInt(value, 10))) {
           return of(clearCellInput());
@@ -354,7 +352,7 @@ const editValueCellEpic = (store) => (action$) => (
   )
 );
 
-const editEmptyCellEpic = (store) => (action$) => (
+const editEmptyCellEpic = (getState) => (action$) => (
   action$.pipe(
     filterStream(({ value, }) => value !== ''),
     mergeMap(({ sheetId, column, row, value, matrix, }) => {
@@ -367,7 +365,7 @@ const editEmptyCellEpic = (store) => (action$) => (
           upCell.type === 'index'
         )
       ) {
-        const { indices, } = getTable(store.getState(), upCell.tableId);
+        const { indices, } = getTable(getState.getState(), upCell.tableId);
         if (Number.isNaN(parseInt(value, 10))) {
           return of(clearCellInput());
         }
@@ -394,7 +392,7 @@ const editEmptyCellEpic = (store) => (action$) => (
             // TODO - handle case of adding non-existent uri
             map((uri = {}) => {
               // TODO - store label, for cases when predicate label doesn't resolve to anything
-              const { predicates, } = getTable(store.getState(), leftCell.tableId);
+              const { predicates, } = getTable(getState.getState(), leftCell.tableId);
               return [
                 replacePredicates(
                   leftCell.tableId,
@@ -427,17 +425,17 @@ const editEmptyCellEpic = (store) => (action$) => (
 );
 
 
-export const editCellEpic = (store) => (action$) => (
+export const editCellEpic = (getState) => (action$) => (
   action$.pipe(
-    filterStream(ofType(UPDATE_CELL_VALUE)),
+    filterStream(propEq('type', UPDATE_CELL_VALUE)),
     (editCellAction$) => {
       const [editEmptyCellAction$, editValueCellAction$] = partition(
         ({ column, row, matrix, }) => matrix[row][column].type === 'empty'
       )(editCellAction$);
 
       return merge(
-        editEmptyCellEpic(store)(editEmptyCellAction$),
-        editValueCellEpic(store)(editValueCellAction$)
+        editEmptyCellEpic(getState)(editEmptyCellAction$),
+        editValueCellEpic(getState)(editValueCellAction$)
       );
     }
   )

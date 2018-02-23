@@ -15,33 +15,38 @@ import {
 }                                 from 'rxjs/operators';
 
 
-export default (store, epics) => {
+export const STREAM = '@__STREAM';
+export const streamAction = (action) => (action.STREAM = true, action);
+
+export default (epics) => ({ dispatch, getState }) => {
+  console.log('INIT');
   const { handler, stream, } = createEventHandlerWithConfig({
     fromESObservable: from,
     toESObservable: identity,
   })();
 
-  // TODO - should take store.getState.bind(store), similar to redux-thunk signature
   merge(
-    ...epics.map((epic) => stream.pipe(epic(store)))
+    ...epics.map((epic) => stream.pipe(epic(getState)))
   )
     .pipe(catchError((error, caught) => {
-      console.error('Uncaught error on the action stream:', error);
+      console.error('Uncaught error on the action stream middleware:', error);
       return caught;
     }))
     .subscribe({
       next: (action) => {
         if (Array.isArray(action)) {
-          store.dispatch(batchActions(action, 'ACTION_STREAM'));
-        } else if (action !== null && action !== undefined) {
-          store.dispatch(action);
+          dispatch(batchActions(action, 'ACTION_STREAM'));
+        } else {
+          dispatch(action);
         }
       },
     });
 
-  return handler;
+  return (next) => (action) => {
+    if (action.STREAM) {
+      return handler(action);
+    }
+
+    return next(action);
+  };
 };
-
-
-// TODO - replace with propEq
-export const ofType = (type) => compose(equals(type), prop('type'));

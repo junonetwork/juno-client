@@ -1,3 +1,6 @@
+import {
+  propEq,
+}                        from 'ramda';
 import { from }          from 'rxjs/observable/from';
 import { of }            from 'rxjs/observable/of';
 import {
@@ -7,9 +10,6 @@ import {
   catchError,
 }                        from 'rxjs/operators';
 import model             from '../../falcor/model';
-import {
-  ofType,
-}                        from '../../redux/actionStream';
 
 
 /**
@@ -42,7 +42,7 @@ export const deleteGraphValue = (path) =>
  */
 export const updateGraphValueEpic = () => (action$) => (
   action$.pipe(
-    filter(ofType(UPDATE_GRAPH_VALUE)),
+    filter(propEq('type', UPDATE_GRAPH_VALUE)),
     mergeMap((action) => (
       from(model.setValue(action.path, action.value)).pipe(
         mapTo({ type: UPDATE_GRAPH_VALUE_SUCCESS, }),
@@ -59,7 +59,7 @@ export const updateGraphValueEpic = () => (action$) => (
 
 export const deleteGraphValueEpic = () => (action$) => (
   action$.pipe(
-    filter(ofType(DELETE_GRAPH_VALUE)),
+    filter(propEq('type', DELETE_GRAPH_VALUE)),
     mergeMap((action) => (
       // TODO - set to null? or call delete?
       from(model.setValue(action.path, null))
