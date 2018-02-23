@@ -18,8 +18,7 @@ import {
 export const STREAM = '@__STREAM';
 export const streamAction = (action) => (action.STREAM = true, action);
 
-export default (epics) => ({ dispatch, getState }) => {
-  console.log('INIT');
+export default (epics) => ({ dispatch, getState }) => (next) => {
   const { handler, stream, } = createEventHandlerWithConfig({
     fromESObservable: from,
     toESObservable: identity,
@@ -42,7 +41,7 @@ export default (epics) => ({ dispatch, getState }) => {
       },
     });
 
-  return (next) => (action) => {
+  return (action) => {
     if (action.STREAM) {
       return handler(action);
     }
