@@ -35,7 +35,7 @@ export default (epics) => ({ dispatch, getState }) => {
     .subscribe({
       next: (action) => {
         if (Array.isArray(action)) {
-          dispatch(batchActions(action, 'ACTION_STREAM'));
+          dispatch(batchActions(action, action.map(prop('type')).join('::')));
         } else {
           dispatch(action);
         }
