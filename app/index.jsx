@@ -24,7 +24,7 @@ import {
   formatAddress,
 }                             from './utils/cell';
 import {
-  formatTableId,
+  generateTableId,
 }                             from './utils/table';
 import                             './style.scss';
 
@@ -43,7 +43,7 @@ store.dispatch(
     addSheet(sheetId, 40, 30),
     addSearchCollectionTable(
       sheetId,
-      formatTableId(sheetId, 0, 0),
+      generateTableId(),
       formatAddress(sheetId, 0, 0),
       'Person',
       ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling'],
@@ -51,7 +51,7 @@ store.dispatch(
     ),
     addSearchCollectionTable(
       sheetId,
-      formatTableId(sheetId, 1, 10),
+      generateTableId(),
       formatAddress(sheetId, 1, 10),
       'Person',
       ['schema:name', 'schema:birthPlace'],
@@ -62,7 +62,7 @@ store.dispatch(
     addSheet('1', 40, 30),
     addSearchCollectionTable(
       '1',
-      formatTableId('1', 0, 0),
+      generateTableId(),
       formatAddress('1', 0, 0),
       'Person',
       ['schema:name'],

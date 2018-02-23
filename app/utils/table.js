@@ -1,5 +1,12 @@
-// TODO - this will have to change, as tables can move
-export const formatTableId = (sheetId, column, row) => `${sheetId}-${column}-${row}`;
+// TODO - unless there's a way to clear out the memoized selectors cache, this will lead to a slow memory leak when tables are deleted.
+// one possible solution would be to recycle ids for deleted tables
+// or alternatively exposing cache deletions to memoized selectors
+export const generateTableId = (() => {
+  let _idx = 0;
+  return () => {
+    return _idx++;
+  };
+})();
 
 export const setInArray = (index, value, array) => ([
   ...array.slice(0, index),

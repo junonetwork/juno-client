@@ -35,7 +35,7 @@ import {
 // }                                    from '../../redux/modules/falcor';
 import model                         from '../../falcor/model';
 import {
-  formatTableId,
+  generateTableId,
   setInArray,
 }                                    from '../../utils/table';
 import {
@@ -408,7 +408,7 @@ const editEmptyCellEpic = (getState) => (action$) => (
       return of([
         addSearchCollectionTable(
           sheetId,
-          formatTableId(sheetId, column, row),
+          generateTableId(),
           formatAddress(sheetId, column, row),
           value,
           ['skos:prefLabel'],

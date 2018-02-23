@@ -32,7 +32,7 @@ import {
   formatAddress,
 }                             from '../../app/utils/cell';
 import {
-  formatTableId,
+  generateTableId,
 }                             from '../../app/utils/table';
 import {
   runPerfTests,
@@ -49,7 +49,7 @@ const initStore = () => {
   );
 
   const sheetId = '0';
-  const tableId = formatTableId(sheetId, 0, 0);
+  const tableId = generateTableId();
   const collectionAddress = formatAddress(sheetId, 0, 0);
 
   store.dispatch(addSheet(0, 50, 500));
