@@ -410,7 +410,7 @@ const editEmptyCellEpic = (getState) => (action$) => (
           sheetId,
           formatTableId(sheetId, column, row),
           formatAddress(sheetId, column, row),
-          `schema:${value}`,
+          value,
           ['skos:prefLabel'],
           [0]
         ),
