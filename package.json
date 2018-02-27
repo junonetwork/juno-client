@@ -11,7 +11,7 @@
     "dev": "node server.js",
     "lint": "eslint ./app/",
     "test": "node test/",
-    "build": "rm -r dist/ && parcel build app/index.html",
+    "build": "rm -r dist/ && parcel build app/index.html --public-url ./",
     "validate": "npm run lint && npm run test && npm run build"
   },
   "author": "James Conkling <james.lane.conkling@gmail.com> jameslaneconkling.github.io",
