@@ -4,14 +4,21 @@ services:
   airplane-glue:
     image: airplane-glue:latest
     depends_on:
-        - middlepacco
+        - airplane-glue-router
+        - adapter
     ports:
       - "80:80"
 
-  middlepacco:
-    image: middlepacco:latest
+  airplane-glue-router:
+    image: airplane-glue-router:latest
     environment:
       NODE_ENV: production
     volumes:
       - ./seed.n3:/usr/src/seed.n3
     restart: always
+
+  adapter:
+    image: middlepack-adapter:latest
+    restart: always
+    ports:
+      - "3030:3000"
