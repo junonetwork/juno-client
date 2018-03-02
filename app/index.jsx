@@ -3,29 +3,8 @@
 import React                  from 'react';
 import { render }             from 'react-dom';
 import { Provider }           from 'react-redux';
-import {
-  batchActions,
-}                             from 'redux-batched-actions';
-import store                  from './redux/store';
-import App                    from './containers/AppContainer';
-import {
-  addSheet,
-}                             from './redux/modules/sheets';
-import {
-  addGraph,
-}                             from './redux/modules/graphs';
-import {
-  addSearchCollectionTable,
-}                             from './redux/modules/tables';
-import {
-  makeCellActive,
-}                             from './redux/modules/active';
-import {
-  formatAddress,
-}                             from './utils/cell';
-import {
-  generateTableId,
-}                             from './utils/table';
+/* import App                    from './containers/AppContainer';*/
+/* import store                  from './redux/store';*/
 import                             './style.scss';
 
 
@@ -34,47 +13,35 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 
-// store.subscribe(() => console.log('store emit'));
-
-const sheetId = '0';
-
-store.dispatch(
-  batchActions([
-    addSheet(sheetId, 40, 30),
-    addSearchCollectionTable(
-      sheetId,
-      generateTableId(),
-      formatAddress(sheetId, 0, 0),
-      'Person',
-      ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling'],
-      [{ from: 1, to: 3, }, 1, 3, 10]
-    ),
-    addSearchCollectionTable(
-      sheetId,
-      generateTableId(),
-      formatAddress(sheetId, 1, 10),
-      'Person',
-      ['schema:name', 'schema:birthPlace'],
-      [{ from: 0, to: 2, }]
-    ),
-    // second window
-    // addGraph('1'),
-    addSheet('1', 40, 30),
-    addSearchCollectionTable(
-      '1',
-      generateTableId(),
-      formatAddress('1', 0, 0),
-      'Person',
-      ['schema:name'],
-      [{ from: 0, to: 1, }]
-    ),
-    makeCellActive(sheetId, 0, 0),
-  ], 'INIT_SHEET')
-);
+console.log('hotreload index.jsx');
+window.counter = window.counter || 0;
+if (window.counter++ > 20) {
+  debugger;
+}
 
 
-render((
-  <Provider store={store}>
-    <App />
-  </Provider>
-), document.getElementById('app'));
+const renderApp = () => {
+  const store = require('./redux/store').default;
+  const App = require('./containers/AppContainer').default;
+
+  render((
+    <Provider store={store}>
+      <App />
+    </Provider>
+  ), document.getElementById('app'));
+};
+
+
+if (module.hot) {
+  module.hot.accept('./containers/AppContainer', () => {
+    // module.hot.accept throws an error before callback runs
+    // which aborts hot reload
+    // but if reload succeeds, index.jsx is reloaded in a infinite loop, causing browser to freeze
+    // probably b/c index.jsx imports redux files
+    console.log('hot reload app');
+    setTimeout(renderApp);
+  });
+}
+
+
+renderApp();
