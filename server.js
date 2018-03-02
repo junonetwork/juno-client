@@ -6,13 +6,16 @@ const proxy = require('http-proxy-middleware');
 const bundler = new Bundler('app/index.html');
 const app = express();
 
+const PORT = process.env.PORT || 4000;
+const DEV_PROXY = process.env.DEV_PROXY || '';
+
 app.use(
   '/api',
   proxy({
-    target: 'http://localhost',
+    target: `http://localhost:${DEV_PROXY}`,
   })
 );
 
 app.use(bundler.middleware());
 
-app.listen(parseInt(process.env.PORT, 10) || 4000);
+app.listen(PORT);
