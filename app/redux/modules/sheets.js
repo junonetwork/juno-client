@@ -10,7 +10,6 @@ import {
   reject,
   equals,
   pathOr,
-  find,
   propEq,
 }                                    from 'ramda';
 import createCachedSelector          from 're-reselect';
@@ -38,6 +37,8 @@ import {
   materializeIndex,
   materializePredicate,
   materializeObject,
+}                                    from '../../utils/materializeCell';
+import {
   createEmpty,
 }                                    from '../../utils/cell';
 import {
