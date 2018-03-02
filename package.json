@@ -1,6 +1,6 @@
 {
   "name": "airplane-glue",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "holds airplanes together",
   "repository": {
     "type": "git",
