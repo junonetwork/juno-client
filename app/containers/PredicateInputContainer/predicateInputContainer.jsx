@@ -96,11 +96,11 @@ export default compose(
   })),
   withHandlers({
     addPredicates: ({ existingPredicates, type, predicateIdx, submit, }) => (newPredicates) => {
-      if (type === 'predicate') {
+      if (newPredicates.length > 0 && type === 'predicate') {
         const [firstPredicate, ...restPredicates] = newPredicates;
         // cell is predicate type - replace existing predicate w/ first new predicate and append rest
         submit([...update(predicateIdx, firstPredicate, existingPredicates), ...restPredicates]);
-      } else {
+      } else if (newPredicates.length > 0) {
         // cell is empty type - append all new predicates
         submit([...existingPredicates, ...newPredicates]);
       }
