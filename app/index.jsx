@@ -13,12 +13,14 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 
-console.log('hotreload index.jsx');
-window.counter = window.counter || 0;
-if (window.counter++ > 20) {
-  debugger;
-}
-
+/*
+ * console.log('hotreload index.jsx');
+ * window.counter = window.counter || 0;
+ * if (window.counter++ > 20) {
+ *   debugger;
+ * }
+ *
+ */
 
 const renderApp = () => {
   const store = require('./redux/store').default;

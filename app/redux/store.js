@@ -43,7 +43,7 @@ if (!window.store) {
     )
   );
 
-  window.store.subscribe(() => console.log('store emit'));
+  // window.store.subscribe(() => console.log('store emit'));
 
   const sheetId = '0';
 
