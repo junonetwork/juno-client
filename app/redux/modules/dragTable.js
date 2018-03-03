@@ -17,7 +17,6 @@ import {
  */
 export const getDragTableFrom = (state) => state.dragTable.from;
 export const getDragTableTo = (state) => state.dragTable.to;
-export const canDropTable = () => false;
 
 
 /**
@@ -74,6 +73,12 @@ export default (
     return {
       table: action.table,
       from: {
+        sheetId: action.sheetId,
+        tableId: action.tableId,
+        column: action.column,
+        row: action.row,
+      },
+      to: {
         sheetId: action.sheetId,
         tableId: action.tableId,
         column: action.column,

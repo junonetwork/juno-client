@@ -10,7 +10,7 @@ import {
   reject,
   equals,
   pathOr,
-  find,
+  path,
   propEq,
 }                                    from 'ramda';
 import createCachedSelector          from 're-reselect';
@@ -361,7 +361,10 @@ export const withDropTable = (state, sheetId, matrix) => {
   const dragFrom = getDragTableFrom(state);
   const dragTo = getDragTableTo(state);
 
-  if (!dragTo || !dragFrom) {
+  if (
+    sheetId !== path(['sheetId'], dragTo) &&
+    sheetId !== path(['sheetId'], dragFrom)
+  ) {
     return { matrix, canDrop: false, };
   }
 
@@ -375,7 +378,7 @@ export const withDropTable = (state, sheetId, matrix) => {
     toTableXOrigin,
     toTableYOrigin,
     fromTable,
-    reject(propEq('id', fromId), getSheetTables(state, sheetId))
+    reject(propEq('id', fromId), getSheetTables(state, dragTo.sheetId))
   );
 
   return pipe(
