@@ -1,7 +1,7 @@
 @import '../../styles/palette';
 
 
-.predicate-input {
+.tooltip-input {
   width: 120px;
   height: 100%;
   position: relative;
@@ -18,7 +18,7 @@
     transform: translateY(-50%);
   }
 
-  .predicate-input-content {
+  .tooltip-input-content {
     position: absolute;
     top: 25px;
     width: 100%;
@@ -30,6 +30,8 @@
     li {
       color: $b_white;
       border-bottom: 1px solid lighten($b_black, 10);
+      width: 100%;
+      padding: 4px 7px;
 
       &:last-child {
         border-bottom: 1px solid transparent;
@@ -47,15 +49,9 @@
       &.selected {
         color: $b_yellow;
       }
-
-      button {
-        height: 100%;
-        width: 100%;
-        padding: 4px 7px;
-      }
     }
 
-    ul.empty-predicate-list {
+    ul.tooltip-empty-list {
       padding: 4px 6px;
       color: $white;
       text-align: center;

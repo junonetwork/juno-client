@@ -16,11 +16,11 @@ import {
   compose,
   withHandlers,
   withProps,
+  mapProps,
   withStateHandlers,
 }                            from 'recompose';
 import { batchActions }      from 'redux-batched-actions';
-import PredicateInput        from '../../components/PredicateInput';
-import withHotKeys           from '../../hoc/withHotKeys';
+import CellToolTip           from '../CellTooltipContainer';
 import mapPropsStream        from '../../falcor/mapPropsStream';
 import connectFalcor         from '../../falcor/connect';
 import {
@@ -64,6 +64,26 @@ export default compose(
       },
     })
   ),
+  withHandlers({
+    addPredicates: ({ existingPredicates, type, predicateIdx, submit, }) => (newPredicates) => {
+      if (newPredicates.length === 0) {
+        return;
+      }
+
+      if (type === 'predicate') {
+        const [firstPredicate, ...restPredicates] = newPredicates;
+        // cell is predicate type - replace existing predicate w/ first new predicate
+        // and append rest
+        submit([
+          ...update(predicateIdx, firstPredicate, existingPredicates),
+          ...restPredicates,
+        ]);
+      } else if (newPredicates.length > 0) {
+        // cell is empty type - append all new predicates
+        submit([...existingPredicates, ...newPredicates]);
+      }
+    },
+  }),
   mapPropsStream(connectFalcor(({ search, }) => ([
     // TODO - mapping search to URIs should move to falcor router
     ['collection', `schema:${search}`, 'ontology', 'list'],
@@ -95,16 +115,6 @@ export default compose(
     )(graphFragment),
   })),
   withHandlers({
-    addPredicates: ({ existingPredicates, type, predicateIdx, submit, }) => (newPredicates) => {
-      if (newPredicates.length > 0 && type === 'predicate') {
-        const [firstPredicate, ...restPredicates] = newPredicates;
-        // cell is predicate type - replace existing predicate w/ first new predicate and append rest
-        submit([...update(predicateIdx, firstPredicate, existingPredicates), ...restPredicates]);
-      } else if (newPredicates.length > 0) {
-        // cell is empty type - append all new predicates
-        submit([...existingPredicates, ...newPredicates]);
-      }
-    },
     forwardSelect: ({ predicateList, selectionIdx, setSelectionIdx, }) => () => {
       if (predicateList.length === 0) {
         setSelectionIdx(-1);
@@ -119,102 +129,66 @@ export default compose(
         setSelectionIdx(selectionIdx - 1);
       }
     },
-  }),
-  withHotKeys(
-    () => true,
-    {
-      up: ({ backwardSelect, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        backwardSelect();
-      },
-      down: ({ forwardSelect, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        forwardSelect();
-      },
-      'shift+up': ({ backwardSelect, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        backwardSelect();
-      },
-      'shift+down': ({ forwardSelect, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        forwardSelect();
-      },
-      left: arrowKeyNavHandler,
-      right: arrowKeyNavHandler,
-      'alt+left': arrowKeyNavHandler,
-      'alt+right': arrowKeyNavHandler,
-      'alt+up': arrowKeyNavHandler,
-      'alt+down': arrowKeyNavHandler,
-      enter: ({
-        value, selectedPredicates, predicateList, selectionIdx,
-        exit, addPredicates,
-      }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (selectionIdx === -1 && selectedPredicates.length === 0 && value === '') {
-          // user hits enter w/o selecting anything or inputing anything -> exit
-          exit();
-        } else if (selectionIdx === -1 && selectedPredicates.length === 0) {
-          // user hits enter without selecting anything -> submit manual input value
-          exit();
-          // TODO - handle creating new predicate
-          // removeEnhancedView();
-          // updateValue(sheetId, column, row, value);
-        } else if (selectionIdx === -1) {
-          // user selects values and hits enter while on input -> submit selection
-          addPredicates(selectedPredicates);
-        } else {
-          // user hits enter while on predicate => submit selection w/ new predicate
-          addPredicates(uniq([...selectedPredicates, predicateList[selectionIdx].uri]));
-        }
-      },
-      'shift+enter': ({
-        value, selectedPredicates, predicateList, selectionIdx,
-        exit, addPredicates, selectPredicate, unselectPredicate,
-      }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (selectionIdx === -1 && selectedPredicates.length === 0 && value === '') {
-          // user hits enter w/o selecting anything or inputing anything -> exit
-          exit();
-        } else if (selectionIdx === -1 && selectedPredicates.length === 0) {
-          // user hits enter without selecting anything -> submit manual input value
-          exit();
-          // TODO - handle creating new predicate
-          // removeEnhancedView();
-          // updateValue(sheetId, column, row, value);
-        } else if (selectionIdx === -1) {
-          // user selects values and hits enter while on input -> submit selection
-          addPredicates(selectedPredicates);
-        } else if (predicateList[selectionIdx].selected) {
-          // user unselects predicate
-          unselectPredicate(predicateList[selectionIdx]);
-        } else {
-          // user adds predicate to selection
-          selectPredicate(predicateList[selectionIdx]);
-        }
-      },
-      esc: ({ exit, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+    arrowLeft: arrowKeyNavHandler,
+    arrowRight: arrowKeyNavHandler,
+    arrowAltLeft: arrowKeyNavHandler,
+    arrowAltRight: arrowKeyNavHandler,
+    arrowAltUp: arrowKeyNavHandler,
+    arrowAltDown: arrowKeyNavHandler,
+    enter: ({
+      value, selectedPredicates, predicateList, selectionIdx,
+      exit, addPredicates,
+    }) => () => {
+      if (selectionIdx === -1 && selectedPredicates.length === 0 && value === '') {
+        // user hits enter w/o selecting anything or inputing anything -> exit
         exit();
-      },
-      delete: ({ value, }) => (e) => {
-        // if user presses delete when input is empty, don't delete column
-        if (value === '') {
-          e.preventDefault();
-          e.stopPropagation();
-        }
-      },
+      } else if (selectionIdx === -1 && selectedPredicates.length === 0) {
+        // user hits enter without selecting anything -> submit manual input value
+        exit();
+        // TODO - handle creating new predicate
+        // removeEnhancedView();
+        // updateValue(sheetId, column, row, value);
+      } else if (selectionIdx === -1) {
+        // user selects values and hits enter while on input -> submit selection
+        addPredicates(selectedPredicates);
+      } else {
+        // user hits enter while on predicate => submit selection w/ new predicate
+        addPredicates(uniq([...selectedPredicates, predicateList[selectionIdx].uri]));
+      }
     },
-    {
-      onBlur: ({ exit, }) => () => exit(),
-    }
-  )
-)(PredicateInput);
+    shiftEnter: ({
+      value, selectedPredicates, predicateList, selectionIdx,
+      exit, addPredicates, selectPredicate, unselectPredicate,
+    }) => () => {
+      if (selectionIdx === -1 && selectedPredicates.length === 0 && value === '') {
+        // user hits enter w/o selecting anything or inputing anything -> exit
+        exit();
+      } else if (selectionIdx === -1 && selectedPredicates.length === 0) {
+        // user hits enter without selecting anything -> submit manual input value
+        exit();
+        // TODO - handle creating new predicate
+        // removeEnhancedView();
+        // updateValue(sheetId, column, row, value);
+      } else if (selectionIdx === -1) {
+        // user selects values and hits enter while on input -> submit selection
+        addPredicates(selectedPredicates);
+      } else if (predicateList[selectionIdx].selected) {
+        // user unselects predicate
+        unselectPredicate(predicateList[selectionIdx]);
+      } else {
+        // user adds predicate to selection
+        selectPredicate(predicateList[selectionIdx]);
+      }
+    },
+    esc: ({ exit, }) => () => {
+      exit();
+    },
+    click: ({ selectedPredicates, addPredicates, }) => (uri) => {
+      addPredicates(uniq([...selectedPredicates, uri]));
+    },
+  }),
+  mapProps(({ predicateList, ...rest }) => ({
+    list: predicateList,
+    ...rest,
+  })),
+)(CellToolTip);
