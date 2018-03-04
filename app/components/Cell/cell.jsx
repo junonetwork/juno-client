@@ -9,17 +9,21 @@ import                              './style.scss';
 
 const camel2Kebab = (str) => str.replace(/([A-Z])/g, (g) => `-${g[0].toLowerCase()}`);
 
-export const shouldRenderPredicateEnhancedInput = (enhanceView, type, leftCellType) => (
-  enhanceView && (
-    type === 'predicate' || leftCellType === 'predicate' ||
-    leftCellType === 'searchCollection' || leftCellType === 'objectCollection'
-  )
+export const shouldRenderSearchInput = (activeView, enhanceView, cellInput, type) => (
+  type === 'searchCollection' &&
+  (enhanceView || (activeView && cellInput))
 );
 
-export const shouldRenderPredicateInput = (activeView, cellInput, type, leftCellType) => (
-  activeView && cellInput && (
+export const shouldRenderPredicateInput = (
+  activeView, enhanceView, cellInput, type, leftCellType
+) => (
+  (
     type === 'predicate' || leftCellType === 'predicate' ||
     leftCellType === 'searchCollection' || leftCellType === 'objectCollection'
+  ) &&
+  (
+    (activeView && cellInput) ||
+    enhanceView
   )
 );
 
@@ -51,18 +55,9 @@ const Cell = ({
     {...hotKeys}
   >
     {
-      shouldRenderPredicateEnhancedInput(enhanceView, type, leftCellType) ?
-        <PredicateInput
-          value={cellInput}
-          sheetId={sheetId}
-          type={type}
-          tableId={type === 'predicate' ? tableId : leftCellTableId}
-          column={column}
-          row={row}
-          predicateIdx={predicateIdx}
-          updateValue={updateValue}
-        /> :
-      shouldRenderPredicateInput(activeView, cellInput, type, leftCellType) ?
+      shouldRenderSearchInput(activeView, enhanceView, cellInput, type) ?
+        <div>Search Input</div> :
+      shouldRenderPredicateInput(activeView, enhanceView, cellInput, type, leftCellType) ?
         <PredicateInput
           value={cellInput}
           sheetId={sheetId}

@@ -7,7 +7,7 @@ import {
 import withHotKeys         from '../../hoc/withHotKeys';
 import Cell                from '../../components/Cell';
 import {
-  shouldRenderPredicateEnhancedInput,
+  shouldRenderSearchInput,
   shouldRenderPredicateInput,
   shouldRenderIndexInput,
 }                          from '../../components/Cell/cell';
@@ -22,8 +22,8 @@ const FAST_STEP = 2;
 // active w/ other store modules
 const shouldFocus = (activeView, enhanceView, type, cellInput, leftCellType, upCellType) => (
   activeView &&
-  !shouldRenderPredicateEnhancedInput(enhanceView, type, leftCellType) &&
-  !shouldRenderPredicateInput(activeView, cellInput, type, leftCellType) &&
+  !shouldRenderSearchInput(activeView, enhanceView, cellInput, type) &&
+  !shouldRenderPredicateInput(activeView, enhanceView, cellInput, type, leftCellType) &&
   !shouldRenderIndexInput(enhanceView, type, upCellType)
 );
 

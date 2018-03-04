@@ -38,6 +38,8 @@ import {
   materializeIndex,
   materializePredicate,
   materializeObject,
+}                                    from '../../utils/materializeCell';
+import {
   createEmpty,
 }                                    from '../../utils/cell';
 import {
