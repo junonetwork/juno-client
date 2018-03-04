@@ -9,7 +9,7 @@ import {
   bool,
   func,
 }                             from 'prop-types';
-/* import                             './style.scss';*/
+import                             './style.scss';
 
 
 class Node extends Component {
