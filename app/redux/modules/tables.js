@@ -297,6 +297,8 @@ const editValueCellEpic = (getState) => (action$) => (
         ]);
       } else if (type === 'predicate') {
         // update column
+        // TODO - inverse is depricated
+        console.warn('inverse path key is deprecated');
         return from(
           model.getValue(['inverse', `"${value}"`, 'skos:prefLabel', 'uri'])
         )
@@ -365,7 +367,7 @@ const editEmptyCellEpic = (getState) => (action$) => (
           upCell.type === 'index'
         )
       ) {
-        const { indices, } = getTable(getState.getState(), upCell.tableId);
+        const { indices, } = getTable(getState(), upCell.tableId);
         if (Number.isNaN(parseInt(value, 10))) {
           return of(clearCellInput());
         }
@@ -392,7 +394,7 @@ const editEmptyCellEpic = (getState) => (action$) => (
             // TODO - handle case of adding non-existent uri
             map((uri = {}) => {
               // TODO - store label, for cases when predicate label doesn't resolve to anything
-              const { predicates, } = getTable(getState.getState(), leftCell.tableId);
+              const { predicates, } = getTable(getState(), leftCell.tableId);
               return [
                 replacePredicates(
                   leftCell.tableId,

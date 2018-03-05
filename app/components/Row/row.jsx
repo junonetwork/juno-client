@@ -6,6 +6,9 @@ import {
 import {
   pure,
 }                              from 'recompose';
+import {
+  pureRowWithFocus,
+}                              from '../../hoc/pureWithFocus';
 import Cell                    from '../../containers/CellContainer';
 
 
@@ -30,4 +33,4 @@ const Row = ({ row, upperRow, ...functions }) => (
 
 Row.propTypes = {};
 
-export default pure(Row);
+export default pureRowWithFocus(Row);

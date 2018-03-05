@@ -21,8 +21,8 @@ import {
   MOVE_TABLE,
 }                                    from './tables';
 import {
-  getCellActiveDescriptor,
-}                                    from './active';
+  getFocus,
+}                                    from './focus';
 import {
   getCellTeaserDescriptor,
 }                                    from './teaser';
@@ -259,21 +259,21 @@ export const withActive = createCachedSelector(
   nthArg(1),
   nthArg(2),
   nthArg(3),
-  getCellActiveDescriptor,
+  getFocus,
   (
     sheetId,
     hints,
     matrix,
-    cellActiveDescriptor
+    focus
   ) => {
     if (
-      !cellActiveDescriptor ||
-      cellActiveDescriptor.sheetId !== sheetId
+      !focus ||
+      focus.sheetId !== sheetId
     ) {
       return { matrix, hints, };
     }
 
-    const { column: activeColumn, row: activeRow, } = cellActiveDescriptor;
+    const { column: activeColumn, row: activeRow, } = focus;
 
     return {
       matrix: updateInMatrix(activeColumn, activeRow, assoc('activeView', true), matrix),

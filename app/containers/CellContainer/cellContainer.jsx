@@ -1,58 +1,51 @@
 import {
   compose,
-  pure,
   setDisplayName,
   withHandlers,
 }                          from 'recompose';
-import withHotKeys         from '../../hoc/withHotKeys';
-import Cell                from '../../components/Cell';
 import {
-  shouldRenderSearchInput,
-  shouldRenderPredicateInput,
-  shouldRenderIndexInput,
-}                          from '../../components/Cell/cell';
+  batchActions,
+}                          from 'redux-batched-actions';
+import withHotKeys         from '../../hoc/withHotKeys';
+import {
+  pureCellWithFocus,
+}                          from '../../hoc/pureWithFocus';
+import {
+  addEnhancedCell,
+  removeEnhancedCell,
+}                          from '../../redux/modules/enhanced';
+import {
+  setCellInput,
+  clearCellInput,
+}                          from '../../redux/modules/cellInput';
+import {
+  cellId,
+  predicateInputId,
+  indexInputId,
+  setFocus,
+}                          from '../../redux/modules/focus';
+import Cell                from '../../components/Cell';
+import store               from '../../redux/store';
 
-
+const { dispatch, } = store;
 const FAST_STEP = 2;
 
 
-// TODO - perhaps all of this should be stored in focus module, so focus logic is
-// centralized in the store.  For cases where focus logic should be calculated on
-// read, focus descriptor could be generated in a selector on the fly, combining
-// active w/ other store modules
-const shouldFocus = (activeView, enhanceView, type, cellInput, leftCellType, upCellType) => (
-  activeView &&
-  !shouldRenderSearchInput(activeView, enhanceView, cellInput, type) &&
-  !shouldRenderPredicateInput(activeView, enhanceView, cellInput, type, leftCellType) &&
-  !shouldRenderIndexInput(enhanceView, type, upCellType)
-);
-
 const arrowKeyNavHandler = (direction, steps) =>
-  ({ sheetId, column, row, cellInput, updateValue, navigate, }) => (e) => {
+  ({ sheetId, column, row, navigate, }) => (e) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (cellInput) {
-      updateValue(sheetId, column, row, cellInput);
-      navigate(sheetId, column, row, direction, steps);
-    } else {
-      navigate(sheetId, column, row, direction, steps);
-    }
+    navigate(sheetId, column, row, direction, steps);
   };
 
 
 export default compose(
   setDisplayName('CellContainer'),
-  pure,
+  pureCellWithFocus,
   withHandlers({
     onMouseEnter: ({ sheetId, column, row, teaseCell, }) => () => {
       teaseCell(sheetId, column, row);
-    },
-    onClick: ({ sheetId, column, row, makeCellActive, }) => (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      makeCellActive(sheetId, column, row);
     },
     onDragStart: ({ sheetId, tableId, column, row, startDragTable, }) => () => {
       startDragTable(sheetId, tableId, column, row);
@@ -63,17 +56,27 @@ export default compose(
     onDragEnd: ({ endDragTable, }) => () => {
       endDragTable();
     },
-    onKeyPress: ({ sheetId, column, row, cellInput, setCellInput, }) => (e) => {
+    onKeyPress: ({ sheetId, column, row, type, leftCellType, cellInput, }) => (e) => {
       e.preventDefault();
       e.stopPropagation();
 
-      setCellInput(sheetId, column, row, cellInput + String.fromCharCode(e.which));
+      if (
+        type === 'predicate' ||
+        leftCellType === 'predicate' ||
+        leftCellType === 'searchCollection' ||
+        leftCellType === 'objectCollection'
+      ) {
+        dispatch(batchActions([
+          setFocus(predicateInputId(sheetId, column, row)),
+          setCellInput(sheetId, column, row, cellInput + String.fromCharCode(e.which)),
+        ], 'SET_CELL_INPUT'));
+      } else {
+        dispatch(setCellInput(sheetId, column, row, cellInput + String.fromCharCode(e.which)));
+      }
     },
   }),
   withHotKeys(
-    ({ activeView, enhanceView, type, cellInput, leftCellType, upCellType, }) => (
-      shouldFocus(activeView, enhanceView, type, cellInput, leftCellType, upCellType)
-    ),
+    ({ sheetId, column, row, }) => cellId(sheetId, column, row),
     {
       up: arrowKeyNavHandler('up', 1),
       'alt+up': arrowKeyNavHandler('up', FAST_STEP),
@@ -84,20 +87,20 @@ export default compose(
       right: arrowKeyNavHandler('right', 1),
       'alt+right': arrowKeyNavHandler('right', FAST_STEP),
       delete: ({
-        sheetId, column, row, cellInput, setCellInput, updateValue,
+        sheetId, column, row, cellInput, updateValue,
       }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
         if (cellInput) {
-          setCellInput(sheetId, column, row, cellInput.slice(0, -1));
+          dispatch(setCellInput(sheetId, column, row, cellInput.slice(0, -1)));
         } else {
           updateValue(sheetId, column, row, '');
         }
       },
       enter: ({
-        sheetId, column, row, enhanceView, enhanceCell, cellInput,
-        removeEnhanceCell, updateValue,
+        sheetId, column, row, enhanceView, cellInput, type, leftCellType, upCellType,
+        updateValue,
       }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -105,23 +108,46 @@ export default compose(
         if (cellInput) {
           updateValue(sheetId, column, row, cellInput);
         } else if (enhanceView) {
-          removeEnhanceCell(sheetId, column, row);
+          dispatch(removeEnhancedCell(sheetId, column, row));
+        } else if (
+          type === 'predicate' ||
+          leftCellType === 'predicate' ||
+          leftCellType === 'searchCollection' ||
+          leftCellType === 'objectCollection'
+        ) {
+          dispatch(batchActions([
+            addEnhancedCell(sheetId, column, row),
+            setFocus(predicateInputId(sheetId, column, row)),
+          ], 'SHOW_PREDICATE_INPUT'));
+        } else if (
+          type === 'index' ||
+          upCellType === 'index' ||
+          upCellType === 'searchCollection' ||
+          upCellType === 'objectCollection'
+        ) {
+          dispatch(batchActions([
+            addEnhancedCell(sheetId, column, row),
+            setFocus(indexInputId(sheetId, column, row)),
+          ], 'SHOW_INDEX_INPUT'));
         } else {
-          enhanceCell(sheetId, column, row);
+          dispatch(addEnhancedCell(sheetId, column, row));
         }
       },
       esc: ({
-        sheetId, column, row, enhanceView, removeEnhanceCell, clearCellInput,
+        sheetId, column, row, enhanceView,
       }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
-        clearCellInput(sheetId, column, row);
-
         if (enhanceView) {
-          removeEnhanceCell(sheetId, column, row);
+          dispatch(batchActions([
+            clearCellInput(sheetId, column, row),
+            removeEnhancedCell(sheetId, column, row),
+          ]));
+        } else {
+          dispatch(clearCellInput(sheetId, column, row));
         }
       },
-    }
+    },
   )
 )(Cell);

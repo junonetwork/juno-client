@@ -19,6 +19,10 @@ import {
   replaceIndices,
 }                            from '../../redux/modules/tables';
 import {
+  indexInputId,
+  setFocus,
+}                            from '../../redux/modules/focus';
+import {
   clearCellInput,
 }                            from '../../redux/modules/cellInput';
 import {
@@ -51,14 +55,22 @@ export default compose(
         dispatch(batchActions([
           removeEnhancedCell(sheetId, column, row),
           replaceIndices(tableId, indicesKeySet),
+          setFocus({ sheetId, column, row, }),
           clearCellInput(sheetId, column, row),
         ], 'SUBMIT_INDEX_INPUT'));
       },
       exit() {
         dispatch(batchActions([
           removeEnhancedCell(sheetId, column, row),
+          setFocus({ sheetId, column, row, }),
           clearCellInput(sheetId, column, row),
         ], 'EXIT_INDEX_INPUT'));
+      },
+      blur() {
+        dispatch(batchActions([
+          removeEnhancedCell(sheetId, column, row),
+          clearCellInput(sheetId, column, row),
+        ], 'BLUR_INDEX_INPUT'));
       },
     })
   ),
@@ -78,7 +90,7 @@ export default compose(
       };
   }),
   withHotKeys(
-    () => true,
+    ({ sheetId, column, row, }) => indexInputId(sheetId, column, row),
     {
       up: submitHandler,
       down: submitHandler,
@@ -105,7 +117,7 @@ export default compose(
       },
     },
     {
-      onBlur: ({ exit, }) => () => exit(),
+      onBlur: ({ blur, }) => () => blur(),
     }
   ),
   withHandlers({

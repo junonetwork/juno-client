@@ -17,8 +17,8 @@ import {
   addSearchCollectionTable,
 }                             from '../../app/redux/modules/tables';
 import {
-  makeCellActive,
-}                             from '../../app/redux/modules/active';
+  setFocus,
+}                             from '../../app/redux/modules/focus';
 import {
   teaseCell,
 }                             from '../../app/redux/modules/teaser';
@@ -61,7 +61,7 @@ const initStore = () => {
     ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling', 'schema:sibling'],
     [0, 1, 2, 3, 0, 1, 0, 10]
   ));
-  store.dispatch(makeCellActive(sheetId, 0, 0));
+  store.dispatch(setFocus({ sheetId, column: 0, row: 0, }));
 
   return store;
 };
@@ -167,11 +167,11 @@ runPerfTests([
       const store = initStore();
       delete require.cache[require.resolve('../../app/redux/modules/sheets')];
       const { getSheetMatrix, } = require('../../app/redux/modules/sheets');
-      store.dispatch(makeCellActive('0', 0, 0));
+      store.dispatch(setFocus({ sheetId: '0', column: 0, row: 0, }));
 
       getSheetMatrix(store.getState(), '0', graphFragment.json);
 
-      store.dispatch(makeCellActive('0', 1, 4));
+      store.dispatch(setFocus({ sheetId: '0', column: 1, row: 4, }));
 
       return { state: store.getState(), getSheetMatrix, };
     },

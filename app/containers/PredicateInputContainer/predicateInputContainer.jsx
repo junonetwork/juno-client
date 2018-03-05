@@ -28,6 +28,10 @@ import {
   replacePredicates,
 }                            from '../../redux/modules/tables';
 import {
+  predicateInputId,
+  setFocus,
+}                            from '../../redux/modules/focus';
+import {
   removeEnhancedCell,
 }                            from '../../redux/modules/enhanced';
 import {
@@ -35,7 +39,9 @@ import {
 }                            from '../../redux/modules/cellInput';
 
 
-const arrowKeyNavHandler = ({ selectedPredicates, addPredicates, }) => () => (
+const arrowKeyNavHandler = ({
+  selectedPredicates, addPredicates,
+}) => () => (
   addPredicates(selectedPredicates)
 );
 
@@ -53,24 +59,32 @@ export default compose(
         dispatch(batchActions([
           removeEnhancedCell(sheetId, column, row),
           replacePredicates(tableId, predicates),
+          setFocus({ sheetId, column, row, }),
           clearCellInput(),
         ], 'SUBMIT_PREDICATE_INPUT'));
       },
       exit: () => {
         dispatch(batchActions([
           removeEnhancedCell(sheetId, column, row),
+          setFocus({ sheetId, column, row, }),
           clearCellInput(),
         ], 'EXIT_PREDICATE_INPUT'));
+      },
+      blur: () => {
+        dispatch(batchActions([
+          removeEnhancedCell(sheetId, column, row),
+          clearCellInput(),
+        ], 'BLUR_PREDICATE_INPUT'));
       },
     })
   ),
   withHandlers({
-    addPredicates: ({ existingPredicates, type, predicateIdx, submit, }) => (newPredicates) => {
+    addPredicates: ({
+      existingPredicates, type, predicateIdx, submit, blur,
+    }) => (newPredicates) => {
       if (newPredicates.length === 0) {
-        return;
-      }
-
-      if (type === 'predicate') {
+        blur();
+      } else if (type === 'predicate') {
         const [firstPredicate, ...restPredicates] = newPredicates;
         // cell is predicate type - replace existing predicate w/ first new predicate
         // and append rest
@@ -78,7 +92,7 @@ export default compose(
           ...update(predicateIdx, firstPredicate, existingPredicates),
           ...restPredicates,
         ]);
-      } else if (newPredicates.length > 0) {
+      } else {
         // cell is empty type - append all new predicates
         submit([...existingPredicates, ...newPredicates]);
       }
@@ -187,8 +201,9 @@ export default compose(
       addPredicates(uniq([...selectedPredicates, uri]));
     },
   }),
-  mapProps(({ predicateList, ...rest }) => ({
+  mapProps(({ predicateList, sheetId, column, row, ...rest }) => ({
     list: predicateList,
+    id: predicateInputId(sheetId, column, row),
     ...rest,
   })),
 )(CellToolTip);

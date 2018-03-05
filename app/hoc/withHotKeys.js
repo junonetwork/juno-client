@@ -1,7 +1,18 @@
+/* global document */
 import {
   Component,
   createFactory,
 }                    from 'react';
+import {
+  equals,
+}                    from 'ramda';
+import {
+  shape,
+}                    from 'prop-types';
+import {
+  setFocus,
+  clearFocus,
+}                    from '../redux/modules/focus';
 
 
 const keyMap = {
@@ -32,29 +43,53 @@ const keyMap = {
 const event2HandlerKey = ({ which, metaKey, altKey, shiftKey, }) =>
   `${altKey ? 'alt+' : ''}${shiftKey ? 'shift+' : ''}${metaKey ? 'cmd+' : ''}${keyMap[which]}`;
 
+const higherOrderNoop = () => () => {};
 
 const withHotKeys = (
-  focus = () => true,
+  id,
   hotKeyHandlers = {},
   options = {},
 ) => (BaseComponent) => {
+  if (id === undefined) {
+    throw new Error('withHotKeys must be passed a value or a function as the first argument');
+  }
+
+  const _id = typeof id === 'function' ?
+    id :
+    () => id;
+
   const {
+    onFocus,
     onBlur,
   } = Object.assign({
-    onBlur: () => () => {},
+    onFocus: higherOrderNoop,
+    onBlur: higherOrderNoop,
   }, options);
+
   const factory = createFactory(BaseComponent);
 
-  return class WithHotKeys extends Component {
+  class WithHotKeys extends Component {
     componentDidMount() {
-      if (focus(this.props)) {
+      if (
+        equals(this.context.store.getState().focus, _id(this.props)) &&
+        this.node !== document.activeElement
+      ) {
         this.node.focus();
       }
     }
 
     componentDidUpdate() {
-      if (focus(this.props)) {
+      if (
+        equals(this.context.store.getState().focus, _id(this.props)) &&
+        this.node !== document.activeElement
+      ) {
         this.node.focus();
+      }
+    }
+
+    componentWillUnmount() {
+      if (equals(this.context.store.getState().focus, _id(this.props))) {
+        this.context.store.dispatch(clearFocus());
       }
     }
 
@@ -70,27 +105,17 @@ const withHotKeys = (
       ref: (node) => {
         this.node = node;
       },
+      onFocus: (e) => {
+        e.stopPropagation();
+
+        if (!equals(this.context.store.getState().focus, _id(this.props))) {
+          this.context.store.dispatch(setFocus(_id(this.props)));
+        }
+
+        onFocus(this.props)(e);
+      },
       onBlur: (e) => {
         onBlur(this.props)(e);
-        /**
-         * TODO - doesn't work consistently
-         * there's a race condition:
-         * - a state change switches focus from component A to B
-         * - if A is rerendered before B: A onBlur triggers w/ new props and it successfully gives up focus
-         * - if B is rerendered before A: A onblur triggers w/ old props and it doesn't give up focus, possibly leading to a cascading update
-         * setImmediate should fix this?
-         */
-        // setImmediate(() => {
-        //   if (!focus(this.props)) {
-        //     onBlur(this.props)(e);
-        //   }
-        //   // } else {
-        //   //   console.log('dont blur');
-        //   //   e.stopPropagation();
-        //   //   e.preventDefault();
-        //   //   this.node.focus();
-        //   // }
-        // });
       },
     }
 
@@ -98,10 +123,28 @@ const withHotKeys = (
       return factory({
         ...this.props,
         hotKeys: this.hotKeys,
+        isFocused: equals(_id(this.props), this.context.store.getState().focus),
       });
     }
+  }
+
+  WithHotKeys.contextTypes = {
+    store: shape(),
   };
+
+  return WithHotKeys;
 };
+
+
+// export const rootHotKeys = (store) => (BaseComponent) => {
+//   const onBlur = store.dispatch(clearFocus());
+
+//   return (props) => (
+//     <div onBlur={onBlur}>
+//       <BaseComponent {...props} />
+//     </div>
+//   );
+// };
 
 
 export default withHotKeys;

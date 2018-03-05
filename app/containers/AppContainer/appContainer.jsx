@@ -15,6 +15,9 @@ import {
   createWindow,
   deleteWindow,
 }                          from '../../redux/modules/windows';
+import {
+  appId,
+}                          from '../../redux/modules/focus';
 import mapPropsStream      from '../../falcor/mapPropsStream';
 import connectFalcor       from '../../falcor/connect';
 import withHotKeys         from '../../hoc/withHotKeys';
@@ -42,7 +45,7 @@ export default compose(
     })
   ),
   withHotKeys(
-    () => false,
+    appId(),
     ({
       'cmd+1': ({ windows, deleteWindowAction, }) => (e) => {
         e.preventDefault();
@@ -58,6 +61,6 @@ export default compose(
           createWindowAction();
         }
       },
-    })
+    }),
   )
 )(App);

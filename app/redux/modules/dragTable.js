@@ -2,14 +2,15 @@ import {
   batchActions,
 }                              from 'redux-batched-actions';
 import {
-  getTableCells, moveTable,
+  getTableCells,
+  moveTable,
 }                              from './tables';
 import {
   getCellOffsetFromTable,
 }                              from '../../utils/sheet';
 import {
-  makeCellActive,
-}                              from './active';
+  setFocus,
+}                              from './focus';
 
 
 /**
@@ -53,7 +54,7 @@ export const dropTable = () => (dispatch, getState) => {
     batchActions([
       { type: DROP_TABLE, },
       moveTable(fromTableId, fromSheetId, toSheetId, toTableXOrigin, toTableYOrigin),
-      makeCellActive(toSheetId, toColumn, toRow),
+      setFocus({ sheetId: toSheetId, column: toColumn, row: toRow, }),
     ])
   );
 };

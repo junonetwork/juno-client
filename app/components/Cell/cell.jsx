@@ -1,7 +1,14 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React                   from 'react';
 import {}                      from 'prop-types';
+import {
+  equals,
+}                              from 'ramda';
 import CellValue               from '../CellValue';
+import {
+  predicateInputId,
+  indexInputId,
+}                              from '../../redux/modules/focus';
 import PredicateInput          from '../../containers/PredicateInputContainer';
 import IndexInput              from '../../containers/IndexInputContainer';
 import                              './style.scss';
@@ -14,39 +21,19 @@ export const shouldRenderSearchInput = (activeView, enhanceView, cellInput, type
   (enhanceView || (activeView && cellInput))
 );
 
-export const shouldRenderPredicateInput = (
-  activeView, enhanceView, cellInput, type, leftCellType
-) => (
-  (
-    type === 'predicate' || leftCellType === 'predicate' ||
-    leftCellType === 'searchCollection' || leftCellType === 'objectCollection'
-  ) &&
-  (
-    (activeView && cellInput) ||
-    enhanceView
-  )
-);
-
-export const shouldRenderIndexInput = (enhanceView, type, upCellType) => (
-  enhanceView && (
-    type === 'index' || upCellType === 'index' ||
-    upCellType === 'searchCollection' || upCellType === 'objectCollection'
-  )
-);
-
 
 const Cell = ({
-  type, sheetId, tableId, column, row, value, $type, cellLength, cellInput,
-  leftCellType, leftCellTableId, upCellType, upCellTableId, predicateIdx,
+  type, sheetId, tableId, column, row, value, $type, cellLength, cellInput, focus,
+  leftCellTableId, upCellTableId, predicateIdx,
   hotKeys, activeView, enhanceView, dropTableView, illegalDropTableView,
   dragTableView, illegalDragTableView, activeHint, teaserHint,
-  onClick, onMouseEnter, onKeyPress, onDragStart, onDragEnd, onDragEnter, updateValue,
+  onMouseEnter, onKeyPress, onDragStart, onDragEnd, onDragEnter, updateValue,
 }) => (
+  /* console.log('render', sheetId, row, column) || */
   <td
     className={`cell ${camel2Kebab(type)} ${activeView ? 'active' : ''} ${activeHint ? 'active-hint' : ''} ${teaserHint ? 'teaser-hint' : ''} ${enhanceView ? 'enhance' : ''} ${dropTableView ? 'drop-table' : ''} ${illegalDropTableView ? 'illegal-drop-table' : ''} ${dragTableView ? 'drag-table' : ''} ${illegalDragTableView ? 'illegal-drag-table' : ''}`}
     role="gridcell"
     draggable={type !== 'empty'}
-    onClick={onClick}
     onMouseEnter={onMouseEnter}
     onKeyPress={onKeyPress}
     onDragStart={onDragStart}
@@ -55,9 +42,9 @@ const Cell = ({
     {...hotKeys}
   >
     {
-      shouldRenderSearchInput(activeView, enhanceView, cellInput, type) ?
-        <div>Search Input</div> :
-      shouldRenderPredicateInput(activeView, enhanceView, cellInput, type, leftCellType) ?
+      /* shouldRenderSearchInput(activeView, enhanceView, cellInput, type) ?
+          <div>Search Input</div> : */
+      equals(focus, predicateInputId(sheetId, column, row)) ?
         <PredicateInput
           value={cellInput}
           sheetId={sheetId}
@@ -68,7 +55,7 @@ const Cell = ({
           predicateIdx={predicateIdx}
           updateValue={updateValue}
         /> :
-      shouldRenderIndexInput(enhanceView, type, upCellType) ?
+      equals(focus, indexInputId(sheetId, column, row)) ?
         <IndexInput
           sheetId={sheetId}
           tableId={type === 'index' ? tableId : upCellTableId}

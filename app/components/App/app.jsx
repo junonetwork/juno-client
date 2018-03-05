@@ -6,7 +6,7 @@ import Graph                from '../../containers/GraphContainer';
 import                           './style.scss';
 
 
-const renderWindow = ({ id, type, data, canDrop, }) => {
+const renderWindow = ({ id, type, data, canDrop, focus, }) => {
   if (type === 'sheet') {
     return (
       <Table
@@ -14,6 +14,7 @@ const renderWindow = ({ id, type, data, canDrop, }) => {
         sheetId={id}
         sheetMatrix={data}
         canDrop={canDrop}
+        focus={focus}
       />
     );
   } else if (type === 'graph') {

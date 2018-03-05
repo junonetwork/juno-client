@@ -1,6 +1,6 @@
 import {
-  SET_ACTIVE,
-}                     from './active';
+  SET_FOCUS,
+}                     from './focus';
 
 
 /**
@@ -48,11 +48,10 @@ export default (
     };
   } else if (action.type === CLEAR_CELL_INPUT) {
     return {};
-  } else if (action.type === SET_ACTIVE) {
+  } else if (action.type === SET_FOCUS) {
     // reset whenever focus context changes
     return {};
   }
-
 
   return state;
 };

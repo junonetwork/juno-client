@@ -6,23 +6,14 @@ import {
 }                          from 'recompose';
 import Table               from '../../components/Table';
 import {
-  makeCellActive,
   navigate,
-}                          from '../../redux/modules/active';
+}                          from '../../redux/modules/navigate';
 import {
   teaseCell,
 }                          from '../../redux/modules/teaser';
 import {
-  addEnhancedCell,
-  removeEnhancedCell,
-}                          from '../../redux/modules/enhanced';
-import {
   updateCellValue,
 }                          from '../../redux/modules/tables';
-import {
-  setCellInput,
-  clearCellInput,
-}                          from '../../redux/modules/cellInput';
 import {
   startDragTable,
   dragTable,
@@ -54,17 +45,6 @@ export default compose(
   withHandlers({
     teaseCell: () => throttledTeaseCell,
     navigate: () => throttledNavigate,
-    makeCellActive: () => (sheetId, column, row) => dispatch(makeCellActive(sheetId, column, row)),
-    enhanceCell: () => (sheetId, column, row) => dispatch(addEnhancedCell(sheetId, column, row)),
-    removeEnhanceCell: () => (sheetId, column, row) => (
-      dispatch(removeEnhancedCell(sheetId, column, row))
-    ),
-    setCellInput: () => (sheetId, column, row, value) => (
-      dispatch(setCellInput(sheetId, column, row, value))
-    ),
-    clearCellInput: () => (sheetId, column, row) => (
-      dispatch(clearCellInput(sheetId, column, row))
-    ),
     startDragTable: () => (sheetId, tableId, column, row) => (
       dispatch(startDragTable(sheetId, tableId, column, row))
     ),

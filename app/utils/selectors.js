@@ -3,7 +3,7 @@ import {
 }                                    from 'ramda';
 import {
   shallowEqual,
-} from 'recompose';
+}                                    from 'recompose';
 import {
   createSelectorCreator,
   defaultMemoize,

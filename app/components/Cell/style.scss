@@ -57,7 +57,8 @@ $cell-height: 26px;
   &.active-hint {
     box-shadow: 0px 0px 0px 1px transparentize($table-active, .4) inset;
   }
-  &.active {
+  &.active,
+  &:focus {
     box-shadow: 0px 0px 0px 1px $table-active inset;
   }
   &.enhance {

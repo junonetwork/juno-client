@@ -18,8 +18,8 @@ import {
   addSearchCollectionTable,
 }                             from './redux/modules/tables';
 import {
-  makeCellActive,
-}                             from './redux/modules/active';
+  setFocus,
+}                             from './redux/modules/focus';
 import {
   formatAddress,
 }                             from './utils/cell';
@@ -68,7 +68,7 @@ store.dispatch(
       ['schema:name'],
       [{ from: 0, to: 1, }]
     ),
-    makeCellActive(sheetId, 0, 0),
+    setFocus({ sheetId, column: 0, row: 0, }),
   ], 'INIT_SHEET')
 );
 

@@ -3,6 +3,9 @@ import {
   reduce,
 }                                    from 'ramda';
 import {
+  getFocus,
+}                                    from './focus';
+import {
   getSheetMatrix,
   withHints as sheetMatrixWithHints,
   getSheetTableIds,
@@ -58,8 +61,12 @@ export const getPathSets = arraySingleDepthEqualitySelector(
  * @param {Object} graphFragment
  * @param {Array} windows
  */
-export const getDataForWindows = (state, graphFragment, windows) =>
-  reduce((windowData, { id, type, }) => {
+export const windowsWithData = (state, graphFragment, windows) => {
+  const focus = getFocus(state);
+
+  return reduce((windowData, { id, type, }) => {
+    // TODO - every window type should implement it's own get<WindowType>DataForWindow
+    // that follows a single interface: (state, windowId, graphFragment) -> { windowWithData, hints }
     if (type === 'sheet') {
       const {
         graphPathMap, hints, matrix, canDrop,
@@ -71,6 +78,7 @@ export const getDataForWindows = (state, graphFragment, windows) =>
         graphPathMap,
         data: matrix,
         canDrop,
+        focus,
       });
       Object.assign(windowData.hints, hints);
 
@@ -81,6 +89,7 @@ export const getDataForWindows = (state, graphFragment, windows) =>
         type,
         graphPathMap: {},
         data: getGraphJGF(state, id, graphFragment),
+        focus,
       });
       Object.assign(
         windowData.hints,
@@ -92,20 +101,21 @@ export const getDataForWindows = (state, graphFragment, windows) =>
 
     throw new Error(`Unknown window type ${type}`);
   }, { windows: [], hints: {}, }, windows);
+};
 
 
 export const windowsWithHints = (windows, hints) => (
-  windows.map(({ id, type, graphPathMap, data, canDrop, }) => {
+  windows.map(({ id, type, graphPathMap, data, ...rest }) => {
     if (type === 'sheet') {
       return {
+        ...rest,
         id,
         type,
         data: sheetMatrixWithHints(id, graphPathMap, hints, data),
-        canDrop,
       };
     } else if (type === 'graph') {
       return {
-        // ...rest,
+        ...rest,
         id,
         type,
         data: graphWithHints(id, hints, data),
@@ -129,7 +139,7 @@ export const getMaterializedWindows = arraySingleDepthEqualitySelector(
       windows: getWindows(state),
     }),
     ({ state, graphFragment, windows, }) => (
-      getDataForWindows(state, graphFragment, windows)
+      windowsWithData(state, graphFragment, windows)
     ),
     ({ windows, hints, }) => (
       windowsWithHints(windows, hints)

@@ -7,7 +7,7 @@ import CellTooltip           from '../../components/CellTooltip';
 
 export default compose(
   withHotKeys(
-    () => true,
+    ({ id, }) => id,
     {
       up: ({ backwardSelect, }) => (e) => {
         e.preventDefault();
@@ -59,7 +59,7 @@ export default compose(
       },
     },
     {
-      onBlur: ({ exit, }) => () => exit(),
+      onBlur: ({ blur, }) => () => blur(),
     }
   )
 )(CellTooltip);
