@@ -26,9 +26,11 @@ import {
 }                          from '../../redux/modules/focus';
 import Cell                from '../../components/Cell';
 import store               from '../../redux/store';
+import {
+  FAST_STEP,
+}                          from '../../preferences';
 
 const { dispatch, } = store;
-const FAST_STEP = 2;
 
 
 const arrowKeyNavHandler = (direction, steps) =>
@@ -149,5 +151,20 @@ export default compose(
         }
       },
     },
+    /* TODO - enter value when navigating away from cell
+     *
+     * {
+     *   onBlur: ({
+     *     sheetId, column, row, cellInput, updateValue,
+     *   }) => () => {
+     *     console.log('blur', cellInput)
+     *     if (cellInput) {
+     *       updateValue(sheetId, column, row, cellInput);
+     *     } else {
+     *       dispatch({ type: 'NO_OP' });
+     *     }
+     *   },
+     * },
+     */
   )
 )(Cell);

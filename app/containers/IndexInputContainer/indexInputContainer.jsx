@@ -34,7 +34,12 @@ import {
 }                            from '../../ohm/rangeGrammar';
 
 
-const submitHandler = ({ inputIsValid, indicesFromInput, submit, exit, }) => () => {
+const submitHandler = ({
+  inputIsValid, indicesFromInput, submit, exit,
+}) => (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
   if (inputIsValid) {
     submit(indicesFromInput);
   } else {

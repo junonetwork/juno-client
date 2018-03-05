@@ -37,13 +37,23 @@ import {
 import {
   clearCellInput,
 }                            from '../../redux/modules/cellInput';
+import {
+  navigate,
+}                            from '../../redux/modules/navigate';
+import {
+  FAST_STEP,
+}                            from '../../preferences';
 
 
-const arrowKeyNavHandler = ({
-  selectedPredicates, addPredicates,
-}) => () => (
-  addPredicates(selectedPredicates)
-);
+const arrowKeyNavHandler = (direction, steps) => ({
+  selectedPredicates, addPredicates, navigate,
+}) => (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  navigate(direction, steps);
+  addPredicates(selectedPredicates);
+};
 
 
 export default compose(
@@ -75,6 +85,9 @@ export default compose(
           removeEnhancedCell(sheetId, column, row),
           clearCellInput(),
         ], 'BLUR_PREDICATE_INPUT'));
+      },
+      navigate: (direction, steps) => {
+        dispatch(navigate(sheetId, column, row, direction, steps));
       },
     })
   ),
@@ -143,12 +156,12 @@ export default compose(
         setSelectionIdx(selectionIdx - 1);
       }
     },
-    arrowLeft: arrowKeyNavHandler,
-    arrowRight: arrowKeyNavHandler,
-    arrowAltLeft: arrowKeyNavHandler,
-    arrowAltRight: arrowKeyNavHandler,
-    arrowAltUp: arrowKeyNavHandler,
-    arrowAltDown: arrowKeyNavHandler,
+    arrowLeft: arrowKeyNavHandler('left', 1),
+    arrowRight: arrowKeyNavHandler('right', 1),
+    arrowAltLeft: arrowKeyNavHandler('left', FAST_STEP),
+    arrowAltRight: arrowKeyNavHandler('right', FAST_STEP),
+    arrowAltUp: arrowKeyNavHandler('up', FAST_STEP),
+    arrowAltDown: arrowKeyNavHandler('down', FAST_STEP),
     enter: ({
       value, selectedPredicates, predicateList, selectionIdx,
       exit, addPredicates,
