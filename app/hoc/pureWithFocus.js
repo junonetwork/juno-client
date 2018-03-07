@@ -1,6 +1,5 @@
 import {
   equals,
-  path,
   omit,
 }                         from 'ramda';
 import {
@@ -11,41 +10,41 @@ import {
 
 const omitFocus = omit(['focus']);
 
-const updateRowFocus = (props, nextProps) => (
-  !equals(props.focus, nextProps.focus) && (
+
+const updateRowFocus = ({ focus, row, }, { focus: nextFocus, row: nextRow, }) => (
+  !equals(focus, focus) && (
     (
-      path(['focus', 'sheetId'], props) === props.row[0].sheetId &&
-      path(['focus', 'row'], props) === props.row[0].row
+      focus.sheetId === row[0].sheetId &&
+      focus.row === row[0].row
     ) || (
-      path(['focus', 'sheetId'], nextProps) === nextProps.row[0].sheetId &&
-      path(['focus', 'row'], nextProps) === nextProps.row[0].row
+      nextFocus.sheetId === nextRow[0].sheetId &&
+      nextFocus.row === nextRow[0].row
     )
   )
 );
 
-const updateCellFocus = (props, nextProps) => (
-  !equals(props.focus, nextProps.focus) && (
+const updateCellFocus = ({ focus, row, }, { focus: nextFocus, row: nextRow, }) => (
+  !equals(focus, focus) && (
     (
-      path(['focus', 'sheetId'], props) === props.sheetId &&
-      path(['focus', 'row'], props) === props.row &&
-      path(['focus', 'column'], props) === props.column
+      focus.sheetId === row[0].sheetId &&
+      focus.row === row[0].row &&
+      focus.column === row[0].column
     ) || (
-      path(['focus', 'sheetId'], nextProps) === nextProps.sheetId &&
-      path(['focus', 'row'], nextProps) === nextProps.row &&
-      path(['focus', 'column'], nextProps) === nextProps.column
+      nextFocus.sheetId === nextRow[0].sheetId &&
+      nextFocus.row === nextRow[0].row &&
+      nextFocus.column === nextRow[0].column
     )
   )
 );
+
 
 // only update rows if focus changes and if focus left or entered row
 export const pureRowWithFocus = shouldUpdate((props, nextProps) => (
-  // !rowFocusEquality(props, nextProps) ||
   updateRowFocus(props, nextProps) ||
   !shallowEqual(omitFocus(props), omitFocus(nextProps))
 ));
 
 export const pureCellWithFocus = shouldUpdate((props, nextProps) => (
-  // !cellFocusEquality(props, nextProps) ||
   updateCellFocus(props, nextProps) ||
   !shallowEqual(omitFocus(props), omitFocus(nextProps))
 ));

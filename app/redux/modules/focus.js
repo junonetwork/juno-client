@@ -7,6 +7,14 @@ export const cellId = (sheetId, column, row) => ({
   sheetId, column, row,
 });
 
+export const searchInputId = (sheetId, column, row) => ({
+  sheetId, column, row, searchInput: true,
+});
+
+export const searchInputRepositoryId = (sheetId, column, row) => ({
+  sheetId, column, row, searchInput: true, repo: true,
+});
+
 export const predicateInputId = (sheetId, column, row) => ({
   sheetId, column, row, predicateInput: true,
 });
@@ -40,13 +48,13 @@ export const clearFocus = () => ({ type: CLEAR_FOCUS, });
  * reducer
  */
 export default (
-  state = null,
+  state = {},
   action
 ) => {
   if (action.type === SET_FOCUS) {
     return action.id;
   } else if (action.type === CLEAR_FOCUS) {
-    return null;
+    return {};
   }
 
   return state;
