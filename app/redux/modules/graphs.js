@@ -41,7 +41,7 @@ import {
  */
 const makeNode = (id, metadata) => ({ id, metadata, });
 const makeEdge = (source, target, metadata) => ({ source, target, metadata, });
-const createGraph = () => ({ tables: [], });
+const createGraph = () => ({ tables: [0], });
 
 
 /**

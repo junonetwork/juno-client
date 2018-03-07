@@ -58,16 +58,17 @@ store.dispatch(
       [{ from: 0, to: 2, }]
     ),
     // second window
-    // addGraph('1'),
-    addSheet('1', 40, 30),
-    addSearchCollectionTable(
-      '1',
-      generateTableId(),
-      formatAddress('1', 0, 0),
-      'Person',
-      ['schema:name'],
-      [{ from: 0, to: 1, }]
-    ),
+    addGraph('1'),
+    /* addSheet('1', 40, 30),
+     * addSearchCollectionTable(
+     *   '1',
+     *   generateTableId(),
+     *   formatAddress('1', 0, 0),
+     *   'Person',
+     *   ['schema:name'],
+     *   [{ from: 0, to: 1, }]
+     * ),
+     */
     setFocus({ sheetId, column: 0, row: 0, }),
   ], 'INIT_SHEET')
 );
