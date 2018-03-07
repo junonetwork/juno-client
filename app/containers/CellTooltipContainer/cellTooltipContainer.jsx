@@ -1,11 +1,28 @@
 import {
   compose,
+  defaultProps,
 }                            from 'recompose';
 import withHotKeys           from '../../hoc/withHotKeys';
 import CellTooltip           from '../../components/CellTooltip';
 
+const noop = () => {};
+
 
 export default compose(
+  defaultProps({
+    backwardsSelect: noop,
+    forwardSelect: noop,
+    arrowLeft: noop,
+    arrowRight: noop,
+    arrowAltLeft: noop,
+    arrowAltRight: noop,
+    arrowAltUp: noop,
+    arrowAltDown: noop,
+    enter: noop,
+    shiftEnter: noop,
+    exit: noop,
+    blur: noop,
+  }),
   withHotKeys(
     ({ id, }) => id,
     {
