@@ -108,7 +108,12 @@ export default compose(
       enter: ({ inputIsValid, indicesFromInput, submit, exit, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
-        submitHandler({ inputIsValid, indicesFromInput, submit, exit, })();
+
+        if (inputIsValid) {
+          submit(indicesFromInput);
+        } else {
+          exit();
+        }
       },
       esc: ({ exit, }) => (e) => {
         e.preventDefault();
