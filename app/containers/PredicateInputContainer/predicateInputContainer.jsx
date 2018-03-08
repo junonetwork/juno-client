@@ -28,6 +28,7 @@ import {
   replacePredicates,
 }                            from '../../redux/modules/tables';
 import {
+  cellId,
   predicateInputId,
   setFocus,
 }                            from '../../redux/modules/focus';
@@ -69,14 +70,14 @@ export default compose(
         dispatch(batchActions([
           removeEnhancedCell(sheetId, column, row),
           replacePredicates(tableId, predicates),
-          setFocus({ sheetId, column, row, }),
+          setFocus(cellId(sheetId, column, row)),
           clearCellInput(),
         ], 'SUBMIT_PREDICATE_INPUT'));
       },
       exit: () => {
         dispatch(batchActions([
           removeEnhancedCell(sheetId, column, row),
-          setFocus({ sheetId, column, row, }),
+          setFocus(cellId(sheetId, column, row)),
           clearCellInput(),
         ], 'EXIT_PREDICATE_INPUT'));
       },
