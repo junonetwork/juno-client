@@ -12,7 +12,7 @@ const omitFocus = omit(['focus']);
 
 
 const updateRowFocus = ({ focus, row, }, { focus: nextFocus, row: nextRow, }) => (
-  !equals(focus, focus) && (
+  !equals(focus, nextFocus) && (
     (
       focus.sheetId === row[0].sheetId &&
       focus.row === row[0].row
@@ -23,16 +23,19 @@ const updateRowFocus = ({ focus, row, }, { focus: nextFocus, row: nextRow, }) =>
   )
 );
 
-const updateCellFocus = ({ focus, row, }, { focus: nextFocus, row: nextRow, }) => (
-  !equals(focus, focus) && (
+const updateCellFocus = (
+  { focus, sheetId, row, column, },
+  { focus: nextFocus, sheetId: nextSheetId, row: nextRow, column: nextColumn, }
+) => (
+  !equals(focus, nextFocus) && (
     (
-      focus.sheetId === row[0].sheetId &&
-      focus.row === row[0].row &&
-      focus.column === row[0].column
+      focus.sheetId === sheetId &&
+      focus.row === row &&
+      focus.column === column
     ) || (
-      nextFocus.sheetId === nextRow[0].sheetId &&
-      nextFocus.row === nextRow[0].row &&
-      nextFocus.column === nextRow[0].column
+      nextFocus.sheetId === nextSheetId &&
+      nextFocus.row === nextRow &&
+      nextFocus.column === nextColumn
     )
   )
 );
