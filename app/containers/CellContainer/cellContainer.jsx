@@ -11,15 +11,12 @@ import {
   pureCellWithFocus,
 }                          from '../../hoc/pureWithFocus';
 import {
-  addEnhancedCell,
-  removeEnhancedCell,
-}                          from '../../redux/modules/enhanced';
-import {
   setCellInput,
   clearCellInput,
 }                          from '../../redux/modules/cellInput';
 import {
   cellId,
+  searchInputRepositoryId,
   predicateInputId,
   indexInputId,
   setFocus,
@@ -72,6 +69,8 @@ export default compose(
           setFocus(predicateInputId(sheetId, column, row)),
           setCellInput(sheetId, column, row, cellInput + String.fromCharCode(e.which)),
         ], 'SET_CELL_INPUT'));
+      } else if (type === 'searchCollection') {
+        // input for searchCollection is handled in SearchInputContainer
       } else {
         dispatch(setCellInput(sheetId, column, row, cellInput + String.fromCharCode(e.which)));
       }
@@ -101,7 +100,7 @@ export default compose(
         }
       },
       enter: ({
-        sheetId, column, row, enhanceView, cellInput, type, leftCellType, upCellType,
+        sheetId, column, row, cellInput, type, leftCellType, upCellType,
         updateValue,
       }) => (e) => {
         e.preventDefault();
@@ -109,46 +108,35 @@ export default compose(
 
         if (cellInput) {
           updateValue(sheetId, column, row, cellInput);
-        } else if (enhanceView) {
-          dispatch(removeEnhancedCell(sheetId, column, row));
+        } else if (
+          type === 'searchCollection' ||
+          type === 'objectCollection' ||
+          type === 'empty'
+        ) {
+          /* dispatch(setFocus(searchInputRepositoryId(sheetId, column, row))); */
         } else if (
           type === 'predicate' ||
           leftCellType === 'predicate' ||
           leftCellType === 'searchCollection' ||
           leftCellType === 'objectCollection'
         ) {
-          dispatch(batchActions([
-            addEnhancedCell(sheetId, column, row),
-            setFocus(predicateInputId(sheetId, column, row)),
-          ], 'SHOW_PREDICATE_INPUT'));
+          dispatch(setFocus(predicateInputId(sheetId, column, row)));
         } else if (
           type === 'index' ||
           upCellType === 'index' ||
           upCellType === 'searchCollection' ||
           upCellType === 'objectCollection'
         ) {
-          dispatch(batchActions([
-            addEnhancedCell(sheetId, column, row),
-            setFocus(indexInputId(sheetId, column, row)),
-          ], 'SHOW_INDEX_INPUT'));
-        } else {
-          dispatch(addEnhancedCell(sheetId, column, row));
+          dispatch(setFocus(indexInputId(sheetId, column, row)));
         }
       },
       esc: ({
-        sheetId, column, row, enhanceView,
+        sheetId, column, row,
       }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
 
-        if (enhanceView) {
-          dispatch(batchActions([
-            clearCellInput(sheetId, column, row),
-            removeEnhancedCell(sheetId, column, row),
-          ]));
-        } else {
-          dispatch(clearCellInput(sheetId, column, row));
-        }
+        dispatch(clearCellInput(sheetId, column, row));
       },
     },
     /* TODO - enter value when navigating away from cell

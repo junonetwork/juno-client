@@ -30,24 +30,6 @@ $cell-height: 26px;
     font-weight: 200;
   }
 
-  // enhance button
-  // button {
-  //   background: none;
-  //   border: none;
-  //   position: absolute;
-  //   top: 0;
-  //   right: 4px;
-  //   padding: 0;
-  //   color: $b_white;
-  //   cursor: pointer;
-  // }
-  // button:hover {
-  //   color: white;
-  // }
-  // button:focus {
-  //   outline: none;
-  // }
-
   &.teaser-hint {
     box-shadow: 0px 0px 0px 1px transparentize($table-teaser, .5) inset;
   }
@@ -61,9 +43,9 @@ $cell-height: 26px;
   &:focus {
     box-shadow: 0px 0px 0px 1px $table-active inset;
   }
-  &.enhance {
-    box-shadow: 0px 0px 0px 2px $b_cyan inset;
-  }
+  // &.enhance {
+  //   box-shadow: 0px 0px 0px 2px $b_cyan inset;
+  // }
   &.drop-table {
     background-color: transparentize($blue, .6);
     &.search-collection,
@@ -117,9 +99,6 @@ $cell-height: 26px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-  &.enhanced .cell-body {
-    max-width: none;
   }
 
   // edit-value

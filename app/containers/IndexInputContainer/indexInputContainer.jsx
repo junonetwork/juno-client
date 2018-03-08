@@ -12,9 +12,6 @@ import { batchActions }      from 'redux-batched-actions';
 import withHotKeys           from '../../hoc/withHotKeys';
 import IndexInput            from '../../components/IndexInput';
 import {
-  removeEnhancedCell,
-}                            from '../../redux/modules/enhanced';
-import {
   getTable,
   replaceIndices,
 }                            from '../../redux/modules/tables';
@@ -58,7 +55,6 @@ export default compose(
     (dispatch, { column, row, sheetId, tableId, }) => ({
       submit(indicesKeySet) {
         dispatch(batchActions([
-          removeEnhancedCell(sheetId, column, row),
           replaceIndices(tableId, indicesKeySet),
           setFocus({ sheetId, column, row, }),
           clearCellInput(sheetId, column, row),
@@ -66,16 +62,13 @@ export default compose(
       },
       exit() {
         dispatch(batchActions([
-          removeEnhancedCell(sheetId, column, row),
           setFocus({ sheetId, column, row, }),
           clearCellInput(sheetId, column, row),
         ], 'EXIT_INDEX_INPUT'));
       },
       blur() {
-        dispatch(batchActions([
-          removeEnhancedCell(sheetId, column, row),
-          clearCellInput(sheetId, column, row),
-        ], 'BLUR_INDEX_INPUT'));
+        // TODO - is this redundant?  does cellInput reducer handle focus action?
+        dispatch(clearCellInput(sheetId, column, row));
       },
     })
   ),

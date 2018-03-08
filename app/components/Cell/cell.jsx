@@ -16,22 +16,21 @@ import                              './style.scss';
 
 const camel2Kebab = (str) => str.replace(/([A-Z])/g, (g) => `-${g[0].toLowerCase()}`);
 
-export const shouldRenderSearchInput = (activeView, enhanceView, cellInput, type) => (
-  type === 'searchCollection' &&
-  (enhanceView || (activeView && cellInput))
+export const shouldRenderSearchInput = (activeView, cellInput, type) => (
+  type === 'searchCollection' && activeView && cellInput
 );
 
 
 const Cell = ({
   type, sheetId, tableId, column, row, value, $type, cellLength, cellInput, focus,
   leftCellTableId, upCellTableId, predicateIdx,
-  hotKeys, activeView, enhanceView, dropTableView, illegalDropTableView,
+  hotKeys, activeView, dropTableView, illegalDropTableView,
   dragTableView, illegalDragTableView, activeHint, teaserHint,
   onMouseEnter, onKeyPress, onDragStart, onDragEnd, onDragEnter, updateValue,
 }) => (
   /* console.log('render', sheetId, row, column) || */
   <td
-    className={`cell ${camel2Kebab(type)} ${activeView ? 'active' : ''} ${activeHint ? 'active-hint' : ''} ${teaserHint ? 'teaser-hint' : ''} ${enhanceView ? 'enhance' : ''} ${dropTableView ? 'drop-table' : ''} ${illegalDropTableView ? 'illegal-drop-table' : ''} ${dragTableView ? 'drag-table' : ''} ${illegalDragTableView ? 'illegal-drag-table' : ''}`}
+    className={`cell ${camel2Kebab(type)} ${activeView ? 'active' : ''} ${activeHint ? 'active-hint' : ''} ${teaserHint ? 'teaser-hint' : ''} ${dropTableView ? 'drop-table' : ''} ${illegalDropTableView ? 'illegal-drop-table' : ''} ${dragTableView ? 'drag-table' : ''} ${illegalDragTableView ? 'illegal-drag-table' : ''}`}
     role="gridcell"
     draggable={type !== 'empty'}
     onMouseEnter={onMouseEnter}
@@ -42,7 +41,7 @@ const Cell = ({
     {...hotKeys}
   >
     {
-      /* shouldRenderSearchInput(activeView, enhanceView, cellInput, type) ?
+      /* shouldRenderSearchInput(activeView, cellInput, type) ?
           <div>Search Input</div> : */
       equals(focus, predicateInputId(sheetId, column, row)) ?
         <PredicateInput

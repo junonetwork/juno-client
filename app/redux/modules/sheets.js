@@ -472,13 +472,13 @@ export const getSheetMatrix = pipe(
     graphPathMap,
     ...withTeaser(state, sheetId, hints, matrix),
   }),
-  ({ state, sheetId, graphPathMap, hints, matrix, }) => ({
-    state,
-    sheetId,
-    graphPathMap,
-    hints,
-    matrix: withEnhanced(state, sheetId, matrix),
-  }),
+  // ({ state, sheetId, graphPathMap, hints, matrix, }) => ({
+  //   state,
+  //   sheetId,
+  //   graphPathMap,
+  //   hints,
+  //   matrix: withEnhanced(state, sheetId, matrix),
+  // }),
   ({ state, sheetId, graphPathMap, hints, matrix, }) => ({
     state,
     sheetId,

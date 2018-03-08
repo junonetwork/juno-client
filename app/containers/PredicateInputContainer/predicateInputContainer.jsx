@@ -33,9 +33,6 @@ import {
   setFocus,
 }                            from '../../redux/modules/focus';
 import {
-  removeEnhancedCell,
-}                            from '../../redux/modules/enhanced';
-import {
   clearCellInput,
 }                            from '../../redux/modules/cellInput';
 import {
@@ -68,7 +65,6 @@ export default compose(
     (dispatch, { sheetId, tableId, column, row, }) => ({
       submit: (predicates) => {
         dispatch(batchActions([
-          removeEnhancedCell(sheetId, column, row),
           replacePredicates(tableId, predicates),
           setFocus(cellId(sheetId, column, row)),
           clearCellInput(),
@@ -76,16 +72,13 @@ export default compose(
       },
       exit: () => {
         dispatch(batchActions([
-          removeEnhancedCell(sheetId, column, row),
           setFocus(cellId(sheetId, column, row)),
           clearCellInput(),
         ], 'EXIT_PREDICATE_INPUT'));
       },
       blur: () => {
-        dispatch(batchActions([
-          removeEnhancedCell(sheetId, column, row),
-          clearCellInput(),
-        ], 'BLUR_PREDICATE_INPUT'));
+        // TODO - is this redundant?  does cellInput reducer handle focus action?
+        dispatch(clearCellInput());
       },
       navigate: (direction, steps) => {
         dispatch(navigate(sheetId, column, row, direction, steps));
@@ -174,7 +167,6 @@ export default compose(
         // user hits enter without selecting anything -> submit manual input value
         exit();
         // TODO - handle creating new predicate
-        // removeEnhancedView();
         // updateValue(sheetId, column, row, value);
       } else if (selectionIdx === -1) {
         // user selects values and hits enter while on input -> submit selection
@@ -195,7 +187,6 @@ export default compose(
         // user hits enter without selecting anything -> submit manual input value
         exit();
         // TODO - handle creating new predicate
-        // removeEnhancedView();
         // updateValue(sheetId, column, row, value);
       } else if (selectionIdx === -1) {
         // user selects values and hits enter while on input -> submit selection
