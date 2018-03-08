@@ -15,9 +15,16 @@ const AutocompleteInput = ({
   >
     <div
       className="input-field"
-      style={{ lineHeight, }}
+      style={{
+        lineHeight,
+        height: lineHeight,
+      }}
     >
-      {value}
+      {
+        selectionIdx === -1 ?
+          value :
+          list[selectionIdx].label
+      }
     </div>
 
     {status === 'next' &&
@@ -27,7 +34,7 @@ const AutocompleteInput = ({
     }
 
     {
-      value &&
+      // value &&
         <div className="autocomplete-content">
           {
             list.length > 0 ?
