@@ -46,6 +46,9 @@ export default compose(
 
       onChange(value + String.fromCharCode(e.which));
     },
+    click: ({ enter, }) => (uri) => {
+      enter(uri);
+    },
   }),
   withHotKeys(
     ({ id, }) => id,
@@ -63,12 +66,12 @@ export default compose(
       enter: ({ list, selectionIdx, enter, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
-        enter(list[selectionIdx]);
+        enter(list[selectionIdx] && list[selectionIdx].uri);
       },
       'shift+enter': ({ list, selectionIdx, enter, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
-        enter(list[selectionIdx]);
+        enter(list[selectionIdx] && list[selectionIdx].uri);
       },
       esc: ({ exit, }) => (e) => {
         e.preventDefault();
