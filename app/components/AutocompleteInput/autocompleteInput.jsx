@@ -5,8 +5,8 @@ import                              './style.scss';
 
 
 const AutocompleteInput = ({
-  list, value, selectionIdx, status, hotKeys, click, lineHeight,
-  onKeyPress,
+  list, value, placeholder, selectionIdx, status, lineHeight,
+  hotKeys, click, onKeyPress,
 }) => (
   <div
     className="autocomplete-input"
@@ -21,6 +21,8 @@ const AutocompleteInput = ({
       }}
     >
       {
+        selectionIdx === -1 && value === '' ?
+          <span className="placeholder">{placeholder}</span> :
         selectionIdx === -1 ?
           value :
           list[selectionIdx].label
@@ -33,28 +35,25 @@ const AutocompleteInput = ({
       </div>
     }
 
-    {
-      // value &&
-        <div className="autocomplete-content">
-          {
-            list.length > 0 ?
-              <ul className="autocomplete-list">
-                {list.map(({ uri, label, selected, }, idx) => (
-                  <AutocompleteInputItem
-                    key={uri}
-                    uri={uri}
-                    label={label}
-                    idx={idx}
-                    selectionIdx={selectionIdx}
-                    selected={selected}
-                    click={click}
-                  />
-                ))}
-              </ul> :
-              <ul className="autocomplete-empty-list">none</ul>
-          }
-        </div>
-    }
+    <div className="autocomplete-content">
+      {
+        list.length > 0 ?
+          <ul className="autocomplete-list">
+            {list.map(({ uri, label, selected, }, idx) => (
+              <AutocompleteInputItem
+                key={uri}
+                uri={uri}
+                label={label}
+                idx={idx}
+                selectionIdx={selectionIdx}
+                selected={selected}
+                click={click}
+              />
+            ))}
+          </ul> :
+          <ul className="autocomplete-empty-list">none</ul>
+      }
+    </div>
   </div>
 );
 
