@@ -51,6 +51,13 @@ button {
   }
 }
 
+input {
+  border: none;
+  background-color: transparent;
+  font-family: inherit;
+  border-bottom: $table-border;
+}
+
 .scroll-styled {
   overflow:auto;
   }
