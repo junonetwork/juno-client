@@ -60,15 +60,15 @@ export default compose(
         e.stopPropagation();
         forwardSelect();
       },
-      enter: ({ enter, }) => (e) => {
+      enter: ({ list, selectionIdx, enter, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
-        enter();
+        enter(list[selectionIdx]);
       },
-      'shift+enter': ({ enter, }) => (e) => {
+      'shift+enter': ({ list, selectionIdx, enter, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
-        enter();
+        enter(list[selectionIdx]);
       },
       esc: ({ exit, }) => (e) => {
         e.preventDefault();
