@@ -12,11 +12,10 @@ import {
 }                          from '../../hoc/pureWithFocus';
 import {
   setCellInput,
-  clearCellInput,
 }                          from '../../redux/modules/cellInput';
 import {
   cellId,
-  searchInputRepositoryId,
+  searchInputId,
   predicateInputId,
   indexInputId,
   setFocus,
@@ -113,7 +112,7 @@ export default compose(
           type === 'objectCollection' ||
           type === 'empty'
         ) {
-          /* dispatch(setFocus(searchInputRepositoryId(sheetId, column, row))); */
+          dispatch(setFocus(searchInputId(sheetId, column, row)));
         } else if (
           type === 'predicate' ||
           leftCellType === 'predicate' ||
@@ -129,14 +128,6 @@ export default compose(
         ) {
           dispatch(setFocus(indexInputId(sheetId, column, row)));
         }
-      },
-      esc: ({
-        sheetId, column, row,
-      }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        dispatch(clearCellInput(sheetId, column, row));
       },
     },
     /* TODO - enter value when navigating away from cell

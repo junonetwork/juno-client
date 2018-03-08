@@ -33,9 +33,6 @@ import {
   setFocus,
 }                            from '../../redux/modules/focus';
 import {
-  clearCellInput,
-}                            from '../../redux/modules/cellInput';
-import {
   navigate,
 }                            from '../../redux/modules/navigate';
 import {
@@ -67,18 +64,10 @@ export default compose(
         dispatch(batchActions([
           replacePredicates(tableId, predicates),
           setFocus(cellId(sheetId, column, row)),
-          clearCellInput(),
         ], 'SUBMIT_PREDICATE_INPUT'));
       },
       exit: () => {
-        dispatch(batchActions([
-          setFocus(cellId(sheetId, column, row)),
-          clearCellInput(),
-        ], 'EXIT_PREDICATE_INPUT'));
-      },
-      blur: () => {
-        // TODO - is this redundant?  does cellInput reducer handle focus action?
-        dispatch(clearCellInput());
+        dispatch(setFocus(cellId(sheetId, column, row)));
       },
       navigate: (direction, steps) => {
         dispatch(navigate(sheetId, column, row, direction, steps));

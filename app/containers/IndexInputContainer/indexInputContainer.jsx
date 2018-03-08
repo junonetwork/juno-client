@@ -20,9 +20,6 @@ import {
   setFocus,
 }                            from '../../redux/modules/focus';
 import {
-  clearCellInput,
-}                            from '../../redux/modules/cellInput';
-import {
   indicesKeySet2String,
 }                            from '../../utils/sheet';
 import {
@@ -57,18 +54,10 @@ export default compose(
         dispatch(batchActions([
           replaceIndices(tableId, indicesKeySet),
           setFocus({ sheetId, column, row, }),
-          clearCellInput(sheetId, column, row),
         ], 'SUBMIT_INDEX_INPUT'));
       },
       exit() {
-        dispatch(batchActions([
-          setFocus({ sheetId, column, row, }),
-          clearCellInput(sheetId, column, row),
-        ], 'EXIT_INDEX_INPUT'));
-      },
-      blur() {
-        // TODO - is this redundant?  does cellInput reducer handle focus action?
-        dispatch(clearCellInput(sheetId, column, row));
+        dispatch(batchActions(setFocus({ sheetId, column, row, })));
       },
     })
   ),
