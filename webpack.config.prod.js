@@ -43,7 +43,6 @@ module.exports = {
   },
 
   plugins: [
-    new webpack.optimize.ModuleConcatenationPlugin(),
     new HtmlWebpackPlugin({ template: 'app/index.html', inject: 'body' }),
     new CopyWebpackPlugin([{ from: 'app/assets', to: 'assets' }]),
     new webpack.DefinePlugin({
@@ -53,7 +52,6 @@ module.exports = {
       ),
     }),
     new ExtractTextPlugin('style.css'),
-    new webpack.optimize.UglifyJsPlugin(),
   ],
 
   devtool: 'source-map',

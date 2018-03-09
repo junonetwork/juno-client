@@ -8,15 +8,13 @@ const childProcess        = require('child_process');
 
 const HOST = 'localhost';
 const PORT = process.env.PORT || 4000;
-const DEV_PROXY = process.env.DEV_PROXY || 'http://localhost';
+const DEV_PROXY = process.env.DEV_PROXY || 'http://localhost:3000';
 
 
 module.exports = {
   entry: {
     app: [
       'babel-polyfill',
-      `webpack-dev-server/client?http://${HOST}:${PORT}`,
-      'webpack/hot/only-dev-server',
       './app/index.jsx',
     ],
   },
@@ -32,7 +30,7 @@ module.exports = {
       {
         test: /\.jsx?$/,
         include: path.join(__dirname, 'app'),
-        loader: 'babel-loader',
+        use: ['babel-loader'],
       },
       {
         test: /\.scss$/,
@@ -43,12 +41,15 @@ module.exports = {
         test: /\.(woff2?|svg)$/,
         loader: 'url-loader?limit=10000',
       },
+      // {
+      //   test: /\.html$/,
+      //   use: [{ loader: 'html-loader', options: { minimize: true }}]
+      // }
     ],
   },
 
   plugins: [
-    new webpack.optimize.ModuleConcatenationPlugin(),
-    new HtmlWebpackPlugin({ template: 'app/index.html', inject: 'body' }),
+    new HtmlWebpackPlugin({ template: 'app/index.html' }),
     new CopyWebpackPlugin([{ from: 'app/assets', to: 'assets' }]),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify('development'),
@@ -56,8 +57,7 @@ module.exports = {
         childProcess.execSync('git describe --always').toString()
       ),
     }),
-    new webpack.NamedModulesPlugin(),
-    new webpack.HotModuleReplacementPlugin(),
+    // new webpack.NamedModulesPlugin(),
   ],
 
   devtool: 'eval-source-map',
@@ -81,6 +81,6 @@ module.exports = {
   },
 
   resolve: {
-    extensions: ['.js', '.jsx', '.json', '.scss'],
+    extensions: ['.jsx'],
   },
 };

@@ -30,11 +30,11 @@ import {
 import                             './style.scss';
 
 
-if (process.env.NODE_ENV === 'development') {
-  window.R = require('ramda');
-}
-
-
+/* if (process.env.NODE_ENV === 'development') {
+ *   window.R = require('ramda');
+ * }
+ * 
+ * */
 // store.subscribe(() => console.log('store emit'));
 
 const sheetId = '0';
