@@ -8,7 +8,7 @@
   },
   "keywords": [],
   "scripts": {
-    "dev": "webpack-dev-server --mode development --open --config webpack.config.dev.js",
+    "dev": "webpack-dev-server --mode development --open --progress --hot --inline --config webpack.config.dev.js",
     "lint": "eslint ./app/",
     "test": "node test/",
     "build": "NODE_ENV=production webpack --config webpack.config.prod.js --progress",

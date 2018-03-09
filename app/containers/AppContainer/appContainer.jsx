@@ -1,3 +1,4 @@
+/* import { hot }             from 'react-hot-loader';*/
 import {
   prop,
 }                          from 'ramda';
@@ -23,7 +24,7 @@ import connectFalcor       from '../../falcor/connect';
 import withHotKeys         from '../../hoc/withHotKeys';
 
 
-export default compose(
+const AppContainer = compose(
   setDisplayName('AppContainer'),
   connect(
     (state) => ({
@@ -64,3 +65,7 @@ export default compose(
     }),
   )
 )(App);
+
+
+export default AppContainer;
+/* export default hot(module)(AppContainer);*/

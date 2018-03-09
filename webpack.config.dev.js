@@ -19,11 +19,11 @@ module.exports = {
     ],
   },
 
-  output: {
-    path: path.join(__dirname, 'dist'),
-    publicPath: '/',
-    filename: 'index.js',
-  },
+  // output: {
+  //   path: path.join(__dirname, 'dist'),
+  //   publicPath: '/',
+  //   filename: 'index.js',
+  // },
 
   module: {
     rules: [
@@ -41,16 +41,17 @@ module.exports = {
         test: /\.(woff2?|svg)$/,
         loader: 'url-loader?limit=10000',
       },
-      // {
-      //   test: /\.html$/,
-      //   use: [{ loader: 'html-loader', options: { minimize: true }}]
-      // }
+      {
+        test: /\.html$/,
+        use: [{ loader: 'html-loader', options: { minimize: true, }, }],
+      },
     ],
   },
 
   plugins: [
-    new HtmlWebpackPlugin({ template: 'app/index.html' }),
-    new CopyWebpackPlugin([{ from: 'app/assets', to: 'assets' }]),
+    // new webpack.HotModuleReplacementPlugin(),
+    new HtmlWebpackPlugin({ template: 'app/index.html', }),
+    new CopyWebpackPlugin([{ from: 'app/assets', to: 'assets', }]),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify('development'),
       'process.env.__GIT_DESCRIPTION__': JSON.stringify(
@@ -60,7 +61,7 @@ module.exports = {
     // new webpack.NamedModulesPlugin(),
   ],
 
-  devtool: 'eval-source-map',
+  // devtool: 'eval-source-map',
 
   devServer: {
     contentBase: './dist',
@@ -81,6 +82,6 @@ module.exports = {
   },
 
   resolve: {
-    extensions: ['.jsx'],
+    extensions: ['.js', '.jsx', '.json', '.scss'],
   },
 };

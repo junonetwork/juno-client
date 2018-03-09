@@ -1,4 +1,4 @@
-
+import { hot }              from 'react-hot-loader';
 import React                from 'react';
 import SplitPane            from 'react-split-pane';
 import Table                from '../../containers/TableContainer';
@@ -31,7 +31,7 @@ const renderWindow = ({ id, type, data, canDrop, focus, }) => {
 };
 
 
-export default ({ windows, hotKeys, }) => (
+const App = ({ windows, hotKeys, }) => (
   <div
     className="app-window"
     {...hotKeys}
@@ -51,3 +51,6 @@ export default ({ windows, hotKeys, }) => (
     </div>
   </div>
 );
+
+/* export default App;*/
+export default hot(module)(App);
