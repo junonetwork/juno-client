@@ -5,7 +5,7 @@ import {
   withStateHandlers,
 }                          from 'recompose';
 import withHotKeys         from '../../hoc/withHotKeys';
-import AutocompleteInput   from '../../components/AutocompleteInput';
+import Autocomplete        from '../../components/Autocomplete';
 
 
 const noop = () => {};
@@ -91,4 +91,4 @@ export default compose(
       onBlur: ({ blur, }) => () => blur(),
     }
   )
-)(AutocompleteInput);
+)(Autocomplete);

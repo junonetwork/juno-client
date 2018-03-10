@@ -6,7 +6,7 @@ import {
 import                              './style.scss';
 
 
-const AutocompleteInputItem = withHandlers({
+const AutocompleteItem = withHandlers({
   clickAction: ({ uri, click, }) => (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -24,6 +24,6 @@ const AutocompleteInputItem = withHandlers({
 );
 
 
-AutocompleteInputItem.propTypes = {};
+AutocompleteItem.propTypes = {};
 
-export default AutocompleteInputItem;
+export default AutocompleteItem;

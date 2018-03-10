@@ -1,15 +1,15 @@
 import React                   from 'react';
 import {}                      from 'prop-types';
-import AutocompleteInputItem   from '../AutocompleteInputItem';
+import AutocompleteItem        from '../AutocompleteItem';
 import                              './style.scss';
 
 
-const AutocompleteInput = ({
+const Autocomplete = ({
   list, value, placeholder, selectionIdx, status, lineHeight,
   hotKeys, click, onKeyPress,
 }) => (
   <div
-    className="autocomplete-input"
+    className="autocomplete"
     onKeyPress={onKeyPress}
     {...hotKeys}
   >
@@ -40,7 +40,7 @@ const AutocompleteInput = ({
         list.length > 0 ?
           <ul className="autocomplete-list">
             {list.map(({ uri, label, selected, }, idx) => (
-              <AutocompleteInputItem
+              <AutocompleteItem
                 key={uri}
                 uri={uri}
                 label={label}
@@ -58,6 +58,6 @@ const AutocompleteInput = ({
 );
 
 
-AutocompleteInput.propTypes = {};
+Autocomplete.propTypes = {};
 
-export default AutocompleteInput;
+export default Autocomplete;
