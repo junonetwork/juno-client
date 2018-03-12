@@ -57,7 +57,7 @@ export default compose(
         ], 'SUBMIT_INDEX_INPUT'));
       },
       exit() {
-        dispatch(batchActions(setFocus({ sheetId, column, row, })));
+        dispatch(setFocus({ sheetId, column, row, }));
       },
     })
   ),
