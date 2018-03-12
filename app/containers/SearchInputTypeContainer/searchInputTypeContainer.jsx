@@ -69,15 +69,15 @@ export default compose(
     ({ sheetId, column, row, }) => searchTypeInputId(sheetId, column, row),
     {
       down: () => () => {},
-      up: ({ sheetId, column, row, }) => () => (
-        dispatch(setFocus(searchRepositoryInputId(sheetId, column, row)))
-      ),
-      enter: ({ sheetId, column, row, }) => () => (
-        dispatch(setFocus(searchTypeInputAutocompleteId(sheetId, column, row)))
-      ),
-      esc: ({ sheetId, column, row, }) => () => (
-        dispatch(setFocus(cellId(sheetId, column, row)))
-      ),
+      up: ({ sheetId, column, row, }) => () => {
+        dispatch(setFocus(searchRepositoryInputId(sheetId, column, row)));
+      },
+      enter: ({ sheetId, column, row, }) => () => {
+        dispatch(setFocus(searchTypeInputAutocompleteId(sheetId, column, row)));
+      },
+      esc: ({ sheetId, column, row, }) => () => {
+        dispatch(setFocus(cellId(sheetId, column, row)));
+      },
     },
   ),
 )(NavigableAutocomplete);

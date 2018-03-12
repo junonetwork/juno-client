@@ -30,10 +30,7 @@ const { dispatch, } = store;
 
 
 const arrowKeyNavHandler = (direction, steps) =>
-  ({ sheetId, column, row, navigate, }) => (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
+  ({ sheetId, column, row, navigate, }) => () => {
     navigate(sheetId, column, row, direction, steps);
   };
 

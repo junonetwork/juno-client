@@ -11,8 +11,12 @@ const noop = () => {};
 const AutocompleteWithHotKeys = withHotKeys(
   ({ id, }) => id,
   {
-    up: ({ backwardSelect, }) => () => backwardSelect(),
-    down: ({ forwardSelect, }) => () => forwardSelect(),
+    up: ({ backwardSelect, }) => () => {
+      backwardSelect();
+    },
+    down: ({ forwardSelect, }) => () => {
+      forwardSelect();
+    },
     enter: ({ value, list, selectionIdx, enter, }) => () => {
       if (selectionIdx === -1) {
         enter(value, selectionIdx);
@@ -27,7 +31,9 @@ const AutocompleteWithHotKeys = withHotKeys(
         enter(list[selectionIdx].uri, selectionIdx);
       }
     },
-    esc: ({ exit, }) => () => exit(),
+    esc: ({ exit, }) => () => {
+      exit();
+    },
     delete: ({ value, onChange, }) => () => {
       if (value.length > 0) {
         onChange(value.slice(0, -1));

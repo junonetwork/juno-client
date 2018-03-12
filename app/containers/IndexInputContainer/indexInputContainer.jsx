@@ -30,10 +30,7 @@ import {
 
 const submitHandler = ({
   inputIsValid, indicesFromInput, submit, exit,
-}) => (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-
+}) => () => {
   if (inputIsValid) {
     submit(indicesFromInput);
   } else {
@@ -94,7 +91,9 @@ export default compose(
           exit();
         }
       },
-      esc: ({ exit, }) => () => exit(),
+      esc: ({ exit, }) => () => {
+        exit();
+      },
       delete: ({ indicesRangeString, setIndicesRangeString, }) => () => {
         setIndicesRangeString(indicesRangeString.slice(0, -1));
       },
