@@ -92,16 +92,13 @@ export default class AutocompleteContainer extends Component {
     }
   }
 
-  click = (uri, idx) => {
-    this.props.enter(uri, idx);
-  }
-
   render() {
     return (
       <AutocompleteWithHotKeys
         {...this.props}
         forwardSelect={this.forwardSelect}
         backwardSelect={this.backwardSelect}
+        click={this.click}
         onKeyPress={this.onKeyPress}
         selectionIdx={Math.min(this.state.selectionIdx, this.props.list.length - 1)}
       />
