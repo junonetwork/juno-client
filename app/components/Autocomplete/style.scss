@@ -8,16 +8,20 @@
   font-weight: 400;
   text-align: left;
 
+  .value {
+    color: $b_blue;
+  }
+
+  .placeholder {
+    color: lighten($white, 15);
+    font-style: italic;
+  }
+
   .input-field {
     padding: 0 8px;
     text-align: left;
     background-color: rgba(0,0,0,0.1);
     box-shadow: 0 0 0 1px rgba(200,200,200,0.1) inset;
-
-    .placeholder {
-      color: lighten($white, 15);
-      font-style: italic;
-    }
   }
 
   .autocomplete-loading {

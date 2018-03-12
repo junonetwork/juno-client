@@ -2,6 +2,7 @@ import {
   pipe,
   pathOr,
   map,
+  equals,
 }                            from 'ramda';
 import {
   compose,
@@ -16,15 +17,17 @@ import AutocompleteContainer from '../AutocompleteContainer';
 
 
 export default compose(
-  mapPropsStream(connectFalcor(() => ([
-    ['ontology', 'repositories'],
-  ]))),
-  withProps(({ sheetId, column, row, graphFragment, }) => ({
+  withProps(({ sheetId, column, row, }) => ({
     id: searchInputRepositoryId(sheetId, column, row),
+    placeholder: 'repository',
+  })),
+  mapPropsStream(connectFalcor(({ id, focus, }) => (
+    equals(id, focus) ? [['ontology', 'repositories']] : null
+  ))),
+  withProps(({ graphFragment, }) => ({
     list: pipe(
       pathOr([], ['json', 'ontology', 'repositories', 'value']),
       map((repoName) => ({ uri: repoName, label: repoName, }))
     )(graphFragment),
-    placeholder: 'repository',
   })),
 )(AutocompleteContainer);

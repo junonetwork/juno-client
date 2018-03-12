@@ -5,7 +5,6 @@ import {
   compose,
   withStateHandlers,
   withHandlers,
-  mapProps,
 }                            from 'recompose';
 import {
   batchActions,
@@ -45,14 +44,6 @@ export default compose(
       setType: () => (type) => ({ type, }),
     }
   ),
-  /* mapProps(({
-   *   repository, type, search: { repository, type, } = {}, ...rest
-   * }) => ({
-   *   ...rest,
-   *   repository: repository || repository || '',
-   *   type: type || type || '',
-   * })),
-   */
   withHandlers({
     create: ({
       sheetId, column, row,
@@ -86,25 +77,10 @@ export default compose(
   // from focusing on cellId and losing focus on input
   // TODO - searchInputRepository/TypeContainer should include label, so clicking on label focused input
   withHandlers({
-    focusSearchInputRepository: ({
-      sheetId, column, row,
-    }) => (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      dispatch(setFocus(searchInputRepositoryId(sheetId, column, row)));
-    },
-    focusSearchInputType: ({
-      sheetId, column, row,
-    }) => (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      dispatch(setFocus(searchInputTypeId(sheetId, column, row)));
-    },
     enterRepository: ({
       sheetId, column, row, setRepository,
     }) => (repository) => {
+      // TODO - entering non-existent type (selectionIdx === -1) should cancel enter
       if (repository) {
         setRepository(repository);
         dispatch(setFocus(searchInputTypeId(sheetId, column, row)));
@@ -123,6 +99,7 @@ export default compose(
       tableId, sheetId, column, row, repository, setType, create, update,
     }) => (type) => {
       // TODO - validate search
+      // TODO - entering non-existent type (selectionIdx === -1) should cancel enter
       if (type && tableId !== undefined) {
         update(repository, type);
       } else if (type) {
