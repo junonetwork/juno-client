@@ -15,6 +15,10 @@ export const searchInputRepositoryId = (sheetId, column, row) => ({
   sheetId, column, row, searchInput: true, repo: true,
 });
 
+export const searchInputTypeId = (sheetId, column, row) => ({
+  sheetId, column, row, searchInput: true, type: true,
+});
+
 export const predicateInputId = (sheetId, column, row) => ({
   sheetId, column, row, predicateInput: true,
 });

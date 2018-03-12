@@ -71,9 +71,10 @@ export const getGraphTeaserHint = (state, graphId) => {
  * @param {Object} state
  * @param {String} tableId
  */
+// TODO - this is duplicate of cell2PathFragment
 export const getSearchCollectionPath = createCachedSelector(
   getTable,
-  ({ search, }) => ['collection', `schema:${search}`]
+  ({ search, }) => ['collection', JSON.stringify(search)]
 )(
   nthArg(1),
 );

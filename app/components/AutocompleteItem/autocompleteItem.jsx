@@ -7,10 +7,10 @@ import                              './style.scss';
 
 
 const AutocompleteItem = withHandlers({
-  clickAction: ({ uri, click, }) => (e) => {
+  clickAction: ({ uri, idx, click, }) => (e) => {
     e.preventDefault();
     e.stopPropagation();
-    click(uri);
+    click(uri, idx);
   },
 })(
   ({ label, idx, selectionIdx, selected, clickAction, }) => (

@@ -8,7 +8,7 @@ import {
 
 export const cell2PathFragment = (cell, sheetMatrix) => {
   if (cell.type === 'searchCollection') {
-    return ['collection', `schema:${cell.search}`];
+    return ['collection', JSON.stringify(cell.search)];
   } else if (cell.type === 'objectCollection') {
     // recurse to calculate pathFragment for parentObject
     const { column, row, } = destructureAddress(cell.parentObjectAddress);
@@ -53,8 +53,9 @@ export const cell2PathFragment = (cell, sheetMatrix) => {
 };
 
 
-// TODO - mapping search to URIs should move to falcor router
-export const getSearchCollectionPath = (search) => ['resource', `schema:${search}`, 'skos:prefLabel'];
+export const getSearchCollectionPath = (type) => [
+  'resource', type, 'skos:prefLabel',
+];
 
 export const getPredicatePath = (uri) => ['resource', uri, 'skos:prefLabel'];
 
@@ -106,12 +107,11 @@ export const getObjectPath = (collectionAddress, indexAddress, predicateAddress,
 
 
 export const materializeSearchCollection = (cell, graphJSON) => {
-  const relativePath = getSearchCollectionPath(cell.search);
+  const relativePath = getSearchCollectionPath(cell.search.type);
 
-  // TODO - mapping search to URIs should move to falcor router
   return {
     ...cell,
-    cellLength: path(['collection', `schema:${cell.search}`, 'length', 'value'], graphJSON),
+    cellLength: path(['collection', JSON.stringify(cell.search), 'length', 'value'], graphJSON),
     ...path(relativePath, graphJSON),
   };
 };

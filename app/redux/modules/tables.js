@@ -13,6 +13,7 @@ import {
 }                                    from 'rxjs/operators';
 import { of }                        from 'rxjs/observable/of';
 import { from }                      from 'rxjs/observable/from';
+import { empty }                     from 'rxjs/observable/empty';
 import { merge }                     from 'rxjs/observable/merge';
 import createCachedSelector          from 're-reselect';
 import {
@@ -35,7 +36,6 @@ import {
 // }                                    from '../../redux/modules/falcor';
 import model                         from '../../falcor/model';
 import {
-  generateTableId,
   setInArray,
 }                                    from '../../utils/table';
 import {
@@ -62,12 +62,11 @@ export const getTable = (state, tableId) =>
 export const getTablePathSets = createCachedSelector(
   getTable,
   ({ search, indices, predicates, }) => [
-    // TODO - mapping search to URIs should move to falcor router
-    ['resource', `schema:${search}`, 'skos:prefLabel'], // collection
-    ['collection', `schema:${search}`, 'length'], // collection length
+    ['resource', search.type, 'skos:prefLabel'], // collection
+    ['collection', JSON.stringify(search), 'length'], // collection length
     ['resource', predicates, 'skos:prefLabel'], // predicates
-    ['collection', `schema:${search}`, indices, predicates, 0, ['skos:prefLabel', 'uri']], // object values
-    ['collection', `schema:${search}`, indices, predicates, 'length'], // object lengths
+    ['collection', JSON.stringify(search), indices, predicates, 0, ['skos:prefLabel', 'uri']], // object values
+    ['collection', JSON.stringify(search), indices, predicates, 'length'], // object lengths
   ]
 )(
   nthArg(1)
@@ -147,7 +146,7 @@ export const getTableCells = createCachedSelector(
 export const ADD_SEARCH_COLLECTION_TABLE = 'ADD_SEARCH_COLLECTION_TABLE';
 export const REMOVE_TABLE = 'REMOVE_TABLE';
 
-export const REPLACE_SEARCH_COLLECTION_SEARCH = 'REPLACE_SEARCH_COLLECTION_SEARCH';
+export const REPLACE_SEARCH_COLLECTION = 'REPLACE_SEARCH_COLLECTION';
 export const REPLACE_PREDICATES = 'REPLACE_PREDICATES';
 export const REPLACE_INDICES = 'REPLACE_INDICES';
 
@@ -175,8 +174,8 @@ export const removeTable = (tableId) => ({
   type: REMOVE_TABLE, tableId,
 });
 
-export const replaceSearchCollectionSearch = (tableId, search) => ({
-  type: REPLACE_SEARCH_COLLECTION_SEARCH, tableId, search,
+export const replaceSearchCollection = (tableId, repository, resourceType) => ({
+  type: REPLACE_SEARCH_COLLECTION, tableId, repository, resourceType,
 });
 
 export const replacePredicates = (tableId, predicates) => ({
@@ -205,7 +204,6 @@ export default (
 ) => {
   if (action.type === ADD_SEARCH_COLLECTION_TABLE) {
     const { tableId, collectionAddress, search, predicates, indices, } = action;
-    // TODO - should createSearchCollectionTable have a sheetId?  given that it could move to other sheets
     return {
       ...state,
       [tableId]: createSearchCollectionTable(
@@ -214,16 +212,18 @@ export default (
     };
   } else if (action.type === REMOVE_TABLE) {
     return omit([action.tableId], state);
-  } else if (action.type === REPLACE_SEARCH_COLLECTION_SEARCH) {
-    return action.search === state[action.tableId].search ?
-      state :
-      {
-        ...state,
-        [action.tableId]: {
-          ...state[action.tableId],
-          search: action.search,
+  } else if (action.type === REPLACE_SEARCH_COLLECTION) {
+    return {
+      ...state,
+      [action.tableId]: {
+        ...state[action.tableId],
+        search: {
+          ...state[action.tableId].search,
+          repository: action.repository,
+          type: action.resourceType,
         },
-      };
+      },
+    };
   } else if (action.type === REPLACE_PREDICATES) {
     return equals(action.predicates, state[action.tableId].predicates) ?
       state :
@@ -282,7 +282,7 @@ const editValueCellEpic = (getState) => (action$) => (
         return of([removeTable(tableId), clearCellInput()]);
       } else if (type === 'searchCollection' || type === 'objectCollection') {
         // update collection
-        return of([replaceSearchCollectionSearch(tableId, value), clearCellInput()]);
+        return of([replaceSearchCollection(tableId, value), clearCellInput()]);
       } else if (type === 'predicate' && value === '') {
         // delete column
         const { collectionAddress, predicates, } = getTable(getState(), tableId);
@@ -357,7 +357,7 @@ const editValueCellEpic = (getState) => (action$) => (
 const editEmptyCellEpic = (getState) => (action$) => (
   action$.pipe(
     filterStream(({ value, }) => value !== ''),
-    mergeMap(({ sheetId, column, row, value, matrix, }) => {
+    mergeMap(({ column, row, value, matrix, }) => {
       // create new row
       const upCell = getUpCell(matrix, column, row);
       if (
@@ -406,18 +406,21 @@ const editEmptyCellEpic = (getState) => (action$) => (
           );
       }
 
+      return empty;
+
       // create a new collection
-      return of([
-        addSearchCollectionTable(
-          sheetId,
-          generateTableId(),
-          formatAddress(sheetId, column, row),
-          value,
-          ['skos:prefLabel'],
-          [0]
-        ),
-        clearCellInput(),
-      ]);
+      // return of([
+      //   addSearchCollectionTable(
+      //     sheetId,
+      //     generateTableId(),
+      //     formatAddress(sheetId, column, row),
+      //     { repository: 'yyy', resourceType: 'xxx', },
+      //     // value,
+      //     ['skos:prefLabel'],
+      //     [0]
+      //   ),
+      //   clearCellInput(),
+      // ]);
     }),
     catchError((error, caught) => {
       console.error('EditEmptyCellEpic error', error);

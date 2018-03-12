@@ -19,7 +19,7 @@ import {
 }                             from './redux/modules/tables';
 import {
   setFocus,
-  searchInputRepositoryId,
+  searchInputId,
 }                             from './redux/modules/focus';
 import {
   formatAddress,
@@ -30,11 +30,11 @@ import {
 import                             './style.scss';
 
 
-/* if (process.env.NODE_ENV === 'development') {
- *   window.R = require('ramda');
- * }
- * 
- * */
+if (process.env.NODE_ENV === 'development') {
+  window.R = require('ramda');
+}
+
+
 // store.subscribe(() => console.log('store emit'));
 
 const sheetId = '0';
@@ -46,7 +46,7 @@ store.dispatch(
       sheetId,
       generateTableId(),
       formatAddress(sheetId, 0, 0),
-      'Person',
+      { repository: 'memory', type: 'schema:Person', },
       ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling'],
       [{ from: 1, to: 3, }, 1, 3, 10]
     ),
@@ -54,7 +54,7 @@ store.dispatch(
       sheetId,
       generateTableId(),
       formatAddress(sheetId, 1, 10),
-      'Person',
+      { repository: 'memory', type: 'schema:Person', },
       ['schema:name', 'schema:birthPlace'],
       [{ from: 0, to: 2, }]
     ),
@@ -65,12 +65,12 @@ store.dispatch(
      *   '1',
      *   generateTableId(),
      *   formatAddress('1', 0, 0),
-     *   'Person',
+     *   { repository: 'memory', type: 'schema:Person', },
      *   ['schema:name'],
      *   [{ from: 0, to: 1, }]
      * ),
      */
-    setFocus(searchInputRepositoryId('0', 0, 0)),
+    setFocus(searchInputId('0', 0, 0)),
   ], 'INIT_SHEET')
 );
 

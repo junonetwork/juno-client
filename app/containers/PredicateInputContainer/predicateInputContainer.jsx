@@ -96,7 +96,7 @@ export default compose(
   }),
   mapPropsStream(connectFalcor(({ search, }) => ([
     // TODO - mapping search to URIs should move to falcor router
-    ['collection', `schema:${search}`, 'ontology', 'list'],
+    ['ontology', search.repository, 'type', search.type],
   ]))),
   withStateHandlers(
     { selectionIdx: -1, selectedPredicates: [], },
@@ -114,7 +114,7 @@ export default compose(
     graphFragment, search, existingPredicates, selectedPredicates, value,
   }) => ({
     predicateList: pipe(
-      pathOr([], ['json', 'collection', `schema:${search}`, 'ontology', 'list', 'value']),
+      pathOr([], ['json', 'ontology', search.repository, 'type', search.type, 'value']),
       map(({ uri, label, }) => ({ uri, label, selected: contains(uri, selectedPredicates), })),
       filter(({ uri, label, }) => (
         label &&

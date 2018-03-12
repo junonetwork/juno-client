@@ -12,6 +12,7 @@ const noop = () => {};
 
 export default compose(
   defaultProps({
+    value: '',
     blur: noop,
     enter: noop,
     exit: noop,
@@ -46,8 +47,8 @@ export default compose(
 
       onChange(value + String.fromCharCode(e.which));
     },
-    click: ({ enter, }) => (uri) => {
-      enter(uri);
+    click: ({ enter, }) => (uri, idx) => {
+      enter(uri, idx);
     },
   }),
   withHotKeys(
@@ -63,15 +64,25 @@ export default compose(
         e.stopPropagation();
         forwardSelect();
       },
-      enter: ({ list, selectionIdx, enter, }) => (e) => {
+      enter: ({ value, list, selectionIdx, enter, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
-        enter(list[selectionIdx] && list[selectionIdx].uri);
+
+        if (selectionIdx === -1) {
+          enter(value, selectionIdx);
+        } else {
+          enter(list[selectionIdx].uri, selectionIdx);
+        }
       },
-      'shift+enter': ({ list, selectionIdx, enter, }) => (e) => {
+      'shift+enter': ({ value, list, selectionIdx, enter, }) => (e) => {
         e.preventDefault();
         e.stopPropagation();
-        enter(list[selectionIdx] && list[selectionIdx].uri);
+
+        if (selectionIdx === -1) {
+          enter(value, selectionIdx);
+        } else {
+          enter(list[selectionIdx].uri, selectionIdx);
+        }
       },
       esc: ({ exit, }) => (e) => {
         e.preventDefault();

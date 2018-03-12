@@ -9,6 +9,7 @@ import {
   predicateInputId,
   indexInputId,
 }                              from '../../redux/modules/focus';
+import SearchInput             from '../../containers/SearchInputContainer';
 import PredicateInput          from '../../containers/PredicateInputContainer';
 import IndexInput              from '../../containers/IndexInputContainer';
 import                              './style.scss';
@@ -16,13 +17,9 @@ import                              './style.scss';
 
 const camel2Kebab = (str) => str.replace(/([A-Z])/g, (g) => `-${g[0].toLowerCase()}`);
 
-export const shouldRenderSearchInput = (activeView, cellInput, type) => (
-  type === 'searchCollection' && activeView && cellInput
-);
-
 
 const Cell = ({
-  type, sheetId, tableId, column, row, value, $type, cellLength, cellInput, focus,
+  type, search, sheetId, tableId, column, row, value, $type, cellLength, cellInput, focus,
   leftCellTableId, upCellTableId, predicateIdx,
   hotKeys, activeView, dropTableView, illegalDropTableView,
   dragTableView, illegalDragTableView, activeHint, teaserHint,
@@ -41,8 +38,20 @@ const Cell = ({
     {...hotKeys}
   >
     {
-      /* shouldRenderSearchInput(activeView, cellInput, type) ?
-          <div>Search Input</div> : */
+      (
+        focus.sheetId === sheetId &&
+        focus.column === column &&
+        focus.row === row &&
+        focus.searchInput
+      ) ?
+        <SearchInput
+          search={search}
+          tableId={tableId}
+          sheetId={sheetId}
+          column={column}
+          row={row}
+          focus={focus}
+        /> :
       equals(focus, predicateInputId(sheetId, column, row)) ?
         <PredicateInput
           value={cellInput}
