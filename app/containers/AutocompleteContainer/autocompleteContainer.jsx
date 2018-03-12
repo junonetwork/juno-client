@@ -13,9 +13,12 @@ const noop = () => {};
 export default compose(
   defaultProps({
     value: '',
+    placeholder: '',
     blur: noop,
     enter: noop,
     exit: noop,
+    onChange: noop,
+    lineHeight: '22px',
   }),
   withStateHandlers(
     { selectionIdx: -1, },

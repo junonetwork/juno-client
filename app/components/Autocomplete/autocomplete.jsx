@@ -62,7 +62,7 @@ const Autocomplete = ({
         </div> :
       value ?
         <div><span className="value">{value}</span></div> :
-        <div><em className="placeholder">{placeholder}</em></div>
+        <div><em className="value placeholder">{placeholder}</em></div>
     }
   </div>
 );

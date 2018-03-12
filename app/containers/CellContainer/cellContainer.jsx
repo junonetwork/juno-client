@@ -15,7 +15,7 @@ import {
 }                          from '../../redux/modules/cellInput';
 import {
   cellId,
-  searchInputId,
+  searchRepositoryInputId,
   predicateInputId,
   indexInputId,
   setFocus,
@@ -112,7 +112,7 @@ export default compose(
           type === 'objectCollection' ||
           type === 'empty'
         ) {
-          dispatch(setFocus(searchInputId(sheetId, column, row)));
+          dispatch(setFocus(searchRepositoryInputId(sheetId, column, row)));
         } else if (
           type === 'predicate' ||
           leftCellType === 'predicate' ||

@@ -9,51 +9,37 @@ const lineHeight = '22px';
 
 
 const SearchInput = ({
-  sheetId, column, row, focus, repository, type, onKeyPress, hotKeys,
-  setRepository, enterRepository, exitRepository, setType, enterType, exitType,
+  tableId, sheetId, column, row, focus, repository, type, hotKeys,
+  setRepository, create, update, setType,
 }) => (
   <div
     className="search-input"
     {...hotKeys}
   >
-    <div
-      className="search-line"
-      style={{ lineHeight, }}
-    >
-      <span className="search-label">Search</span>
-
-      <SearchInputRepositoryContainer
-        value={repository}
-        sheetId={sheetId}
-        column={column}
-        row={row}
-        focus={focus}
-        lineHeight={lineHeight}
-        onKeyPress={onKeyPress}
-        onChange={setRepository}
-        enter={enterRepository}
-        exit={exitRepository}
-      />
-    </div>
-    <div
-      className="search-line"
-      style={{ lineHeight, }}
-    >
-      <span className="search-label">For</span>
-      <SearchInputTypeContainer
-        value={type}
-        repository={repository}
-        sheetId={sheetId}
-        column={column}
-        row={row}
-        focus={focus}
-        lineHeight={lineHeight}
-        onKeyPress={onKeyPress}
-        onChange={setType}
-        enter={enterType}
-        exit={exitType}
-      />
-    </div>
+    <SearchInputRepositoryContainer
+      repository={repository}
+      type={type}
+      tableId={tableId}
+      sheetId={sheetId}
+      column={column}
+      row={row}
+      focus={focus}
+      lineHeight={lineHeight}
+      setRepository={setRepository}
+    />
+    <SearchInputTypeContainer
+      repository={repository}
+      type={type}
+      tableId={tableId}
+      sheetId={sheetId}
+      column={column}
+      row={row}
+      focus={focus}
+      lineHeight={lineHeight}
+      setType={setType}
+      create={create}
+      update={update}
+    />
   </div>
 );
 

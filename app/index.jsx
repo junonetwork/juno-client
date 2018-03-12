@@ -19,7 +19,7 @@ import {
 }                             from './redux/modules/tables';
 import {
   setFocus,
-  searchInputId,
+  searchRepositoryInputId,
 }                             from './redux/modules/focus';
 import {
   formatAddress,
@@ -70,7 +70,7 @@ store.dispatch(
      *   [{ from: 0, to: 1, }]
      * ),
      */
-    setFocus(searchInputId('0', 0, 0)),
+    setFocus(searchRepositoryInputId('0', 0, 0)),
   ], 'INIT_SHEET')
 );
 

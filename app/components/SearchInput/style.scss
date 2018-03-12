@@ -9,6 +9,14 @@
     display: table;
     clear: both;
 
+    &:focus .autocomplete {
+      border-bottom: 1px solid $b_blue;
+    }
+
+    .autocomplete {
+      border-bottom: 1px solid transparent;
+    }
+
     .search-label {
       text-align: left;
       float: left; // TODO - try to remove when no longer using table layout

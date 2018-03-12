@@ -11,12 +11,20 @@ export const searchInputId = (sheetId, column, row) => ({
   sheetId, column, row, searchInput: true,
 });
 
-export const searchInputRepositoryId = (sheetId, column, row) => ({
-  sheetId, column, row, searchInput: true, repo: true,
+export const searchRepositoryInputId = (sheetId, column, row) => ({
+  sheetId, column, row, searchInput: true, repository: true,
 });
 
-export const searchInputTypeId = (sheetId, column, row) => ({
+export const searchRepositoryInputAutocompleteId = (sheetId, column, row) => ({
+  sheetId, column, row, searchInput: true, repository: true, autocomplete: true,
+});
+
+export const searchTypeInputId = (sheetId, column, row) => ({
   sheetId, column, row, searchInput: true, type: true,
+});
+
+export const searchTypeInputAutocompleteId = (sheetId, column, row) => ({
+  sheetId, column, row, searchInput: true, type: true, autocomplete: true,
 });
 
 export const predicateInputId = (sheetId, column, row) => ({
