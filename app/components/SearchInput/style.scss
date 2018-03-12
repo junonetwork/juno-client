@@ -9,29 +9,11 @@
     display: table;
     clear: both;
 
-    &:focus .autocomplete {
-      border-bottom: 1px solid $b_blue;
-    }
-
-    .autocomplete {
-      border-bottom: 1px solid transparent;
-    }
-
     .search-label {
       text-align: left;
       float: left; // TODO - try to remove when no longer using table layout
       margin-right: 12px;
       font-weight: 400;
-    }
-
-    .search-value {
-      color: $b_blue;
-      text-align: left;
-      float: left; // TODO - try to remove when no longer using table layout
-      font-weight: 400;
-      em.disabled {
-        color: lighten($white, 15);
-      }
     }
   }
 }

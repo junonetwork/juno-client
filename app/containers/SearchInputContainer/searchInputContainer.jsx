@@ -71,6 +71,7 @@ export default compose(
       dispatch(setFocus(cellId(sheetId, column, row)))
     ),
   }),
+  // TODO - replace w/ stopPropagation HOC
   withHotKeys(
     ({ sheetId, column, row, }) => searchInputId(sheetId, column, row),
   ),

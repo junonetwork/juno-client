@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   pipe,
   pathOr,
@@ -20,35 +19,11 @@ import {
   searchTypeInputId,
   setFocus,
 }                            from '../../redux/modules/focus';
-import Autocomplete          from '../AutocompleteContainer';
+import NavigableAutocomplete from '../../components/NavigableAutocomplete';
 import store                 from '../../redux/store';
 
 const { dispatch, } = store;
 
-
-const SearchInputRepository = ({
-  sheetId, column, row, repository, list, lineHeight, focus, hotKeys,
-  setRepository, enterInput, exitInput,
-}) => (
-  <div
-    className="search-line"
-    style={{ lineHeight, }}
-    {...hotKeys}
-  >
-    <span className="search-label">Search</span>
-    <Autocomplete
-      id={searchRepositoryInputAutocompleteId(sheetId, column, row)}
-      value={repository}
-      list={list}
-      placeholder="repository"
-      focus={focus}
-      lineHeight={lineHeight}
-      onChange={setRepository}
-      enter={enterInput}
-      exit={exitInput}
-    />
-  </div>
-);
 
 export default compose(
   mapPropsStream(connectFalcor(({ focus, sheetId, column, row, }) => (
@@ -56,7 +31,10 @@ export default compose(
       [['ontology', 'repositories']] :
       null
   ))),
-  withProps(({ graphFragment, }) => ({
+  withProps(({ repository, sheetId, column, row, graphFragment, }) => ({
+    placeholder: 'repository',
+    value: repository,
+    autocompleteFocusId: searchRepositoryInputAutocompleteId(sheetId, column, row),
     list: pipe(
       pathOr([], ['json', 'ontology', 'repositories', 'value']),
       map((repoName) => ({ uri: repoName, label: repoName, }))
@@ -64,17 +42,17 @@ export default compose(
   })),
   withHandlers({
     enterInput: ({
-      sheetId, column, row, setRepository,
+      sheetId, column, row, setInput,
     }) => (repository, idx) => {
       if (idx !== -1) {
-        setRepository(repository);
+        setInput(repository);
         dispatch(setFocus(searchTypeInputId(sheetId, column, row)));
       }
     },
     exitInput: ({
-      sheetId, column, row, setRepository,
+      sheetId, column, row, setInput,
     }) => () => {
-      setRepository('');
+      setInput('');
       dispatch(setFocus(searchRepositoryInputId(sheetId, column, row)));
     },
   }),
@@ -105,4 +83,4 @@ export default compose(
       },
     },
   ),
-)(SearchInputRepository);
+)(NavigableAutocomplete);

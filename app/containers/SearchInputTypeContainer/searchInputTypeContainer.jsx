@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   pipe,
   pathOr,
@@ -20,35 +19,11 @@ import {
   searchTypeInputAutocompleteId,
   setFocus,
 }                            from '../../redux/modules/focus';
-import Autocomplete          from '../AutocompleteContainer';
+import NavigableAutocomplete from '../../components/NavigableAutocomplete';
 import store                 from '../../redux/store';
 
 const { dispatch, } = store;
 
-
-const SearchInputType = ({
-  sheetId, column, row, typeLabel, list, lineHeight, focus, hotKeys,
-  setTypeLabel, enterInput, exitInput,
-}) => (
-  <div
-    className="search-line"
-    style={{ lineHeight, }}
-    {...hotKeys}
-  >
-    <span className="search-label">For</span>
-    <Autocomplete
-      id={searchTypeInputAutocompleteId(sheetId, column, row)}
-      value={typeLabel}
-      list={list}
-      placeholder="type"
-      focus={focus}
-      lineHeight={lineHeight}
-      onChange={setTypeLabel}
-      enter={enterInput}
-      exit={exitInput}
-    />
-  </div>
-);
 
 // TODO - prevent type input when repository is not specified
 export default compose(
@@ -57,7 +32,12 @@ export default compose(
       [['ontology', repository, 'types']] :
       null
   ))),
-  withProps(({ repository, graphFragment, }) => ({
+  withProps(({
+    sheetId, column, row, repository, typeLabel, graphFragment,
+  }) => ({
+    placeholder: 'type',
+    value: typeLabel,
+    autocompleteFocusId: searchTypeInputAutocompleteId(sheetId, column, row),
     list: pipe(
       pathOr([], ['json', 'ontology', repository, 'types', 'value']),
       map(({ uri, label, }) => ({ uri, label, }))
@@ -75,9 +55,9 @@ export default compose(
       }
     },
     exitInput: ({
-      sheetId, column, row, setTypeLabel,
+      sheetId, column, row, setInput,
     }) => () => {
-      setTypeLabel('');
+      setInput('');
       dispatch(setFocus(searchTypeInputId(sheetId, column, row)));
     },
   }),
@@ -107,4 +87,4 @@ export default compose(
       },
     },
   ),
-)(SearchInputType);
+)(NavigableAutocomplete);
