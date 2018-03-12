@@ -1,0 +1,10 @@
+@import '../../styles/palette';
+
+.navigable-autocomplete {
+  display: inline-block;
+  border-bottom: 1px solid transparent;
+
+  &:focus {
+    border-bottom: 1px solid transparentize($b_blue, 0.4);
+  }
+}
