@@ -46,7 +46,7 @@ store.dispatch(
       sheetId,
       generateTableId(),
       formatAddress(sheetId, 0, 0),
-      { repository: 'memory', type: 'schema:Person', },
+      { repository: 'memory', type: 'schema:Person', typeLabel: 'Person', },
       ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling'],
       [{ from: 1, to: 3, }, 1, 3, 10]
     ),
@@ -54,7 +54,7 @@ store.dispatch(
       sheetId,
       generateTableId(),
       formatAddress(sheetId, 1, 10),
-      { repository: 'memory', type: 'schema:Person', },
+      { repository: 'memory', type: 'schema:Person', typeLabel: 'Person', },
       ['schema:name', 'schema:birthPlace'],
       [{ from: 0, to: 2, }]
     ),
@@ -65,7 +65,7 @@ store.dispatch(
      *   '1',
      *   generateTableId(),
      *   formatAddress('1', 0, 0),
-     *   { repository: 'memory', type: 'schema:Person', },
+     *   { repository: 'memory', type: 'schema:Person', typeLabel: 'Person', },
      *   ['schema:name'],
      *   [{ from: 0, to: 1, }]
      * ),

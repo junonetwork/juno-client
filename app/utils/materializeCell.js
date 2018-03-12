@@ -1,5 +1,6 @@
 import {
   path,
+  omit,
 }                 from 'ramda';
 import {
   destructureAddress,
@@ -8,7 +9,8 @@ import {
 
 export const cell2PathFragment = (cell, sheetMatrix) => {
   if (cell.type === 'searchCollection') {
-    return ['collection', JSON.stringify(cell.search)];
+    // TODO - make a safe/standard search serialize function
+    return ['collection', JSON.stringify(omit(['typeLabel'], cell.search))];
   } else if (cell.type === 'objectCollection') {
     // recurse to calculate pathFragment for parentObject
     const { column, row, } = destructureAddress(cell.parentObjectAddress);
@@ -111,7 +113,7 @@ export const materializeSearchCollection = (cell, graphJSON) => {
 
   return {
     ...cell,
-    cellLength: path(['collection', JSON.stringify(cell.search), 'length', 'value'], graphJSON),
+    cellLength: path(['collection', JSON.stringify(omit(['typeLabel'], cell.search)), 'length', 'value'], graphJSON),
     ...path(relativePath, graphJSON),
   };
 };

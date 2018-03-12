@@ -9,8 +9,8 @@ const lineHeight = '22px';
 
 
 const SearchInput = ({
-  tableId, sheetId, column, row, focus, repository, type, hotKeys,
-  setRepository, create, update, setType,
+  tableId, sheetId, column, row, focus, repository, type, typeLabel,
+  hotKeys, setRepository, create, update, setTypeLabel,
 }) => (
   <div
     className="search-input"
@@ -18,7 +18,6 @@ const SearchInput = ({
   >
     <SearchInputRepositoryContainer
       repository={repository}
-      type={type}
       tableId={tableId}
       sheetId={sheetId}
       column={column}
@@ -29,14 +28,14 @@ const SearchInput = ({
     />
     <SearchInputTypeContainer
       repository={repository}
-      type={type}
+      typeLabel={typeLabel}
       tableId={tableId}
       sheetId={sheetId}
       column={column}
       row={row}
       focus={focus}
       lineHeight={lineHeight}
-      setType={setType}
+      setTypeLabel={setTypeLabel}
       create={create}
       update={update}
     />

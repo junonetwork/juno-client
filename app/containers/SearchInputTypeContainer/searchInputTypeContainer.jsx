@@ -27,8 +27,8 @@ const { dispatch, } = store;
 
 
 const SearchInputType = ({
-  sheetId, column, row, type, list, lineHeight, focus, hotKeys,
-  setType, enterInput, exitInput,
+  sheetId, column, row, typeLabel, list, lineHeight, focus, hotKeys,
+  setTypeLabel, enterInput, exitInput,
 }) => (
   <div
     className="search-line"
@@ -38,18 +38,19 @@ const SearchInputType = ({
     <span className="search-label">For</span>
     <Autocomplete
       id={searchTypeInputAutocompleteId(sheetId, column, row)}
-      value={type}
+      value={typeLabel}
       list={list}
       placeholder="type"
       focus={focus}
       lineHeight={lineHeight}
-      onChange={setType}
+      onChange={setTypeLabel}
       enter={enterInput}
       exit={exitInput}
     />
   </div>
 );
 
+// TODO - prevent type input when repository is not specified
 export default compose(
   mapPropsStream(connectFalcor(({ focus, sheetId, column, row, repository, }) => (
     equals(focus, searchTypeInputAutocompleteId(sheetId, column, row)) ?
@@ -64,19 +65,19 @@ export default compose(
   })),
   withHandlers({
     enterInput: ({
-      tableId, repository, create, update,
+      tableId, repository, list, create, update,
     }) => (type, idx) => {
       // TODO - validate search
       if (idx !== -1 && tableId !== undefined) {
-        update(repository, type);
+        update(repository, type, list[idx].label);
       } else if (idx !== -1) {
-        create(repository, type);
+        create(repository, type, list[idx].label);
       }
     },
     exitInput: ({
-      sheetId, column, row, setType,
+      sheetId, column, row, setTypeLabel,
     }) => () => {
-      setType('');
+      setTypeLabel('');
       dispatch(setFocus(searchTypeInputId(sheetId, column, row)));
     },
   }),

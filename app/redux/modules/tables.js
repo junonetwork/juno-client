@@ -46,6 +46,7 @@ import {
 /**
  * utils
  */
+const omitTypeLabel = omit(['typeLabel']);
 
 
 /**
@@ -63,10 +64,10 @@ export const getTablePathSets = createCachedSelector(
   getTable,
   ({ search, indices, predicates, }) => [
     ['resource', search.type, 'skos:prefLabel'], // collection
-    ['collection', JSON.stringify(search), 'length'], // collection length
+    ['collection', JSON.stringify(omitTypeLabel(search)), 'length'], // collection length
     ['resource', predicates, 'skos:prefLabel'], // predicates
-    ['collection', JSON.stringify(search), indices, predicates, 0, ['skos:prefLabel', 'uri']], // object values
-    ['collection', JSON.stringify(search), indices, predicates, 'length'], // object lengths
+    ['collection', JSON.stringify(omitTypeLabel(search)), indices, predicates, 0, ['skos:prefLabel', 'uri']], // object values
+    ['collection', JSON.stringify(omitTypeLabel(search)), indices, predicates, 'length'], // object lengths
   ]
 )(
   nthArg(1)
@@ -174,8 +175,10 @@ export const removeTable = (tableId) => ({
   type: REMOVE_TABLE, tableId,
 });
 
-export const replaceSearchCollection = (tableId, repository, resourceType) => ({
-  type: REPLACE_SEARCH_COLLECTION, tableId, repository, resourceType,
+export const replaceSearchCollection = (
+  tableId, repository, resourceType, resourceTypeLabel
+) => ({
+  type: REPLACE_SEARCH_COLLECTION, tableId, repository, resourceType, resourceTypeLabel,
 });
 
 export const replacePredicates = (tableId, predicates) => ({
@@ -221,6 +224,7 @@ export default (
           ...state[action.tableId].search,
           repository: action.repository,
           type: action.resourceType,
+          typeLabel: action.resourceTypeLabel,
         },
       },
     };

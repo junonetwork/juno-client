@@ -33,26 +33,27 @@ const { dispatch, } = store;
 
 export default compose(
   withStateHandlers(
-    ({ search: { repository = '', type = '', } = {}, }) => ({
+    ({ search: { repository = '', type = '', typeLabel = '', } = {}, }) => ({
       repository,
       type,
+      typeLabel,
     }),
     {
       setRepository: () => (repository) => ({ repository, }),
-      setType: () => (type) => ({ type, }),
+      setTypeLabel: () => (typeLabel) => ({ typeLabel, }),
     }
   ),
   withHandlers({
     create: ({
       sheetId, column, row,
-    }) => (repository, type) => {
+    }) => (repository, type, typeLabel) => {
       dispatch(batchActions([
         addSearchCollectionTable(
           sheetId,
           generateTableId(),
           formatAddress(sheetId, column, row),
-          { repository, type, },
-          ['schema:name', 'schema:birthPlace'],
+          { repository, type, typeLabel, },
+          ['schema:name'],
           [{ from: 0, to: 2, }]
         ),
         setFocus(cellId(sheetId, column, row)),
@@ -60,9 +61,9 @@ export default compose(
     },
     update: ({
       tableId, sheetId, column, row,
-    }) => (repository, type) => {
+    }) => (repository, type, typeLabel) => {
       dispatch(batchActions([
-        replaceSearchCollection(tableId, repository, type),
+        replaceSearchCollection(tableId, repository, type, typeLabel),
         setFocus(cellId(sheetId, column, row)),
       ]));
     },
