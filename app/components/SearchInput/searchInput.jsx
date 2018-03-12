@@ -14,42 +14,36 @@ const SearchInput = ({
 }) => (
   <div
     className="search-input"
+    style={{
+      lineHeight,
+      gridTemplateRows: lineHeight,
+    }}
     {...hotKeys}
   >
-    <div
-      className="search-line"
-      style={{ lineHeight, }}
-    >
-      <span className="search-label">Search</span>
-      <SearchInputRepositoryContainer
-        repository={repository}
-        sheetId={sheetId}
-        column={column}
-        row={row}
-        focus={focus}
-        lineHeight={lineHeight}
-        setInput={setRepository}
-      />
-    </div>
-    <div
-      className="search-line"
-      style={{ lineHeight, }}
-    >
-      <span className="search-label">For</span>
-      <SearchInputTypeContainer
-        repository={repository}
-        typeLabel={typeLabel}
-        tableId={tableId}
-        sheetId={sheetId}
-        column={column}
-        row={row}
-        focus={focus}
-        lineHeight={lineHeight}
-        setInput={setTypeLabel}
-        create={create}
-        update={update}
-      />
-    </div>
+    <span className="search-label">Search</span>
+    <SearchInputRepositoryContainer
+      repository={repository}
+      sheetId={sheetId}
+      column={column}
+      row={row}
+      focus={focus}
+      lineHeight={lineHeight}
+      setInput={setRepository}
+    />
+    <span className="search-label">For</span>
+    <SearchInputTypeContainer
+      repository={repository}
+      typeLabel={typeLabel}
+      tableId={tableId}
+      sheetId={sheetId}
+      column={column}
+      row={row}
+      focus={focus}
+      lineHeight={lineHeight}
+      setInput={setTypeLabel}
+      create={create}
+      update={update}
+    />
   </div>
 );
 
