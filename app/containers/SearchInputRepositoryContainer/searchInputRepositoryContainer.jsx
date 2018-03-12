@@ -3,6 +3,9 @@ import {
   pathOr,
   map,
   equals,
+  filter,
+  test,
+  prop,
 }                            from 'ramda';
 import {
   compose,
@@ -37,7 +40,8 @@ export default compose(
     autocompleteFocusId: searchRepositoryInputAutocompleteId(sheetId, column, row),
     list: pipe(
       pathOr([], ['json', 'ontology', 'repositories', 'value']),
-      map((repoName) => ({ uri: repoName, label: repoName, }))
+      map((repoName) => ({ uri: repoName, label: repoName, })),
+      filter(pipe(prop('label'), test(RegExp(repository, 'i'))))
     )(graphFragment),
   })),
   withHandlers({
