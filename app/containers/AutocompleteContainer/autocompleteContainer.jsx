@@ -11,45 +11,24 @@ const noop = () => {};
 const AutocompleteWithHotKeys = withHotKeys(
   ({ id, }) => id,
   {
-    up: ({ backwardSelect, }) => (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      backwardSelect();
-    },
-    down: ({ forwardSelect, }) => (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      forwardSelect();
-    },
-    enter: ({ value, list, selectionIdx, enter, }) => (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
+    up: ({ backwardSelect, }) => () => backwardSelect(),
+    down: ({ forwardSelect, }) => () => forwardSelect(),
+    enter: ({ value, list, selectionIdx, enter, }) => () => {
       if (selectionIdx === -1) {
         enter(value, selectionIdx);
       } else {
         enter(list[selectionIdx].uri, selectionIdx);
       }
     },
-    'shift+enter': ({ value, list, selectionIdx, enter, }) => (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
+    'shift+enter': ({ value, list, selectionIdx, enter, }) => () => {
       if (selectionIdx === -1) {
         enter(value, selectionIdx);
       } else {
         enter(list[selectionIdx].uri, selectionIdx);
       }
     },
-    esc: ({ exit, }) => (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      exit();
-    },
-    delete: ({ value, onChange, }) => (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
+    esc: ({ exit, }) => () => exit(),
+    delete: ({ value, onChange, }) => () => {
       if (value.length > 0) {
         onChange(value.slice(0, -1));
       }
@@ -172,55 +151,33 @@ AutocompleteContainer.defaultProps = {
  *     },
  *   }),
  *   withHotKeys(
- *     ({ id, }) => id,
- *     {
- *       up: ({ backwardSelect, }) => (e) => {
- *         e.preventDefault();
- *         e.stopPropagation();
- *         backwardSelect();
- *       },
- *       down: ({ forwardSelect, }) => (e) => {
- *         e.preventDefault();
- *         e.stopPropagation();
- *         forwardSelect();
- *       },
- *       enter: ({ value, list, selectionIdx, enter, }) => (e) => {
- *         e.preventDefault();
- *         e.stopPropagation();
- *
- *         if (selectionIdx === -1) {
- *           enter(value, selectionIdx);
- *         } else {
- *           enter(list[selectionIdx].uri, selectionIdx);
- *         }
- *       },
- *       'shift+enter': ({ value, list, selectionIdx, enter, }) => (e) => {
- *         e.preventDefault();
- *         e.stopPropagation();
- *
- *         if (selectionIdx === -1) {
- *           enter(value, selectionIdx);
- *         } else {
- *           enter(list[selectionIdx].uri, selectionIdx);
- *         }
- *       },
- *       esc: ({ exit, }) => (e) => {
- *         e.preventDefault();
- *         e.stopPropagation();
- *         exit();
- *       },
- *       delete: ({ value, onChange, }) => (e) => {
- *         e.preventDefault();
- *         e.stopPropagation();
- *
- *         if (value.length > 0) {
- *           onChange(value.slice(0, -1));
- *         }
- *       },
- *     },
- *     {
- *       onBlur: ({ blur, }) => () => blur(),
- *     }
- *   )
+ *    ({ id, }) => id,
+ *    {
+ *      up: ({ backwardSelect, }) => () => backwardSelect(),
+ *      down: ({ forwardSelect, }) => () => forwardSelect(),
+ *      enter: ({ value, list, selectionIdx, enter, }) => () => {
+ *        if (selectionIdx === -1) {
+ *          enter(value, selectionIdx);
+ *        } else {
+ *          enter(list[selectionIdx].uri, selectionIdx);
+ *        }
+ *      },
+ *      'shift+enter': ({ value, list, selectionIdx, enter, }) => () => {
+ *        if (selectionIdx === -1) {
+ *          enter(value, selectionIdx);
+ *        } else {
+ *          enter(list[selectionIdx].uri, selectionIdx);
+ *        }
+ *      },
+ *      esc: ({ exit, }) => () => exit(),
+ *      delete: ({ value, onChange, }) => () => {
+ *        if (value.length > 0) {
+ *          onChange(value.slice(0, -1));
+ *        }
+ *      },
+ *    },
+ *    {
+ *      onBlur: ({ blur, }) => () => blur(),
+ *    }
  * )(Autocomplete);
  */

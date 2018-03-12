@@ -26,47 +26,19 @@ export default compose(
   withHotKeys(
     ({ id, }) => id,
     {
-      up: ({ backwardSelect, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        backwardSelect();
-      },
-      down: ({ forwardSelect, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        forwardSelect();
-      },
-      'shift+up': ({ backwardSelect, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        backwardSelect();
-      },
-      'shift+down': ({ forwardSelect, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        forwardSelect();
-      },
+      up: ({ backwardSelect, }) => () => backwardSelect(),
+      down: ({ forwardSelect, }) => () => forwardSelect(),
+      'shift+up': ({ backwardSelect, }) => () => backwardSelect(),
+      'shift+down': ({ forwardSelect, }) => () => forwardSelect(),
       left: ({ arrowLeft, }) => (e) => arrowLeft(e),
       right: ({ arrowRight, }) => (e) => arrowRight(e),
       'alt+left': ({ arrowAltLeft, }) => (e) => arrowAltLeft(e),
       'alt+right': ({ arrowAltRight, }) => (e) => arrowAltRight(e),
       'alt+up': ({ arrowAltUp, }) => (e) => arrowAltUp(e),
       'alt+down': ({ arrowAltDown, }) => (e) => arrowAltDown(e),
-      enter: ({ enter, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        enter();
-      },
-      'shift+enter': ({ shiftEnter, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        shiftEnter();
-      },
-      esc: ({ exit, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        exit();
-      },
+      enter: ({ enter, }) => () => enter(),
+      'shift+enter': ({ shiftEnter, }) => () => shiftEnter(),
+      esc: ({ exit, }) => () => exit(),
       delete: ({ value, }) => (e) => {
         // if user presses delete when input is empty, don't delete column
         if (value === '') {

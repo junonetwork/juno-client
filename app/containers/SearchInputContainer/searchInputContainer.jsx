@@ -1,7 +1,4 @@
 import {
-  equals,
-}                            from 'ramda';
-import {
   compose,
   withStateHandlers,
   withHandlers,

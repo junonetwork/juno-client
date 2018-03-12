@@ -48,16 +48,12 @@ const AppContainer = compose(
   withHotKeys(
     appId(),
     ({
-      'cmd+1': ({ windows, deleteWindowAction, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+      'cmd+1': ({ windows, deleteWindowAction, }) => () => {
         if (windows.length !== 1) {
           deleteWindowAction();
         }
       },
-      'cmd+2': ({ windows, createWindowAction, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+      'cmd+2': ({ windows, createWindowAction, }) => () => {
         if (windows.length !== 2) {
           createWindowAction();
         }

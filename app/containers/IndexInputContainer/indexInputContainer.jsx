@@ -87,24 +87,15 @@ export default compose(
       'alt+right': submitHandler,
       'alt+up': submitHandler,
       'alt+down': submitHandler,
-      enter: ({ inputIsValid, indicesFromInput, submit, exit, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
+      enter: ({ inputIsValid, indicesFromInput, submit, exit, }) => () => {
         if (inputIsValid) {
           submit(indicesFromInput);
         } else {
           exit();
         }
       },
-      esc: ({ exit, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        exit();
-      },
-      delete: ({ indicesRangeString, setIndicesRangeString, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+      esc: ({ exit, }) => () => exit(),
+      delete: ({ indicesRangeString, setIndicesRangeString, }) => () => {
         setIndicesRangeString(indicesRangeString.slice(0, -1));
       },
     },

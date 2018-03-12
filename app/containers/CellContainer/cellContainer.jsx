@@ -88,10 +88,7 @@ export default compose(
       'alt+right': arrowKeyNavHandler('right', FAST_STEP),
       delete: ({
         sheetId, column, row, cellInput, updateValue,
-      }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
+      }) => () => {
         if (cellInput) {
           dispatch(setCellInput(sheetId, column, row, cellInput.slice(0, -1)));
         } else {
@@ -101,10 +98,7 @@ export default compose(
       enter: ({
         sheetId, column, row, cellInput, type, leftCellType, upCellType,
         updateValue,
-      }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
+      }) => () => {
         if (cellInput) {
           updateValue(sheetId, column, row, cellInput);
         } else if (
@@ -136,7 +130,6 @@ export default compose(
      *   onBlur: ({
      *     sheetId, column, row, cellInput, updateValue,
      *   }) => () => {
-     *     console.log('blur', cellInput)
      *     if (cellInput) {
      *       updateValue(sheetId, column, row, cellInput);
      *     } else {

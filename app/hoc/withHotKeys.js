@@ -99,8 +99,11 @@ const withHotKeys = (
         const key = event2HandlerKey(e);
 
         if (hotKeyHandlers[key]) {
-          // TODO - should this stopPropagation by default?  handler by default fires for every nested withHotKeys component
-          hotKeyHandlers[key](this.props)(e);
+          const shouldAllowPropagation = hotKeyHandlers[key](this.props)(e);
+          if (!shouldAllowPropagation) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
         }
       },
       ref: (node) => {

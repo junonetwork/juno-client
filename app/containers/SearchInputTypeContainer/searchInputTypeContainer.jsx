@@ -68,27 +68,16 @@ export default compose(
   withHotKeys(
     ({ sheetId, column, row, }) => searchTypeInputId(sheetId, column, row),
     {
-      down: () => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-      },
-      up: ({ sheetId, column, row, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        dispatch(setFocus(searchRepositoryInputId(sheetId, column, row)));
-      },
-      enter: ({
-        sheetId, column, row,
-      }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        dispatch(setFocus(searchTypeInputAutocompleteId(sheetId, column, row)));
-      },
-      esc: ({ sheetId, column, row, }) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        dispatch(setFocus(cellId(sheetId, column, row)));
-      },
+      down: () => () => {},
+      up: ({ sheetId, column, row, }) => () => (
+        dispatch(setFocus(searchRepositoryInputId(sheetId, column, row)))
+      ),
+      enter: ({ sheetId, column, row, }) => () => (
+        dispatch(setFocus(searchTypeInputAutocompleteId(sheetId, column, row)))
+      ),
+      esc: ({ sheetId, column, row, }) => () => (
+        dispatch(setFocus(cellId(sheetId, column, row)))
+      ),
     },
   ),
 )(NavigableAutocomplete);
