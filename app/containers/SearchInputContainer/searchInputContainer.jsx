@@ -1,6 +1,7 @@
 import {
   compose,
   withStateHandlers,
+  withProps,
   withHandlers,
 }                            from 'recompose';
 import {
@@ -40,10 +41,17 @@ export default compose(
       setTypeLabel: () => (typeLabel) => ({ typeLabel, }),
     }
   ),
+  withProps(({ repository, type, }) => ({
+    searchIsValid: repository && type,
+  })),
   withHandlers({
     create: ({
-      sheetId, column, row,
+      searchIsValid, sheetId, column, row,
     }) => (repository, type, typeLabel) => {
+      if (!searchIsValid) {
+        return;
+      }
+
       dispatch(batchActions([
         addSearchCollectionTable(
           sheetId,
@@ -57,8 +65,12 @@ export default compose(
       ]));
     },
     update: ({
-      tableId, sheetId, column, row,
+      searchIsValid, tableId, sheetId, column, row,
     }) => (repository, type, typeLabel) => {
+      if (!searchIsValid) {
+        return;
+      }
+
       dispatch(batchActions([
         replaceSearchCollection(tableId, repository, type, typeLabel),
         setFocus(cellId(sheetId, column, row)),

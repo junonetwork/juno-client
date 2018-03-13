@@ -7,6 +7,10 @@
   border: 1px solid $b_blue;
   padding: 6px 8px;
 
+  &.invalid {
+    border-color: $b_red;
+  }
+
   .search-label {
     color: lighten($white, 30);
     text-align: right;

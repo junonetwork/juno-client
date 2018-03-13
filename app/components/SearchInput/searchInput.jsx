@@ -9,11 +9,11 @@ const lineHeight = '22px';
 
 
 const SearchInput = ({
-  tableId, sheetId, column, row, focus, repository, typeLabel,
+  searchIsValid, tableId, sheetId, column, row, focus, repository, typeLabel,
   hotKeys, setRepository, create, update, setTypeLabel,
 }) => (
   <div
-    className="search-input"
+    className={`search-input ${searchIsValid ? '' : 'invalid'}`}
     style={{
       lineHeight,
       gridTemplateRows: lineHeight,
