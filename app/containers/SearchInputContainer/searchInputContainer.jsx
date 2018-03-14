@@ -31,6 +31,9 @@ const searchIsValid = (repository, type, typeLabel) =>
   repository && type && typeLabel;
 
 
+// TODO - it might make sense to separate repository/type label input, which changes
+// w/ keystroke input and is often invalid
+// from repository/type id, which only changes w/ autocomplete submit
 export default compose(
   withStateHandlers(
     ({ search: { repository = '', type = '', typeLabel = '', } = {}, }) => ({

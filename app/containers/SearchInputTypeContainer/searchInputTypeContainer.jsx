@@ -71,7 +71,8 @@ export default compose(
       up: ({ sheetId, column, row, }) => () => {
         dispatch(setFocus(searchRepositoryInputId(sheetId, column, row)));
       },
-      enter: ({ sheetId, column, row, }) => () => {
+      enter: ({ sheetId, column, row, setInput, }) => () => {
+        setInput('');
         dispatch(setFocus(searchTypeInputAutocompleteId(sheetId, column, row)));
       },
       esc: ({ sheetId, column, row, }) => () => {
