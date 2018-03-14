@@ -6,7 +6,7 @@ const CopyWebpackPlugin   = require('copy-webpack-plugin');
 const childProcess        = require('child_process');
 
 
-const HOST = 'localhost';
+const HOST = 'localhost'; // '0.0.0.0';
 const PORT = process.env.PORT || 4000;
 const DEV_PROXY = process.env.DEV_PROXY || 'http://localhost:3000';
 
