@@ -10,7 +10,7 @@ const lineHeight = '22px';
 
 const SearchInput = ({
   searchIsValid, tableId, sheetId, column, row, focus, repository, typeLabel,
-  hotKeys, setRepository, create, update, setTypeLabel,
+  hotKeys, setRepository, create, update, setType,
 }) => (
   <div
     className={`search-input ${searchIsValid ? '' : 'invalid'}`}
@@ -40,7 +40,7 @@ const SearchInput = ({
       row={row}
       focus={focus}
       lineHeight={lineHeight}
-      setInput={setTypeLabel}
+      setInput={setType}
       create={create}
       update={update}
     />

@@ -51,7 +51,6 @@ export default compose(
     enterInput: ({
       tableId, repository, list, create, update,
     }) => (type, idx) => {
-      // TODO - validate search
       if (idx !== -1 && tableId !== undefined) {
         update(repository, type, list[idx].label);
       } else if (idx !== -1) {

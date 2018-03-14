@@ -27,6 +27,8 @@ import SearchInput           from '../../components/SearchInput';
 import store                 from '../../redux/store';
 
 const { dispatch, } = store;
+const searchIsValid = (repository, type, typeLabel) =>
+  repository && type && typeLabel;
 
 
 export default compose(
@@ -37,18 +39,20 @@ export default compose(
       typeLabel,
     }),
     {
-      setRepository: () => (repository) => ({ repository, }),
-      setTypeLabel: () => (typeLabel) => ({ typeLabel, }),
+      setRepository: () => (repository) => ({
+        repository, typeLabel: '', type: '',
+      }),
+      setType: () => (typeLabel) => ({ typeLabel, }),
     }
   ),
-  withProps(({ repository, type, }) => ({
-    searchIsValid: repository && type,
+  withProps(({ repository, type, typeLabel, }) => ({
+    searchIsValid: searchIsValid(repository, type, typeLabel),
   })),
   withHandlers({
     create: ({
-      searchIsValid, sheetId, column, row,
+      sheetId, column, row,
     }) => (repository, type, typeLabel) => {
-      if (!searchIsValid) {
+      if (!searchIsValid(repository, type, typeLabel)) {
         return;
       }
 
@@ -65,9 +69,9 @@ export default compose(
       ]));
     },
     update: ({
-      searchIsValid, tableId, sheetId, column, row,
+      tableId, sheetId, column, row,
     }) => (repository, type, typeLabel) => {
-      if (!searchIsValid) {
+      if (!searchIsValid(repository, type, typeLabel)) {
         return;
       }
 
