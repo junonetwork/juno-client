@@ -5,7 +5,7 @@ import                              './style.scss';
 
 
 const NavigableAutocomplete = ({
-  value, list, placeholder, lineHeight, hotKeys, autocompleteFocusId,
+  value, graphFragmentStatus, list, placeholder, lineHeight, hotKeys, autocompleteFocusId,
   setInput, enterInput, exitInput,
 }) => (
   <span
@@ -14,6 +14,7 @@ const NavigableAutocomplete = ({
   >
     <Autocomplete
       id={autocompleteFocusId}
+      status={graphFragmentStatus}
       value={value}
       list={list}
       placeholder={placeholder}

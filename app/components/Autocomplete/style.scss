@@ -31,6 +31,10 @@
     transform: translateY(-50%);
   }
 
+  .autocomplete-error {
+    color: $b_red;
+  }
+
   .autocomplete-content {
     position: absolute;
     width: 100%;
