@@ -63,10 +63,10 @@ export const getTable = (state, tableId) =>
 export const getTablePathSets = createCachedSelector(
   getTable,
   ({ search, indices, predicates, }) => [
-    ['resource', search.type, 'skos:prefLabel'], // collection
+    ['resource', search.type, 'skos:prefLabel', 0], // collection
     ['collection', JSON.stringify(omitTypeLabel(search)), 'length'], // collection length
-    ['resource', predicates, 'skos:prefLabel'], // predicates
-    ['collection', JSON.stringify(omitTypeLabel(search)), indices, predicates, 0, ['skos:prefLabel', 'uri']], // object values
+    ['resource', predicates, 'skos:prefLabel', 0], // predicates
+    ['collection', JSON.stringify(omitTypeLabel(search)), indices, predicates, 0, ['skos:prefLabel', 'uri'], 0], // object values
     ['collection', JSON.stringify(omitTypeLabel(search)), indices, predicates, 'length'], // object lengths
   ]
 )(
@@ -299,29 +299,6 @@ const editValueCellEpic = (getState) => (action$) => (
           ),
           clearCellInput(),
         ]);
-      } else if (type === 'predicate') {
-        // update column
-        // TODO - inverse is depricated
-        console.warn('inverse path key is deprecated');
-        return from(
-          model.getValue(['inverse', `"${value}"`, 'skos:prefLabel', 'uri'])
-        )
-          .pipe(
-            // TODO - handle case of adding non-existent uri
-            map((uri = {}) => {
-              const { collectionAddress, predicates, } = getTable(getState(), tableId);
-              const indexOfReplaceColumn = column -
-                destructureAddress(collectionAddress).column - 1;
-
-              return [
-                replacePredicates(
-                  tableId,
-                  setInArray(indexOfReplaceColumn, uri.value || value, predicates)
-                ),
-                clearCellInput(),
-              ];
-            })
-          );
       } else if (type === 'index' && value === '') {
         // delete row
         const { collectionAddress, indices, } = getTable(getState(), tableId);
@@ -383,34 +360,34 @@ const editEmptyCellEpic = (getState) => (action$) => (
       }
 
       // create new column
-      const leftCell = getLeftCell(matrix, column, row);
-      if (
-        leftCell && (
-          leftCell.type === 'searchCollection' ||
-          leftCell.type === 'objectCollection' ||
-          leftCell.type === 'predicate'
-        )
-      ) {
-        return from(
-          model.getValue(['inverse', `"${value}"`, 'skos:prefLabel', 'uri'])
-        )
-          .pipe(
-            // TODO - handle case of adding non-existent uri
-            map((uri = {}) => {
-              // TODO - store label, for cases when predicate label doesn't resolve to anything
-              const { predicates, } = getTable(getState(), leftCell.tableId);
-              return [
-                replacePredicates(
-                  leftCell.tableId,
-                  [...predicates, uri.value || value]
-                ),
-                clearCellInput(),
-              ];
-            }),
-          );
-      }
+      // const leftCell = getLeftCell(matrix, column, row);
+      // if (
+      //   leftCell && (
+      //     leftCell.type === 'searchCollection' ||
+      //     leftCell.type === 'objectCollection' ||
+      //     leftCell.type === 'predicate'
+      //   )
+      // ) {
+      //   return from(
+      //     model.getValue(['inverse', `"${value}"`, 'skos:prefLabel', 'uri'])
+      //   )
+      //     .pipe(
+      //       // TODO - handle case of adding non-existent uri
+      //       map((uri = {}) => {
+      //         // TODO - store label, for cases when predicate label doesn't resolve to anything
+      //         const { predicates, } = getTable(getState(), leftCell.tableId);
+      //         return [
+      //           replacePredicates(
+      //             leftCell.tableId,
+      //             [...predicates, uri.value || value]
+      //           ),
+      //           clearCellInput(),
+      //         ];
+      //       }),
+      //     );
+      // }
 
-      return empty;
+      return empty();
 
       // create a new collection
       // return of([

@@ -89,7 +89,7 @@ export const getPathsThroughGraph = createCachedSelector(
   ({ indices, predicates, }) => (
     xprod(expandIndicesKeySet(indices), predicates)
       .map(([index, predicate]) => ([
-        index, predicate, 0, 'skos:prefLabel',
+        index, predicate, 0, 'skos:prefLabel', 0,
       ]))
   )
 )(
@@ -124,7 +124,7 @@ export const getJGFMapFromPath = (
 
 
   const predicateValue = predicate === 'skos:prefLabel' ?
-    path([collectionIndex, predicate], graphJSON) :
+    path([collectionIndex, predicate, 0], graphJSON) :
     path([collectionIndex, predicate, predicateIndex], graphJSON);
 
   if (!predicateValue) {

@@ -56,10 +56,10 @@ export const cell2PathFragment = (cell, sheetMatrix) => {
 
 
 export const getSearchCollectionPath = (type) => [
-  'resource', type, 'skos:prefLabel',
+  'resource', type, 'skos:prefLabel', 0,
 ];
 
-export const getPredicatePath = (uri) => ['resource', uri, 'skos:prefLabel'];
+export const getPredicatePath = (uri) => ['resource', uri, 'skos:prefLabel', 0];
 
 export const getIndexPath = (collectionAddress, index, sheetMatrix) => {
   const {
@@ -164,8 +164,8 @@ export const materializeObject = (cell, graphJSON, sheetMatrix) => {
   }
 
   // if boxValue points to an object, get its skos:prefLabel
-  if (boxValue && boxValue['skos:prefLabel']) {
-    boxValue = boxValue['skos:prefLabel'];
+  if (boxValue && boxValue['skos:prefLabel'] && boxValue['skos:prefLabel'][0]) {
+    boxValue = boxValue['skos:prefLabel'][0];
   }
 
   return {
