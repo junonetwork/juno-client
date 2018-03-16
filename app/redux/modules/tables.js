@@ -54,7 +54,7 @@ const omitTypeLabel = omit(['typeLabel']);
  */
 export const getTable = (state, tableId) =>
   state.tables[tableId];
-
+const serializeSearch = (search) => JSON.stringify(omitTypeLabel(search));
 
 /**
  * @param {Object} state
@@ -62,13 +62,26 @@ export const getTable = (state, tableId) =>
  */
 export const getTablePathSets = createCachedSelector(
   getTable,
-  ({ search, indices, predicates, }) => [
-    ['resource', search.type, 'skos:prefLabel', 0], // collection
-    ['collection', JSON.stringify(omitTypeLabel(search)), 'length'], // collection length
-    ['resource', predicates, 'skos:prefLabel', 0], // predicates
-    ['collection', JSON.stringify(omitTypeLabel(search)), indices, predicates, 0, ['skos:prefLabel', 'uri'], 0], // object values
-    ['collection', JSON.stringify(omitTypeLabel(search)), indices, predicates, 'length'], // object lengths
-  ]
+  ({ search, indices, predicates, }) => {
+    const paths = [
+      ['resource', search.type, 'skos:prefLabel', 0], // collection
+      ['collection', serializeSearch(search), 'length'], // collection length
+    ];
+
+    if (predicates.length > 0 && indices.length > 0) {
+      paths.push(
+        ['resource', predicates, 'skos:prefLabel', 0], // predicates
+        ['collection', serializeSearch(search), indices, predicates, 0, ['skos:prefLabel', 'uri'], 0], // object values
+        ['collection', serializeSearch(search), indices, predicates, 'length'], // object lengths
+      );
+    } else if (predicates.length > 0) {
+      paths.push(
+        ['resource', predicates, 'skos:prefLabel', 0], // predicates
+      );
+    }
+
+    return paths;
+  }
 )(
   nthArg(1)
 );
