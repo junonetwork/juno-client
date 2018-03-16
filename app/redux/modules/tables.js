@@ -71,7 +71,8 @@ export const getTablePathSets = createCachedSelector(
     if (predicates.length > 0 && indices.length > 0) {
       paths.push(
         ['resource', predicates, 'skos:prefLabel', 0], // predicates
-        ['collection', serializeSearch(search), indices, predicates, 0, ['skos:prefLabel', 'uri'], 0], // object values
+        ['collection', serializeSearch(search), indices, predicates, 0, 'skos:prefLabel', 0], // object values
+        ['collection', serializeSearch(search), indices, predicates, 0, 'uri'], // object values
         ['collection', serializeSearch(search), indices, predicates, 'length'], // object lengths
       );
     } else if (predicates.length > 0) {
