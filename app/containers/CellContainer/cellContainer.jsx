@@ -99,12 +99,6 @@ export default compose(
         if (cellInput) {
           updateValue(sheetId, column, row, cellInput);
         } else if (
-          type === 'searchCollection' ||
-          type === 'objectCollection' ||
-          type === 'empty'
-        ) {
-          dispatch(setFocus(searchRepositoryInputId(sheetId, column, row)));
-        } else if (
           type === 'predicate' ||
           leftCellType === 'predicate' ||
           leftCellType === 'searchCollection' ||
@@ -118,6 +112,12 @@ export default compose(
           upCellType === 'objectCollection'
         ) {
           dispatch(setFocus(indexInputId(sheetId, column, row)));
+        } else if (
+          type === 'searchCollection' ||
+          type === 'objectCollection' ||
+          type === 'empty'
+        ) {
+          dispatch(setFocus(searchRepositoryInputId(sheetId, column, row)));
         }
       },
     },
