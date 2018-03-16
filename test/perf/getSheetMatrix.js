@@ -58,7 +58,7 @@ const initStore = () => {
     tableId,
     collectionAddress,
     'Person',
-    ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling', 'schema:sibling'],
+    ['skos:prefLabel', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling', 'schema:sibling'],
     [0, 1, 2, 3, 0, 1, 0, 10]
   ));
   store.dispatch(setFocus({ sheetId, column: 0, row: 0, }));

@@ -65,7 +65,7 @@ export default compose(
           generateTableId(),
           formatAddress(sheetId, column, row),
           { repository, type, typeLabel, },
-          ['schema:name'],
+          ['skos:prefLabel'],
           [{ from: 0, to: 2, }]
         ),
         setFocus(cellId(sheetId, column, row)),

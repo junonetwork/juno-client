@@ -47,7 +47,7 @@ store.dispatch(
       generateTableId(),
       formatAddress(sheetId, 0, 0),
       { repository: 'memory', type: 'schema:Person', typeLabel: 'Person', },
-      ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling'],
+      ['skos:prefLabel', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling'],
       [{ from: 1, to: 3, }, 1, 3, 10]
     ),
     addSearchCollectionTable(
@@ -55,7 +55,7 @@ store.dispatch(
       generateTableId(),
       formatAddress(sheetId, 1, 10),
       { repository: 'memory', type: 'schema:Person', typeLabel: 'Person', },
-      ['schema:name', 'schema:birthPlace'],
+      ['skos:prefLabel', 'schema:birthPlace'],
       [{ from: 0, to: 2, }]
     ),
     // second window
@@ -66,7 +66,7 @@ store.dispatch(
      *   generateTableId(),
      *   formatAddress('1', 0, 0),
      *   { repository: 'memory', type: 'schema:Person', typeLabel: 'Person', },
-     *   ['schema:name'],
+     *   ['skos:prefLabel'],
      *   [{ from: 0, to: 1, }]
      * ),
      */

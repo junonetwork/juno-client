@@ -113,7 +113,13 @@ export const materializeSearchCollection = (cell, graphJSON) => {
 
   return {
     ...cell,
-    cellLength: path(['collection', JSON.stringify(omit(['typeLabel'], cell.search)), 'length', 'value'], graphJSON),
+    cellLength: path(
+      [
+        'collection',
+        JSON.stringify(omit(['typeLabel'], cell.search)), 'length', 'value',
+      ],
+      graphJSON
+    ),
     ...path(relativePath, graphJSON),
   };
 };
