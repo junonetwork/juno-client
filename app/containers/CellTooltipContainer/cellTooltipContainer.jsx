@@ -71,6 +71,8 @@ export default compose(
           e.preventDefault();
           e.stopPropagation();
         }
+
+        return true;
       },
     },
     {
