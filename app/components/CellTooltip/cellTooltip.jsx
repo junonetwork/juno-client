@@ -43,7 +43,7 @@ const CellTooltip = ({
     }
 
     <div
-      className="tooltip-input-content"
+      className="tooltip-input-content scroll-styled"
     >
       {list.length > 0 ?
         <ul className="tooltip-list">

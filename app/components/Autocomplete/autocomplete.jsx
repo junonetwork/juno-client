@@ -40,7 +40,7 @@ const Autocomplete = ({
           </div>
           {
             status === 'complete' &&
-              <div className="autocomplete-content">
+              <div className="autocomplete-content scroll-styled">
                 {
                   list.length > 0 ?
                     <ul className="autocomplete-list">
