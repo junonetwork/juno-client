@@ -28,6 +28,7 @@ import model, {
 }                       from './model';
 
 
+// TODO - rewrite using pipe
 const connect = (falcorModel, _graphChange$) => (
   paths,
   {
@@ -45,7 +46,7 @@ const connect = (falcorModel, _graphChange$) => (
 
       const _paths = typeof paths === 'function' ? paths(props) : paths;
 
-      if (!_paths) {
+      if (_paths === null || _paths.length === 0) {
         return Observable.of({ ...props, graphFragment: {}, graphFragmentStatus: 'complete', });
       } else if (_paths instanceof Error) {
         return Observable.of({
