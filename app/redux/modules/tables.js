@@ -6,15 +6,14 @@ import {
 }                                    from 'ramda';
 import {
   filter as filterStream,
-  map,
   mergeMap,
   catchError,
   partition,
 }                                    from 'rxjs/operators';
 import { of }                        from 'rxjs/observable/of';
-import { from }                      from 'rxjs/observable/from';
 import { empty }                     from 'rxjs/observable/empty';
 import { merge }                     from 'rxjs/observable/merge';
+import { batchActions }              from 'redux-batched-actions';
 import createCachedSelector          from 're-reselect';
 import {
   expandIndicesKeySet,
@@ -28,13 +27,7 @@ import {
   createPredicate,
   destructureAddress,
   getUpCell,
-  getLeftCell,
 }                                    from '../../utils/cell';
-// import {
-//   deleteGraphValue,
-//   updateGraphValue,
-// }                                    from '../../redux/modules/falcor';
-import model                         from '../../falcor/model';
 import {
   setInArray,
 }                                    from '../../utils/table';
@@ -297,22 +290,22 @@ const editValueCellEpic = (getState) => (action$) => (
         return of(clearCellInput());
       } else if ((type === 'searchCollection' || type === 'objectCollection') && value === '') {
         // delete collection
-        return of([removeTable(tableId), clearCellInput()]);
+        return of(batchActions([removeTable(tableId), clearCellInput()]));
       } else if (type === 'searchCollection' || type === 'objectCollection') {
         // update collection
-        return of([replaceSearchCollection(tableId, value), clearCellInput()]);
+        return of(batchActions([replaceSearchCollection(tableId, value), clearCellInput()]));
       } else if (type === 'predicate' && value === '') {
         // delete column
         const { collectionAddress, predicates, } = getTable(getState(), tableId);
         const indexOfDeleteColumn = column - destructureAddress(collectionAddress).column - 1;
 
-        return of([
+        return of(batchActions([
           replacePredicates(
             tableId,
             predicates.filter((_, idx) => idx !== indexOfDeleteColumn)
           ),
           clearCellInput(),
-        ]);
+        ]));
       } else if (type === 'index' && value === '') {
         // delete row
         const { collectionAddress, indices, } = getTable(getState(), tableId);
@@ -321,7 +314,7 @@ const editValueCellEpic = (getState) => (action$) => (
         const newIndices = expandIndicesKeySet(indices)
           .filter((_, idx) => idx !== indexOfDeleteRow);
 
-        return of([replaceIndices(tableId, newIndices), clearCellInput()]);
+        return of(batchActions([replaceIndices(tableId, newIndices), clearCellInput()]));
       } else if (type === 'index') {
         // update row
         const { collectionAddress, indices, } = getTable(getState(), tableId);
@@ -337,7 +330,10 @@ const editValueCellEpic = (getState) => (action$) => (
           expandIndicesKeySet(indices)
         );
 
-        return of([replaceIndices(tableId, newIndices), clearCellInput()]);
+        return of(batchActions([
+          replaceIndices(tableId, newIndices),
+          clearCellInput(),
+        ]));
       }
 
       throw new Error('Edited a cell with no editValueCellEpic handler');
@@ -367,10 +363,10 @@ const editEmptyCellEpic = (getState) => (action$) => (
           return of(clearCellInput());
         }
 
-        return of([
+        return of(batchActions([
           replaceIndices(upCell.tableId, [...indices, parseInt(value, 10)]),
           clearCellInput(),
-        ]);
+        ]));
       }
 
       // create new column
@@ -401,10 +397,8 @@ const editEmptyCellEpic = (getState) => (action$) => (
       //     );
       // }
 
-      return empty();
-
       // create a new collection
-      // return of([
+      // return of(batchActions([
       //   addSearchCollectionTable(
       //     sheetId,
       //     generateTableId(),
@@ -415,7 +409,9 @@ const editEmptyCellEpic = (getState) => (action$) => (
       //     [0]
       //   ),
       //   clearCellInput(),
-      // ]);
+      // ]));
+
+      return empty();
     }),
     catchError((error, caught) => {
       console.error('EditEmptyCellEpic error', error);
