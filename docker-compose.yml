@@ -5,7 +5,7 @@ services:
     image: airplane-glue:latest
     depends_on:
         - airplane-glue-router
-        - adapter
+        - wikipedia-adapter
     ports:
       - "80:80"
 
@@ -13,10 +13,13 @@ services:
     image: airplane-glue-router:latest
     environment:
       NODE_ENV: production
+      WIKIPEDIA_URL: wikipedia-adapter:3001
     volumes:
       - ./seed.n3:/usr/src/seed.n3
     restart: always
 
-  adapter:
+  wikipedia-adapter:
     image: wikipedia-adapter:latest
+    environment:
+      PORT: 3001
     restart: always
