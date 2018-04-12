@@ -13,6 +13,7 @@ services:
     image: airplane-glue-router:latest
     environment:
       NODE_ENV: production
+      PORT: 3000
       WIKIPEDIA_URL: wikipedia-adapter:3001
     volumes:
       - ./seed.n3:/usr/src/seed.n3
