@@ -18,7 +18,5 @@ services:
     restart: always
 
   adapter:
-    image: middlepack-adapter:latest
+    image: wikipedia-adapter:latest
     restart: always
-    ports:
-      - "3030:3000"
