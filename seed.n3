@@ -1,0 +1,108 @@
+  @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+  @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+  @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+  @prefix schema: <http://schema.org/> .
+  @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+  <data:james> a schema:Person ;
+      skos:prefLabel "James Conkling"@en ;
+      schema:name "JLC"@en ;
+      schema:name "Jamie"@en ;
+      schema:name "Jimmie"@en ;
+      schema:name "Santiago"@en ;
+      schema:birthDate "1988-05-02"^^xsd:date ;
+      schema:birthPlace <http://www.wikidata.org/wiki/Q60> ;
+      schema:gender "Male"@en ;
+      schema:sibling <data:micah> ;
+      schema:sibling <data:sam> ;
+      schema:sibling <data:tim> ;
+      schema:sibling <data:parker> .
+
+  <data:micah> a schema:Person ;
+      skos:prefLabel "Micah Conkling"@en ;
+      schema:name "Mitzan"@en ;
+      schema:birthDate "1988-05-02"^^xsd:date ;
+      schema:birthPlace <http://www.wikidata.org/wiki/Q60> ;
+      schema:gender "Male"@en ;
+      schema:sibling <data:james> ;
+      schema:sibling <data:sam> ;
+      schema:sibling <data:tim> ;
+      schema:sibling <data:parker> .
+
+  <data:sam> a schema:Person ;
+      skos:prefLabel "Sam Conkling"@en ;
+      schema:name "Samuel"@en ;
+      schema:birthDate "1984-01-22"^^xsd:date ;
+      schema:birthPlace <http://www.wikidata.org/wiki/Q60> ;
+      schema:gender "Male"@en ;
+      schema:sibling <data:micah> ;
+      schema:sibling <data:james> ;
+      schema:sibling <data:tim> ;
+      schema:sibling <data:parker> .
+
+  <data:tim> a schema:Person ;
+      skos:prefLabel "Tim Conkling"@en ;
+      schema:name "Timothy"@en ;
+      schema:birthDate "1982-05-07"^^xsd:date ;
+      schema:birthPlace <http://www.wikidata.org/wiki/Q60> ;
+      schema:gender "Male"@en ;
+      schema:sibling <data:micah> ;
+      schema:sibling <data:sam> ;
+      schema:sibling <data:james> ;
+      schema:sibling <data:parker> .
+
+  <data:parker> a schema:Person ;
+      skos:prefLabel "Parker Taylor"@en ;
+      schema:name "Parker"@en ;
+      schema:birthDate "1987-10-07"^^xsd:date ;
+      schema:birthPlace <http://www.wikidata.org/wiki/Q60> ;
+      schema:gender "Male"@en ;
+      schema:sibling <data:micah> ;
+      schema:sibling <data:sam> ;
+      schema:sibling <data:tim> ;
+      schema:sibling <data:james> .
+
+  <http://www.wikidata.org/wiki/Q60> a schema:Place ;
+      skos:prefLabel "Portland, ME" .
+
+  rdf:type a rdf:Property ;
+        rdfs:isDefinedBy <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ;
+        rdfs:comment "The subject is an instance of a class." ;
+        rdfs:range rdfs:Class ;
+        rdfs:domain rdfs:Resource ;
+        skos:prefLabel "Type" .
+
+  schema:name
+      schema:domainIncludes schema:Thing ;
+      schema:rangeIncludes schema:Text ;
+      a rdf:Property ;
+      rdfs:comment "A person's name'" ;
+      skos:prefLabel "Name"@en .
+
+  schema:birthPlace a rdf:Property ;
+      skos:prefLabel "Birth Place"@en .
+
+  skos:prefLabel a rdf:Property ;
+      skos:prefLabel "Label"@en .
+
+  schema:birthDate a rdf:Property ;
+      schema:domainIncludes schema:Person ;
+      schema:rangeIncludes schema:Date ;
+      rdfs:comment "Date of birth." ;
+      skos:prefLabel "Birth Date"@en .
+
+  schema:sibling
+      schema:domainIncludes schema:Person ;
+      schema:rangeIncludes schema:Person ;
+      a rdf:Property ;
+      rdfs:comment "A sibling of this person." ;
+      skos:prefLabel "Siblings"@en .
+
+  schema:gender a rdf:Property ;
+      skos:prefLabel "Gender"@en .
+
+  schema:Person a rdfs:Class ;
+      skos:prefLabel "Person"@en .
+
+  schema:Place a rdfs:Class ;
+      skos:prefLabel "Place"@en .
