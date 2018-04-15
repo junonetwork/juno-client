@@ -27,6 +27,7 @@ import {
 import {
   REMOVE_TABLE,
   getTable,
+  serializeSearch,
 }                                    from './tables';
 import {
   expandIndicesKeySet,
@@ -71,10 +72,14 @@ export const getGraphTeaserHint = (state, graphId) => {
  * @param {Object} state
  * @param {String} tableId
  */
-// TODO - this is duplicate of cell2PathFragment
+// TODO - this is quite similar to some of what's going on in materializeSearchCollection and cell2PathFragment
+//      - all need to find the pathFragment for a table of any type (search, value, resource)
+//      - extract into multimethod table2PathFragment
+//      - although the former uses a cell, the latter a table
+// TODO - this needs to be a multimethod to dispatch on table type
 export const getSearchCollectionPath = createCachedSelector(
   getTable,
-  ({ search, }) => ['collection', JSON.stringify(omit(['typeLabel'], search))]
+  ({ collection: { search } }) => ['collection', serializeSearch(search)]
 )(
   nthArg(1),
 );

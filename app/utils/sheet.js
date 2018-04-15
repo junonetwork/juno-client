@@ -6,17 +6,6 @@ import {
 }                                    from 'ramda';
 
 
-export const createSearchCollectionTable = (
-  tableId, collectionAddress, search, predicates, indices
-) => ({
-  collectionType: 'searchCollection',
-  tableId,
-  collectionAddress,
-  search,
-  predicates,
-  indices,
-});
-
 export const expandIndicesKeySet = (keySet) => (
   keySet.reduce((indexList, key) => {
     if (typeof key === 'object') {

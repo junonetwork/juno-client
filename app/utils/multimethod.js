@@ -9,6 +9,7 @@ export default (dispatch, methods, defaultMethod) => (...args) => {
 
   const dispatchValue = dispatch(...args);
 
+  // TODO - use object literal for constant time lookup?
   for (let i = 0; i < methods.length; i += 2) {
     if (dispatchValue === methods[i]) {
       return methods[i + 1](...args);

@@ -54,7 +54,7 @@ export default compose(
   connect(
     (state, { tableId, }) => {
       // TODO - make work for objectCollection
-      const { search, predicates, } = getTable(state, tableId);
+      const { collection: { search }, predicates, } = getTable(state, tableId);
 
       return { search, existingPredicates: predicates, };
     },

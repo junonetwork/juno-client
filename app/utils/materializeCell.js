@@ -1,16 +1,18 @@
 import {
   path,
-  omit,
 }                 from 'ramda';
 import {
   destructureAddress,
 }                 from './cell';
+import {
+  serializeSearch,
+}                 from '../redux/modules/tables';
 
 
+// TODO - make multimethod
 export const cell2PathFragment = (cell, sheetMatrix) => {
   if (cell.type === 'searchCollection') {
-    // TODO - make a safe/standard search serialize function
-    return ['collection', JSON.stringify(omit(['typeLabel'], cell.search))];
+    return ['collection', serializeSearch(cell.search)];
   } else if (cell.type === 'objectCollection') {
     // recurse to calculate pathFragment for parentObject
     const { column, row, } = destructureAddress(cell.parentObjectAddress);
@@ -116,7 +118,9 @@ export const materializeSearchCollection = (cell, graphJSON) => {
     cellLength: path(
       [
         'collection',
-        JSON.stringify(omit(['typeLabel'], cell.search)), 'length', 'value',
+        serializeSearch(cell.search),
+        'length',
+        'value',
       ],
       graphJSON
     ),

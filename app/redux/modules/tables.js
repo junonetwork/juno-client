@@ -3,6 +3,8 @@ import {
   equals,
   omit,
   propEq,
+  last,
+  path,
 }                                    from 'ramda';
 import {
   filter as filterStream,
@@ -17,8 +19,8 @@ import { batchActions }              from 'redux-batched-actions';
 import createCachedSelector          from 're-reselect';
 import {
   expandIndicesKeySet,
-  createSearchCollectionTable,
 }                                    from '../../utils/sheet';
+import multimethod                   from '../../utils/multimethod';
 import {
   formatAddress,
   createSearchCollection,
@@ -41,41 +43,111 @@ import {
  */
 const omitTypeLabel = omit(['typeLabel']);
 
+// TODO - fix search serialization
+export const serializeSearch = (search) => JSON.stringify(omitTypeLabel(search));
+
+export const createSearchCollectionTable = (
+  tableId, collectionAddress, search, predicates, indices
+) => ({
+  tableId,
+  collectionAddress,
+  collection: {
+    type: 'search',
+    search,
+  },
+  predicates,
+  indices,
+});
+
 
 /**
  * selectors
  */
 export const getTable = (state, tableId) =>
   state.tables[tableId];
-const serializeSearch = (search) => JSON.stringify(omitTypeLabel(search));
+
+const getSearchCollectionPathSets = ({
+  indices, predicates, collection: { search },
+}) => {
+  const paths = [
+    ['resource', search.type, 'skos:prefLabel', 0], // collection
+    ['collection', serializeSearch(search), 'length'], // collection length
+  ];
+
+  if (predicates.length > 0 && indices.length > 0) {
+    paths.push(
+      ['resource', predicates, 'skos:prefLabel', 0], // predicates
+      ['collection', serializeSearch(search), indices, predicates, 0, 'skos:prefLabel', 0], // object values
+      ['collection', serializeSearch(search), indices, predicates, 0, 'uri'], // object values
+      ['collection', serializeSearch(search), indices, predicates, 'length'], // object lengths
+    );
+  } else if (predicates.length > 0) {
+    paths.push(
+      ['resource', predicates, 'skos:prefLabel', 0], // predicates
+    );
+  }
+
+  return paths;
+};
+
+const getValueCollectionPathSets = ({
+  objectCollectionPath, indices, predicates,
+}) => {
+  // objectCollectionPath:
+  // ['resource', 'data:james', 'schema:birthPlace']
+  // ['resource', 'data:james', 'schema:birthDate']
+  const paths = [
+    ['resource', last(objectCollectionPath), 'skos:prefLabel', 0], // collection
+    [...objectCollectionPath, 'length'], // collection length
+  ];
+
+  if (predicates.length > 0 && indices.length > 0) {
+    paths.push(
+      ['resource', predicates, 'skos:prefLabel', 0], // predicates
+      [...objectCollectionPath, indices, predicates, 0, 'skos:prefLabel', 0], // object values
+      [...objectCollectionPath, indices, predicates, 0, 'uri'], // object values
+      [...objectCollectionPath, indices, predicates, 'length'], // object values
+    );
+  } else if (predicates.length > 0) {
+    paths.push(
+      ['resource', predicates, 'skos:prefLabel', 0], // predicates
+    );
+  }
+
+  return paths;
+};
+
 
 /**
  * @param {Object} state
  * @param {String} tableId
  */
+/**
+ * what if we had some form of dynamic dispatch for table->pathSets?
+ * also, table->materialized table should concentrate deserialization at the table level
+ * allowing for easier definition of new table contexts: sheet, graph, cards, etc
+ *
+ * or, make table serialization (toPathSets) and deserialization (toMaterializedCells, toJGF, toCards)
+ *   - dispatch on the collectionCell type: searchCollection, resourceCollection, resource, predicateCollection (though maybe predicateCollection is the same as searchCollection).
+ *   - table gets a collection field: a map of type and type-specific stuff: search, collectionPath, resourcePath,
+ *   - there is only one table type
+ *   - there are many collectionCell types
+ *   - searchCollection vs. predicateCollection vs valueCollection vs. resourceCollection :
+ *     ['collection', 'type=Person', '0..10']
+ *     ['collection', 'type=Person', '0..10', ':siblings']
+ *     ['resource', ':james', ':siblings']
+ *     ['resource', ':james']
+ *   - table.collectionAddress moves to sheets
+ */
 export const getTablePathSets = createCachedSelector(
   getTable,
-  ({ search, indices, predicates, }) => {
-    const paths = [
-      ['resource', search.type, 'skos:prefLabel', 0], // collection
-      ['collection', serializeSearch(search), 'length'], // collection length
-    ];
-
-    if (predicates.length > 0 && indices.length > 0) {
-      paths.push(
-        ['resource', predicates, 'skos:prefLabel', 0], // predicates
-        ['collection', serializeSearch(search), indices, predicates, 0, 'skos:prefLabel', 0], // object values
-        ['collection', serializeSearch(search), indices, predicates, 0, 'uri'], // object values
-        ['collection', serializeSearch(search), indices, predicates, 'length'], // object lengths
-      );
-    } else if (predicates.length > 0) {
-      paths.push(
-        ['resource', predicates, 'skos:prefLabel', 0], // predicates
-      );
-    }
-
-    return paths;
-  }
+  multimethod(
+    path(['collection', 'type']),
+    [
+      'search', getSearchCollectionPathSets,
+      'value', getValueCollectionPathSets,
+    ]
+  )
 )(
   nthArg(1)
 );
@@ -86,17 +158,18 @@ export const getTablePathSets = createCachedSelector(
  * @param {String} sheetId
  * @param {String} tableId
  */
+// TODO - create multimethod to dispatch on table collection type
 export const getTableCells = createCachedSelector(
   nthArg(1),
-  nthArg(2),
   (state, _, tableId) => getTable(state, tableId),
-  (sheetId, tableId, { collectionAddress, predicates, indices, search, }) => {
+  (sheetId, { tableId, collectionAddress, predicates, indices, collection: { search } }) => {
     // console.log('getTableCells');
 
     const {
       column: collectionColumn,
       row: collectionRow,
     } = destructureAddress(collectionAddress);
+    const collectionCell = createSearchCollection(sheetId, tableId, collectionColumn, collectionRow, search);
 
     return {
       column: collectionColumn,
@@ -139,7 +212,7 @@ export const getTableCells = createCachedSelector(
             predicateURI
           ));
           return matrixRow;
-        }, [createSearchCollection(sheetId, tableId, collectionColumn, collectionRow, search)]),
+        }, [collectionCell]),
       ]),
     };
   }
