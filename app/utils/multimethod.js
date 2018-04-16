@@ -1,3 +1,6 @@
+import { equals } from 'ramda';
+
+
 const errorHandler = (dispatchValue) => {
   throw new Error(`No multimethod handler for dispatch value '${dispatchValue}'`);
 };
@@ -11,7 +14,7 @@ export default (dispatch, methods, defaultMethod) => (...args) => {
 
   // TODO - use object literal for constant time lookup?
   for (let i = 0; i < methods.length; i += 2) {
-    if (dispatchValue === methods[i]) {
+    if (equals(dispatchValue, methods[i])) {
       return methods[i + 1](...args);
     }
   }

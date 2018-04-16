@@ -15,7 +15,7 @@ export const getLeftCell = (matrix, column, row) => matrix[row] && matrix[row][c
  * @param {String} tableId
  * @param {Number} column
  * @param {Number} row
- * @param {String} search
+ * @param {Object} search
  */
 export const createSearchCollection = (
   sheetId, tableId, column, row, search
@@ -27,6 +27,26 @@ export const createSearchCollection = (
   column,
   row,
   search,
+  cellInput: '',
+});
+
+/**
+ * @param {String} sheetId
+ * @param {String} tableId
+ * @param {Number} column
+ * @param {Number} row
+ * @param {Array}  resourcePath
+ */
+export const createValueCollection = (
+  sheetId, tableId, column, row, resourcePath
+) => ({
+  type: 'valueCollection',
+  sheetId,
+  tableId,
+  address: formatAddress(sheetId, column, row),
+  column,
+  row,
+  resourcePath,
   cellInput: '',
 });
 

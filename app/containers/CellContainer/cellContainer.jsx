@@ -59,7 +59,7 @@ export default compose(
         type === 'predicate' ||
         leftCellType === 'predicate' ||
         leftCellType === 'searchCollection' ||
-        leftCellType === 'objectCollection'
+        leftCellType === 'valueCollection'
       ) {
         dispatch(batchActions([
           setFocus(predicateInputId(sheetId, column, row)),
@@ -102,19 +102,19 @@ export default compose(
           type === 'predicate' ||
           leftCellType === 'predicate' ||
           leftCellType === 'searchCollection' ||
-          leftCellType === 'objectCollection'
+          leftCellType === 'valueCollection'
         ) {
           dispatch(setFocus(predicateInputId(sheetId, column, row)));
         } else if (
           type === 'index' ||
           upCellType === 'index' ||
           upCellType === 'searchCollection' ||
-          upCellType === 'objectCollection'
+          upCellType === 'valueCollection'
         ) {
           dispatch(setFocus(indexInputId(sheetId, column, row)));
         } else if (
           type === 'searchCollection' ||
-          type === 'objectCollection' ||
+          type === 'valueCollection' ||
           type === 'empty'
         ) {
           dispatch(setFocus(searchRepositoryInputId(sheetId, column, row)));

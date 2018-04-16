@@ -17,6 +17,7 @@ import createCachedSelector          from 're-reselect';
 import {
   getTableCells,
   ADD_SEARCH_COLLECTION_TABLE,
+  ADD_VALUE_COLLECTION_TABLE,
   REMOVE_TABLE,
   MOVE_TABLE,
 }                                    from './tables';
@@ -34,10 +35,7 @@ import {
   getDragTableTo,
 }                                    from './dragTable';
 import {
-  materializeSearchCollection,
-  materializeIndex,
-  materializePredicate,
-  materializeObject,
+  materializeCell,
 }                                    from '../../utils/materializeCell';
 import {
   createEmpty,
@@ -181,38 +179,28 @@ export const materializeSheetMatrix = createCachedSelector(
     const materializedSheetMatrix = sheetMatrix
       .map((row) => (
         row.map((cell) => {
-          if (cell.type === 'searchCollection') {
-            return materializeSearchCollection(cell, graphJSON, sheetMatrix);
-          } else if (cell.type === 'index') {
-            const materializedCell = materializeIndex(cell, graphJSON, sheetMatrix);
+          const materializedCell = materializeCell(cell, graphJSON, sheetMatrix);
+          if (cell.type === 'index') {
             graphPathMap = addPathToPathMap(
               materializedCell.absolutePath,
               materializedCell.column,
               materializedCell.row,
               graphPathMap
             );
-            return materializedCell;
-          } else if (cell.type === 'predicate') {
-            return materializePredicate(cell, graphJSON, sheetMatrix);
           } else if (cell.type === 'object') {
-            const materializedCell = materializeObject(cell, graphJSON, sheetMatrix);
             graphPathMap = addPathToPathMap(
               materializedCell.absolutePath,
               materializedCell.column,
               materializedCell.row,
               graphPathMap
             );
-
-            return materializedCell;
-          } else if (cell.type === 'empty') {
-            return cell;
           }
 
-          throw new Error('tried to get path for unknown cell type', cell.type);
+          return materializedCell;
         })
       ));
 
-    return { graphPathMap, matrix: materializedSheetMatrix, hints: {}, };
+    return { graphPathMap, matrix: materializedSheetMatrix, hints: {} };
   }
 )(
   nthArg(0)
@@ -618,7 +606,10 @@ export default (
         maxRow: state[action.sheetId].maxRow + 1,
       },
     };
-  } else if (action.type === ADD_SEARCH_COLLECTION_TABLE) {
+  } else if (
+    action.type === ADD_SEARCH_COLLECTION_TABLE ||
+    action.type === ADD_VALUE_COLLECTION_TABLE
+  ) {
     return {
       ...state,
       [action.sheetId]: {

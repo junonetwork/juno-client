@@ -1,23 +1,23 @@
 import {
   path,
-}                 from 'ramda';
+  prop,
+  last,
+} from 'ramda';
+import multimethod from './multimethod';
 import {
   destructureAddress,
-}                 from './cell';
+} from './cell';
 import {
   serializeSearch,
-}                 from '../redux/modules/tables';
+} from '../redux/modules/tables';
 
 
 // TODO - make multimethod
 export const cell2PathFragment = (cell, sheetMatrix) => {
   if (cell.type === 'searchCollection') {
     return ['collection', serializeSearch(cell.search)];
-  } else if (cell.type === 'objectCollection') {
-    // recurse to calculate pathFragment for parentObject
-    const { column, row, } = destructureAddress(cell.parentObjectAddress);
-
-    return cell2PathFragment(sheetMatrix[row][column], sheetMatrix);
+  } else if (cell.type === 'valueCollection') {
+    return cell.resourcePath;
   } else if (cell.type === 'predicate') {
     return [cell.uri];
   } else if (cell.type === 'index') {
@@ -110,7 +110,7 @@ export const getObjectPath = (collectionAddress, indexAddress, predicateAddress,
 };
 
 
-export const materializeSearchCollection = (cell, graphJSON) => {
+const materializeSearchCollection = (cell, graphJSON) => {
   const relativePath = getSearchCollectionPath(cell.search.type);
 
   return {
@@ -124,12 +124,31 @@ export const materializeSearchCollection = (cell, graphJSON) => {
       ],
       graphJSON
     ),
-    ...path(relativePath, graphJSON),
+    value: path([...relativePath, 'value'], graphJSON),
   };
 };
 
 
-export const materializeIndex = (cell, graphJSON, sheetMatrix) => {
+const materializeValueCollection = (cell, graphJSON) => {
+  return {
+    ...cell,
+    cellLength: path(
+      [
+        ...cell.resourcePath,
+        'length',
+        'value',
+      ],
+      graphJSON
+    ),
+    value: path(
+      ['resource', last(cell.resourcePath), 'skos:prefLabel', 0, 'value'],
+      graphJSON
+    ),
+  };
+};
+
+
+const materializeIndex = (cell, graphJSON, sheetMatrix) => {
   const relativePath = getIndexPath(cell.collectionAddress, cell.index, sheetMatrix);
 
   return {
@@ -140,17 +159,17 @@ export const materializeIndex = (cell, graphJSON, sheetMatrix) => {
 };
 
 
-export const materializePredicate = (cell, graphJSON) => {
+const materializePredicate = (cell, graphJSON) => {
   const relativePath = getPredicatePath(cell.uri);
 
   return {
     ...cell,
-    ...path(relativePath, graphJSON),
+    value: path([...relativePath, 'value'], graphJSON),
   };
 };
 
 
-export const materializeObject = (cell, graphJSON, sheetMatrix) => {
+const materializeObject = (cell, graphJSON, sheetMatrix) => {
   const relativePath = getObjectPath(
     cell.collectionAddress, cell.indexAddress, cell.predicateAddress, sheetMatrix
   );
@@ -185,3 +204,15 @@ export const materializeObject = (cell, graphJSON, sheetMatrix) => {
     ...(boxValue || {}),
   };
 };
+
+export const materializeCell = multimethod(
+  prop('type'),
+  [
+    'searchCollection', materializeSearchCollection,
+    'valueCollection', materializeValueCollection,
+    'index', materializeIndex,
+    'predicate', materializePredicate,
+    'object', materializeObject,
+    'empty', (cell) => cell,
+  ]
+);

@@ -53,7 +53,7 @@ const arrowKeyNavHandler = (direction, steps) => ({
 export default compose(
   connect(
     (state, { tableId, }) => {
-      // TODO - make work for objectCollection
+      // TODO - make work for valueCollection
       const { collection: { search }, predicates, } = getTable(state, tableId);
 
       return { search, existingPredicates: predicates, };

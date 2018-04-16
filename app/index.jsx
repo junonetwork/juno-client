@@ -16,6 +16,7 @@ import {
 }                             from './redux/modules/graphs';
 import {
   addSearchCollectionTable,
+  addValueCollectionTable,
 }                             from './redux/modules/tables';
 import {
   setFocus,
@@ -46,17 +47,25 @@ store.dispatch(
       sheetId,
       generateTableId(),
       formatAddress(sheetId, 0, 0),
-      { repository: 'memory', type: 'schema:Person', typeLabel: 'Person', },
+      { repository: 'memory', type: 'schema:Person', typeLabel: 'Person' },
       ['skos:prefLabel', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling'],
-      [{ from: 1, to: 3, }, 1, 3, 10]
+      [{ from: 1, to: 3 }, 1, 3, 10]
     ),
     addSearchCollectionTable(
       sheetId,
       generateTableId(),
       formatAddress(sheetId, 1, 10),
-      { repository: 'memory', type: 'schema:Person', typeLabel: 'Person', },
+      { repository: 'memory', type: 'schema:Person', typeLabel: 'Person' },
       ['skos:prefLabel', 'schema:birthPlace'],
-      [{ from: 0, to: 2, }]
+      [{ from: 0, to: 2 }]
+    ),
+    addValueCollectionTable(
+      sheetId,
+      generateTableId(),
+      formatAddress(sheetId, 5, 10),
+      ['resource', 'data:micah', 'schema:sibling'],
+      ['skos:prefLabel', 'schema:birthPlace'],
+      [{ from: 0, to: 3 }]
     ),
     // second window
     addGraph('1'),

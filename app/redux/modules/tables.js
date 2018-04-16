@@ -5,6 +5,7 @@ import {
   propEq,
   last,
   path,
+  prop,
 }                                    from 'ramda';
 import {
   filter as filterStream,
@@ -24,6 +25,7 @@ import multimethod                   from '../../utils/multimethod';
 import {
   formatAddress,
   createSearchCollection,
+  createValueCollection,
   createObject,
   createIndex,
   createPredicate,
@@ -46,6 +48,7 @@ const omitTypeLabel = omit(['typeLabel']);
 // TODO - fix search serialization
 export const serializeSearch = (search) => JSON.stringify(omitTypeLabel(search));
 
+// TODO - move collectionAddress to sheets module
 export const createSearchCollectionTable = (
   tableId, collectionAddress, search, predicates, indices
 ) => ({
@@ -54,6 +57,19 @@ export const createSearchCollectionTable = (
   collection: {
     type: 'search',
     search,
+  },
+  predicates,
+  indices,
+});
+
+export const createValueCollectionTable = (
+  tableId, collectionAddress, resourcePath, predicates, indices
+) => ({
+  tableId,
+  collectionAddress,
+  collection: {
+    type: 'value',
+    resourcePath,
   },
   predicates,
   indices,
@@ -91,22 +107,22 @@ const getSearchCollectionPathSets = ({
 };
 
 const getValueCollectionPathSets = ({
-  objectCollectionPath, indices, predicates,
+  indices, predicates, collection: { resourcePath },
 }) => {
-  // objectCollectionPath:
+  // resourcePath:
   // ['resource', 'data:james', 'schema:birthPlace']
   // ['resource', 'data:james', 'schema:birthDate']
   const paths = [
-    ['resource', last(objectCollectionPath), 'skos:prefLabel', 0], // collection
-    [...objectCollectionPath, 'length'], // collection length
+    ['resource', last(resourcePath), 'skos:prefLabel', 0], // collection
+    [...resourcePath, 'length'], // collection length
   ];
 
   if (predicates.length > 0 && indices.length > 0) {
     paths.push(
       ['resource', predicates, 'skos:prefLabel', 0], // predicates
-      [...objectCollectionPath, indices, predicates, 0, 'skos:prefLabel', 0], // object values
-      [...objectCollectionPath, indices, predicates, 0, 'uri'], // object values
-      [...objectCollectionPath, indices, predicates, 'length'], // object values
+      [...resourcePath, indices, predicates, 0, 'skos:prefLabel', 0], // object values
+      [...resourcePath, indices, predicates, 0, 'uri'], // object values
+      [...resourcePath, indices, predicates, 'length'], // object values
     );
   } else if (predicates.length > 0) {
     paths.push(
@@ -159,17 +175,35 @@ export const getTablePathSets = createCachedSelector(
  * @param {String} tableId
  */
 // TODO - create multimethod to dispatch on table collection type
+const createCollection = multimethod(
+  prop('type'),
+  [
+    'search', ({ search }, sheetId, tableId, column, row) => (
+      createSearchCollection(sheetId, tableId, column, row, search)
+    ),
+    'value', ({ resourcePath }, sheetId, tableId, column, row) => (
+      createValueCollection(sheetId, tableId, column, row, resourcePath)
+    ),
+  ]
+);
+
 export const getTableCells = createCachedSelector(
   nthArg(1),
   (state, _, tableId) => getTable(state, tableId),
-  (sheetId, { tableId, collectionAddress, predicates, indices, collection: { search } }) => {
+  (sheetId, { collection,  tableId, collectionAddress, predicates, indices }) => {
     // console.log('getTableCells');
 
     const {
       column: collectionColumn,
       row: collectionRow,
     } = destructureAddress(collectionAddress);
-    const collectionCell = createSearchCollection(sheetId, tableId, collectionColumn, collectionRow, search);
+    const collectionCell = createCollection(
+      collection,
+      sheetId,
+      tableId,
+      collectionColumn,
+      collectionRow
+    );
 
     return {
       column: collectionColumn,
@@ -225,6 +259,7 @@ export const getTableCells = createCachedSelector(
  * constants
  */
 export const ADD_SEARCH_COLLECTION_TABLE = 'ADD_SEARCH_COLLECTION_TABLE';
+export const ADD_VALUE_COLLECTION_TABLE = 'ADD_VALUE_COLLECTION_TABLE';
 export const REMOVE_TABLE = 'REMOVE_TABLE';
 
 export const REPLACE_SEARCH_COLLECTION = 'REPLACE_SEARCH_COLLECTION';
@@ -247,6 +282,18 @@ export const addSearchCollectionTable = (
   tableId,
   collectionAddress,
   search,
+  predicates,
+  indices,
+});
+
+export const addValueCollectionTable = (
+  sheetId, tableId, collectionAddress, resourcePath, predicates, indices
+) => ({
+  type: ADD_VALUE_COLLECTION_TABLE,
+  sheetId,
+  tableId,
+  collectionAddress,
+  resourcePath,
   predicates,
   indices,
 });
@@ -291,6 +338,14 @@ export default (
       ...state,
       [tableId]: createSearchCollectionTable(
         tableId, collectionAddress, search, predicates, indices
+      ),
+    };
+  } else if (action.type === ADD_VALUE_COLLECTION_TABLE) {
+    const { tableId, collectionAddress, resourcePath, predicates, indices, } = action;
+    return {
+      ...state,
+      [tableId]: createValueCollectionTable(
+        tableId, collectionAddress, resourcePath, predicates, indices
       ),
     };
   } else if (action.type === REMOVE_TABLE) {
@@ -361,10 +416,10 @@ const editValueCellEpic = (getState) => (action$) => (
         // return of(updateGraphValue(getObjectPath(...)));
         console.log('UPDATE OBJECT CELL');
         return of(clearCellInput());
-      } else if ((type === 'searchCollection' || type === 'objectCollection') && value === '') {
+      } else if ((type === 'searchCollection' || type === 'valueCollection') && value === '') {
         // delete collection
         return of(batchActions([removeTable(tableId), clearCellInput()]));
-      } else if (type === 'searchCollection' || type === 'objectCollection') {
+      } else if (type === 'searchCollection' || type === 'valueCollection') {
         // update collection
         return of(batchActions([replaceSearchCollection(tableId, value), clearCellInput()]));
       } else if (type === 'predicate' && value === '') {
@@ -427,7 +482,7 @@ const editEmptyCellEpic = (getState) => (action$) => (
       if (
         upCell && (
           upCell.type === 'searchCollection' ||
-          upCell.type === 'objectCollection' ||
+          upCell.type === 'valueCollection' ||
           upCell.type === 'index'
         )
       ) {
@@ -447,7 +502,7 @@ const editEmptyCellEpic = (getState) => (action$) => (
       // if (
       //   leftCell && (
       //     leftCell.type === 'searchCollection' ||
-      //     leftCell.type === 'objectCollection' ||
+      //     leftCell.type === 'valueCollection' ||
       //     leftCell.type === 'predicate'
       //   )
       // ) {

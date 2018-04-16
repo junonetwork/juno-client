@@ -12,7 +12,7 @@ $cell-height: 26px;
 
   // type
   &.search-collection,
-  &.object-collection {
+  &.value-collection {
     font-weight: 600;
     text-align: right;
     background-color: lighten($bg, 12);
@@ -49,7 +49,7 @@ $cell-height: 26px;
   &.drop-table {
     background-color: transparentize($blue, .6);
     &.search-collection,
-    &.object-collection {
+    &.value-collection {
       background-color: transparentize($blue, .2);
     }
     &.predicate {
@@ -59,7 +59,7 @@ $cell-height: 26px;
   &.illegal-drop-table {
     background-color: transparentize($b_red, .4);
     &.search-collection,
-    &.object-collection {
+    &.value-collection {
       background-color: transparentize($b_red, .1);
     }
     &.predicate {
