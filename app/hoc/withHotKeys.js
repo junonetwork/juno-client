@@ -15,6 +15,7 @@ import {
 }                    from '../redux/modules/focus';
 
 
+// TODO - allow (e.g.) 'shift+a' to be specified as 'A', though keys that can't be capitalized should still be keyed using the shift keyword (e.g.) 'shift+left'
 const keyMap = {
   8: 'delete',
   9: 'tab',
@@ -37,17 +38,71 @@ const keyMap = {
   55: '7',
   56: '8',
   57: '9',
-  // TODO - add letters, symbols
+  65: 'a',
+  66: 'b',
+  67: 'c',
+  68: 'd',
+  69: 'e',
+  70: 'f',
+  71: 'g',
+  72: 'h',
+  73: 'i',
+  74: 'j',
+  75: 'k',
+  76: 'l',
+  77: 'm',
+  78: 'n',
+  79: 'o',
+  80: 'p',
+  81: 'q',
+  82: 'r',
+  83: 's',
+  84: 't',
+  85: 'u',
+  86: 'v',
+  87: 'w',
+  88: 'x',
+  89: 'y',
+  90: 'z',
+  186: ';',
+  187: '=',
+  188: ',',
+  189: '-',
+  190: '.',
+  191: '/',
+  219: '[',
+  220: '\\',
+  221: ']',
+  222: '\'',
 };
 
-const event2HandlerKey = ({ which, metaKey, altKey, shiftKey, }) =>
-  `${altKey ? 'alt+' : ''}${shiftKey ? 'shift+' : ''}${metaKey ? 'cmd+' : ''}${keyMap[which]}`;
+const event2HandlerKey = ({ which, metaKey, altKey, ctrlKey, shiftKey }) => {
+  const keys = [];
+
+  if (altKey) {
+    keys.push('alt');
+  }
+  if (shiftKey) {
+    keys.push('shift');
+  }
+  if (metaKey) {
+    keys.push('cmd');
+  }
+  if (ctrlKey) {
+    keys.push('ctrl');
+  }
+  if (keyMap[which]) {
+    keys.push(keyMap[which]);
+  }
+
+  return keys.join('+');
+};
 
 const higherOrderNoop = () => () => {};
 
 const withHotKeys = (
   id,
-  hotKeyHandlers = {},
+  keyDown = {},
   options = {},
 ) => (BaseComponent) => {
   if (id === undefined) {
@@ -98,8 +153,8 @@ const withHotKeys = (
       onKeyDown: (e) => {
         const key = event2HandlerKey(e);
 
-        if (hotKeyHandlers[key]) {
-          const shouldAllowPropagation = hotKeyHandlers[key](this.props)(e);
+        if (keyDown[key]) {
+          const shouldAllowPropagation = keyDown[key](this.props)(e);
           if (!shouldAllowPropagation) {
             e.preventDefault();
             e.stopPropagation();
@@ -138,17 +193,6 @@ const withHotKeys = (
 
   return WithHotKeys;
 };
-
-
-// export const rootHotKeys = (store) => (BaseComponent) => {
-//   const onBlur = store.dispatch(clearFocus());
-
-//   return (props) => (
-//     <div onBlur={onBlur}>
-//       <BaseComponent {...props} />
-//     </div>
-//   );
-// };
 
 
 export default withHotKeys;
