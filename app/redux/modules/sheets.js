@@ -6,12 +6,13 @@ import {
   assoc,
   pipe,
   map,
-  contains,
+  any,
   reject,
-  equals,
   pathOr,
-  path,
+  prop,
   propEq,
+  ifElse,
+  identity,
 }                                    from 'ramda';
 import createCachedSelector          from 're-reselect';
 import {
@@ -31,6 +32,10 @@ import {
   getCellInput,
 }                                    from './cellInput';
 import {
+  isLegalDrop,
+  getDragTableId,
+  getDragTableType,
+  getDragTable,
   getDragTableFrom,
   getDragTableTo,
 }                                    from './dragTable';
@@ -38,16 +43,13 @@ import {
   materializeCell,
 }                                    from '../../utils/materializeCell';
 import {
+  formatAddress,
   createEmpty,
 }                                    from '../../utils/cell';
 import {
   setRowInMatrix,
   updateInMatrix,
 }                                    from '../../utils/table';
-import {
-  getCellOffsetFromTable,
-  isLegalDrop,
-}                                    from '../../utils/sheet';
 import {
   arraySingleDepthEqualitySelector,
 }                                    from '../../utils/selectors';
@@ -59,8 +61,9 @@ import {
 /**
  * utils
  */
-const createSheet = (maxColumn, maxRow) =>
-  ({ maxColumn, maxRow, tables: [], });
+const createSheet = (maxColumn, maxRow) => ({
+  maxColumn, maxRow, tables: [],
+});
 // TODO - what is a safe way to serialize path?  keys can have any url safe character, including '/' and curie special character ':'
 // https://perishablepress.com/stop-using-unsafe-characters-in-urls/
 export const path2Key = (path) => path.join('|');
@@ -87,7 +90,7 @@ const addPathToPathMap = (absolutePath, column, row, graphPathMap) => {
 export const getSheet = (state, sheetId) => state.sheets[sheetId];
 export const getSheetMaxColumn = (state, sheetId) => state.sheets[sheetId].maxColumn;
 export const getSheetMaxRow = (state, sheetId) => state.sheets[sheetId].maxRow;
-export const getSheetTableIds = (state, sheetId) => state.sheets[sheetId].tables;
+export function getSheetTableDescriptors(state, sheetId) { return state.sheets[sheetId].tables; }
 
 
 /**
@@ -119,8 +122,8 @@ export const createEmptySheet = createCachedSelector(
  */
 export const getSheetTables = createCachedSelector(
   (state, sheetId) => (
-    getSheetTableIds(state, sheetId)
-      .map((tableId) => getTableCells(state, sheetId, tableId))
+    getSheetTableDescriptors(state, sheetId)
+      .map(({ id }) => getTableCells(state, sheetId, id))
   ),
   (tables) => {
     // console.log('getSheetTables');
@@ -348,39 +351,51 @@ export const withEnhanced = createCachedSelector(
  * @param {Object} sheetMatrix
  */
 export const withDropTable = (state, sheetId, matrix) => {
+  const dragTableId = getDragTableId(state);
   const dragFrom = getDragTableFrom(state);
   const dragTo = getDragTableTo(state);
 
   if (
-    sheetId !== path(['sheetId'], dragTo) &&
-    sheetId !== path(['sheetId'], dragFrom)
+    sheetId !== prop('sheetId', dragTo) &&
+    sheetId !== prop('sheetId', dragFrom)
   ) {
-    return { matrix, canDrop: false, };
+    return { matrix, canDrop: false };
   }
 
-  const fromTable = getTableCells(state, dragFrom.sheetId, dragFrom.tableId).table;
-  const { column: fromColumn, row: fromRow, tableId: fromId, } = dragFrom;
-  const [xOffset, yOffset] = getCellOffsetFromTable(fromColumn, fromRow, fromTable);
-  const toTableXOrigin = Math.max(dragTo.column - xOffset, 0);
-  const toTableYOrigin = Math.max(dragTo.row - yOffset, 0);
+  const { sheetId: fromSheetId, column: fromColumn, row: fromRow } = dragFrom;
+  const { sheetId: toSheetId, column: toColumn, row: toRow } = dragTo;
+  const {
+    xLength, yLength, xOffset, yOffset, toTableXOrigin, toTableYOrigin,
+  } = getDragTable(
+    getDragTableType(state), state, fromSheetId, dragTableId,
+    fromColumn, fromRow, toColumn, toRow,
+  );
 
   const canDrop = isLegalDrop(
+    xLength,
+    yLength,
     toTableXOrigin,
     toTableYOrigin,
-    fromTable,
-    reject(propEq('id', fromId), getSheetTables(state, dragTo.sheetId))
+    reject(propEq('id', dragTableId), getSheetTables(state, toSheetId))
   );
 
   return pipe(
     (_matrix) => (
-      dragTo.sheetId !== sheetId ?
+      toSheetId !== sheetId ?
         _matrix :
-        fromTable
-          .filter((_, rowIdx) => toTableYOrigin + rowIdx < _matrix.length)
-          .reduce((matrixWithDropTable, row, rowIdx) => (
-            row
-              .filter((_, columnIdx) => toTableXOrigin + columnIdx < _matrix[0].length)
-              .reduce((_matrixWithDropTable, _, columnIdx) => (
+        // table xLength truncated to fit on sheet
+        range(0, Math.min(yLength, _matrix.length - toTableYOrigin))
+        // range(0, yLength)
+          // truncate dragTable y length to fit sheet
+          // TODO - possible to do this w/i range?
+          // .filter((_, rowIdx) => )
+          // TODO - row === rowIdx?
+          .reduce((matrixWithDropTable, rowIdx) => (
+            // range(0, toTableXOrigin + columnIdx < _matrix[0].length)
+            range(0, Math.min(xLength, _matrix[0].length - toTableXOrigin))
+              // truncate dragTable x length to fit sheet
+              // .filter((_, columnIdx) => toTableXOrigin + columnIdx < _matrix[0].length)
+              .reduce((_matrixWithDropTable, columnIdx) => (
                 updateInMatrix(
                   toTableXOrigin + columnIdx,
                   toTableYOrigin + rowIdx,
@@ -393,7 +408,7 @@ export const withDropTable = (state, sheetId, matrix) => {
           ), _matrix)
     ),
     (_matrix) => (
-      dragTo.sheetId !== sheetId ?
+      toSheetId !== sheetId ?
         _matrix :
         updateInMatrix(
           toTableXOrigin + xOffset,
@@ -405,7 +420,7 @@ export const withDropTable = (state, sheetId, matrix) => {
         )
     ),
     (_matrix) => (
-      dragFrom.sheetId !== sheetId ?
+      fromSheetId !== sheetId ?
         _matrix :
         updateInMatrix(
           fromColumn,
@@ -578,7 +593,8 @@ export const increaseSheetMaxRow = (sheetId) =>
  * reducer
  */
 export default (
-  state = {},
+  /* state = {} */
+  state = { 0: createSheet(40, 40) },
   action
 ) => {
   if (action.type === ADD_SHEET) {
@@ -614,28 +630,59 @@ export default (
       ...state,
       [action.sheetId]: {
         ...state[action.sheetId],
-        tables: [...state[action.sheetId].tables, action.tableId],
+        tables: [
+          ...state[action.sheetId].tables,
+          { id: action.tableId, address: action.address },
+        ],
       },
     };
   } else if (action.type === REMOVE_TABLE) {
-    // TODO - remove nested tables
     return map((sheet) => ({
       ...sheet,
-      tables: contains(action.tableId, sheet.tables) ?
-        reject(equals(action.tableId), sheet.tables) :
+      tables: any(propEq('id', action.tableId), sheet.tables) ?
+        reject(propEq('id', action.tableId), sheet.tables) :
         sheet.tables,
     }), state);
-  } else if (action.type === MOVE_TABLE && action.fromSheetId !== action.toSheetId) {
-    // TODO - handle nested tables
+  } else if (action.type === MOVE_TABLE && action.fromSheetId === action.toSheetId) {
+    const {
+      tableId, fromSheetId, toSheetId, toColumn, toRow,
+    } = action;
     return {
       ...state,
-      [action.fromSheetId]: {
-        ...state[action.fromSheetId],
-        tables: reject(equals(action.tableId), state[action.fromSheetId].tables),
+      [fromSheetId]: {
+        ...state[fromSheetId],
+        tables: map(
+          ifElse(
+            propEq('id', tableId),
+            assoc('address', formatAddress(toSheetId, toColumn, toRow)),
+            identity
+          ),
+          state[fromSheetId].tables
+        ),
       },
-      [action.toSheetId]: {
-        ...state[action.toSheetId],
-        tables: [...state[action.toSheetId].tables, action.tableId],
+    };
+  } else if (action.type === MOVE_TABLE) {
+    const {
+      tableId, fromSheetId, toSheetId, toColumn, toRow,
+    } = action;
+    return {
+      ...state,
+      [fromSheetId]: {
+        ...state[fromSheetId],
+        tables: reject(
+          propEq('id', tableId),
+          state[fromSheetId].tables
+        ),
+      },
+      [toSheetId]: {
+        ...state[toSheetId],
+        tables: [
+          ...state[toSheetId].tables,
+          {
+            id: tableId,
+            address: formatAddress(toSheetId, toColumn, toRow),
+          },
+        ],
       },
     };
   }

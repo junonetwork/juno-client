@@ -17,6 +17,7 @@ import {
 import {
   addSearchCollectionTable,
   addValueCollectionTable,
+  createSearchDescriptor,
 }                             from './redux/modules/tables';
 import {
   setFocus,
@@ -42,22 +43,26 @@ const sheetId = '0';
 
 store.dispatch(
   batchActions([
-    addSheet(sheetId, 40, 30),
+    addSheet(sheetId, 20, 30),
     addSearchCollectionTable(
       sheetId,
       generateTableId(),
       formatAddress(sheetId, 0, 0),
-      { repository: 'memory', type: 'schema:Person', typeLabel: 'Person' },
+      createSearchDescriptor('memory', 'schema:Person', 'Person'),
       ['skos:prefLabel', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling'],
-      [{ from: 1, to: 3 }, 1, 3, 10]
+      [{ from: 1, to: 3 }, 1, 3, 10],
+      'memory',
+      'schema:Person'
     ),
     addSearchCollectionTable(
       sheetId,
       generateTableId(),
       formatAddress(sheetId, 1, 10),
-      { repository: 'memory', type: 'schema:Person', typeLabel: 'Person' },
+      createSearchDescriptor('memory', 'schema:Person', 'Person'),
       ['skos:prefLabel', 'schema:birthPlace'],
-      [{ from: 0, to: 2 }]
+      [{ from: 0, to: 2 }],
+      'memory',
+      'schema:Person'
     ),
     addValueCollectionTable(
       sheetId,
@@ -65,7 +70,9 @@ store.dispatch(
       formatAddress(sheetId, 5, 10),
       ['resource', 'data:micah', 'schema:sibling'],
       ['skos:prefLabel', 'schema:birthPlace'],
-      [{ from: 0, to: 3 }]
+      [{ from: 0, to: 3 }],
+      'memory',
+      'schema:Person'
     ),
     // second window
     addGraph('1'),
@@ -74,9 +81,11 @@ store.dispatch(
      *   '1',
      *   generateTableId(),
      *   formatAddress('1', 0, 0),
-     *   { repository: 'memory', type: 'schema:Person', typeLabel: 'Person', },
+     *   { repository: 'memory', type: 'schema:Person', typeLabel: 'Person' },
      *   ['skos:prefLabel'],
-     *   [{ from: 0, to: 1, }]
+     *   [{ from: 0, to: 1, }],
+     *   'memory',
+     *   'schema:Person'
      * ),
      */
     setFocus(cellId('0', 0, 0)),

@@ -26,11 +26,11 @@ import {
   FAST_STEP,
 }                          from '../../preferences';
 
-const { dispatch, } = store;
+const { dispatch } = store;
 
 
 const arrowKeyNavHandler = (direction, steps) =>
-  ({ sheetId, column, row, navigate, }) => () => {
+  ({ sheetId, column, row, navigate }) => () => {
     navigate(sheetId, column, row, direction, steps);
   };
 
@@ -39,19 +39,20 @@ export default compose(
   setDisplayName('CellContainer'),
   pureCellWithFocus,
   withHandlers({
-    onMouseEnter: ({ sheetId, column, row, teaseCell, }) => () => {
+    onMouseEnter: ({ sheetId, column, row, teaseCell }) => () => {
       teaseCell(sheetId, column, row);
     },
-    onDragStart: ({ sheetId, tableId, column, row, startDragTable, }) => () => {
-      startDragTable(sheetId, tableId, column, row);
+    onDragStart: ({ sheetId, tableId, type, column, row, absolutePath, startDragTable }) => () => {
+      // TODO - come up w/ a better way to pass params to dragStart
+      startDragTable(sheetId, tableId, type, column, row, { resourcePath: absolutePath });
     },
-    onDragEnter: ({ sheetId, column, row, dragTable, }) => () => {
+    onDragEnter: ({ sheetId, column, row, dragTable }) => () => {
       dragTable(sheetId, column, row);
     },
-    onDragEnd: ({ endDragTable, }) => () => {
+    onDragEnd: ({ endDragTable }) => () => {
       endDragTable();
     },
-    onKeyPress: ({ sheetId, column, row, type, leftCellType, cellInput, }) => (e) => {
+    onKeyPress: ({ sheetId, column, row, type, leftCellType, cellInput }) => (e) => {
       e.preventDefault();
       e.stopPropagation();
 
@@ -73,7 +74,7 @@ export default compose(
     },
   }),
   withHotKeys(
-    ({ sheetId, column, row, }) => cellId(sheetId, column, row),
+    ({ sheetId, column, row }) => cellId(sheetId, column, row),
     {
       up: arrowKeyNavHandler('up', 1),
       'alt+up': arrowKeyNavHandler('up', FAST_STEP),

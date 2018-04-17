@@ -31,9 +31,10 @@ const renderWindow = ({ id, type, data, canDrop, focus, }) => {
 };
 
 
-const App = ({ windows, hotKeys, }) => (
+const App = ({ windows, hotKeys, onKeyUp }) => (
   <div
     className="app-window"
+    onKeyUp={onKeyUp}
     {...hotKeys}
   >
     <div className="pane-window">

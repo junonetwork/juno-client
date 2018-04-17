@@ -15,6 +15,7 @@ import {
 import {
   addSearchCollectionTable,
   replaceSearchCollection,
+  createSearchDescriptor,
 }                            from '../../redux/modules/tables';
 import {
   formatAddress,
@@ -26,7 +27,7 @@ import withHotKeys           from '../../hoc/withHotKeys';
 import SearchInput           from '../../components/SearchInput';
 import store                 from '../../redux/store';
 
-const { dispatch, } = store;
+const { dispatch } = store;
 const searchIsValid = (repository, type, typeLabel) =>
   repository && type && typeLabel;
 
@@ -64,9 +65,11 @@ export default compose(
           sheetId,
           generateTableId(),
           formatAddress(sheetId, column, row),
-          { repository, type, typeLabel, },
+          createSearchDescriptor(repository, type, typeLabel),
           ['skos:prefLabel'],
-          [{ from: 0, to: 2, }]
+          [{ from: 0, to: 2, }],
+          repository,
+          type
         ),
         setFocus(cellId(sheetId, column, row)),
       ]));

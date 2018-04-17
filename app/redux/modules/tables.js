@@ -5,7 +5,6 @@ import {
   propEq,
   last,
   path,
-  prop,
 }                                    from 'ramda';
 import {
   filter as filterStream,
@@ -24,8 +23,7 @@ import {
 import multimethod                   from '../../utils/multimethod';
 import {
   formatAddress,
-  createSearchCollection,
-  createValueCollection,
+  createCollection,
   createObject,
   createIndex,
   createPredicate,
@@ -36,6 +34,9 @@ import {
   setInArray,
 }                                    from '../../utils/table';
 import {
+  rangeLength,
+}                                    from '../../utils/falcor';
+import {
   clearCellInput,
 }                                    from './cellInput';
 
@@ -43,36 +44,42 @@ import {
 /**
  * utils
  */
-const omitTypeLabel = omit(['typeLabel']);
-
 // TODO - fix search serialization
+const omitTypeLabel = omit(['typeLabel']);
 export const serializeSearch = (search) => JSON.stringify(omitTypeLabel(search));
 
-// TODO - move collectionAddress to sheets module
-export const createSearchCollectionTable = (
-  tableId, collectionAddress, search, predicates, indices
+export const createSearchDescriptor = (repository, type, typeLabel) => ({
+  repository, type, typeLabel,
+});
+
+const createSearchCollectionTable = (
+  tableId, search,
+  predicates, indices, repository, type,
 ) => ({
-  tableId,
-  collectionAddress,
   collection: {
     type: 'search',
     search,
   },
+  tableId,
   predicates,
   indices,
+  repository,
+  type,
 });
 
-export const createValueCollectionTable = (
-  tableId, collectionAddress, resourcePath, predicates, indices
+const createValueCollectionTable = (
+  tableId, resourcePath,
+  predicates, indices, repository, type,
 ) => ({
-  tableId,
-  collectionAddress,
   collection: {
     type: 'value',
     resourcePath,
   },
+  tableId,
   predicates,
   indices,
+  repository,
+  type,
 });
 
 
@@ -82,62 +89,21 @@ export const createValueCollectionTable = (
 export const getTable = (state, tableId) =>
   state.tables[tableId];
 
-const getSearchCollectionPathSets = ({
-  indices, predicates, collection: { search },
-}) => {
-  const paths = [
-    ['resource', search.type, 'skos:prefLabel', 0], // collection
-    ['collection', serializeSearch(search), 'length'], // collection length
-  ];
+// Arguably this belongs in the sheets directory, but b/c webpack doesn't handle circular deps correctly,
+// must be included here: https://github.com/reactjs/reselect/issues/169#issuecomment-381686600
+export const getTableAddress = (state, sheetId, tableId) => state.sheets[sheetId].tables
+  .find(propEq('id', tableId))
+  .address;
 
-  if (predicates.length > 0 && indices.length > 0) {
-    paths.push(
-      ['resource', predicates, 'skos:prefLabel', 0], // predicates
-      ['collection', serializeSearch(search), indices, predicates, 0, 'skos:prefLabel', 0], // object values
-      ['collection', serializeSearch(search), indices, predicates, 0, 'uri'], // object values
-      ['collection', serializeSearch(search), indices, predicates, 'length'], // object lengths
-    );
-  } else if (predicates.length > 0) {
-    paths.push(
-      ['resource', predicates, 'skos:prefLabel', 0], // predicates
-    );
-  }
-
-  return paths;
-};
-
-const getValueCollectionPathSets = ({
-  indices, predicates, collection: { resourcePath },
-}) => {
-  // resourcePath:
-  // ['resource', 'data:james', 'schema:birthPlace']
-  // ['resource', 'data:james', 'schema:birthDate']
-  const paths = [
-    ['resource', last(resourcePath), 'skos:prefLabel', 0], // collection
-    [...resourcePath, 'length'], // collection length
-  ];
-
-  if (predicates.length > 0 && indices.length > 0) {
-    paths.push(
-      ['resource', predicates, 'skos:prefLabel', 0], // predicates
-      [...resourcePath, indices, predicates, 0, 'skos:prefLabel', 0], // object values
-      [...resourcePath, indices, predicates, 0, 'uri'], // object values
-      [...resourcePath, indices, predicates, 'length'], // object values
-    );
-  } else if (predicates.length > 0) {
-    paths.push(
-      ['resource', predicates, 'skos:prefLabel', 0], // predicates
-    );
-  }
-
-  return paths;
+export const getTableDimensions = (state, tableId) => {
+  const table = getTable(state, tableId);
+  return {
+    x: table.predicates.length + 1,
+    y: table.indices.reduce((length, rangeKey) => length + rangeLength(rangeKey), 1),
+  };
 };
 
 
-/**
- * @param {Object} state
- * @param {String} tableId
- */
 /**
  * what if we had some form of dynamic dispatch for table->pathSets?
  * also, table->materialized table should concentrate deserialization at the table level
@@ -155,13 +121,58 @@ const getValueCollectionPathSets = ({
  *     ['resource', ':james']
  *   - table.collectionAddress moves to sheets
  */
+
+/**
+ * @param {Object} state
+ * @param {String} tableId
+ */
 export const getTablePathSets = createCachedSelector(
   getTable,
   multimethod(
     path(['collection', 'type']),
     [
-      'search', getSearchCollectionPathSets,
-      'value', getValueCollectionPathSets,
+      'search', ({ indices, predicates, collection: { search } }) => {
+        const paths = [
+          ['resource', search.type, 'skos:prefLabel', 0], // collection
+          ['collection', serializeSearch(search), 'length'], // collection length
+        ];
+
+        if (predicates.length > 0 && indices.length > 0) {
+          paths.push(
+            ['resource', predicates, 'skos:prefLabel', 0], // predicates
+            ['collection', serializeSearch(search), indices, predicates, 0, 'skos:prefLabel', 0], // object values
+            ['collection', serializeSearch(search), indices, predicates, 0, 'uri'], // object values
+            ['collection', serializeSearch(search), indices, predicates, 'length'], // object lengths
+          );
+        } else if (predicates.length > 0) {
+          paths.push(
+            ['resource', predicates, 'skos:prefLabel', 0], // predicates
+          );
+        }
+
+        return paths;
+      },
+      'value', ({ indices, predicates, collection: { resourcePath } }) => {
+        const paths = [
+          ['resource', last(resourcePath), 'skos:prefLabel', 0], // collection
+          [...resourcePath, 'length'], // collection length
+        ];
+
+        if (predicates.length > 0 && indices.length > 0) {
+          paths.push(
+            ['resource', predicates, 'skos:prefLabel', 0], // predicates
+            [...resourcePath, indices, predicates, 0, 'skos:prefLabel', 0], // object values
+            [...resourcePath, indices, predicates, 0, 'uri'], // object values
+            [...resourcePath, indices, predicates, 'length'], // object values
+          );
+        } else if (predicates.length > 0) {
+          paths.push(
+            ['resource', predicates, 'skos:prefLabel', 0], // predicates
+          );
+        }
+
+        return paths;
+      },
     ]
   )
 )(
@@ -174,23 +185,11 @@ export const getTablePathSets = createCachedSelector(
  * @param {String} sheetId
  * @param {String} tableId
  */
-// TODO - create multimethod to dispatch on table collection type
-const createCollection = multimethod(
-  prop('type'),
-  [
-    'search', ({ search }, sheetId, tableId, column, row) => (
-      createSearchCollection(sheetId, tableId, column, row, search)
-    ),
-    'value', ({ resourcePath }, sheetId, tableId, column, row) => (
-      createValueCollection(sheetId, tableId, column, row, resourcePath)
-    ),
-  ]
-);
-
 export const getTableCells = createCachedSelector(
   nthArg(1),
+  getTableAddress,
   (state, _, tableId) => getTable(state, tableId),
-  (sheetId, { collection,  tableId, collectionAddress, predicates, indices }) => {
+  (sheetId, collectionAddress, { collection,  tableId, predicates, indices }) => {
     // console.log('getTableCells');
 
     const {
@@ -268,6 +267,7 @@ export const REPLACE_INDICES = 'REPLACE_INDICES';
 
 export const UPDATE_CELL_VALUE = 'UPDATE_CELL_VALUE';
 
+// TODO - move to sheets module
 export const MOVE_TABLE = 'MOVE_TABLE';
 
 
@@ -275,27 +275,33 @@ export const MOVE_TABLE = 'MOVE_TABLE';
  * action creators
  */
 export const addSearchCollectionTable = (
-  sheetId, tableId, collectionAddress, search, predicates, indices
+  sheetId, tableId, address, search,
+  predicates, indices, repository, resourceType
 ) => ({
   type: ADD_SEARCH_COLLECTION_TABLE,
   sheetId,
   tableId,
-  collectionAddress,
+  address,
   search,
   predicates,
   indices,
+  repository,
+  resourceType,
 });
 
 export const addValueCollectionTable = (
-  sheetId, tableId, collectionAddress, resourcePath, predicates, indices
+  sheetId, tableId, address, resourcePath,
+  predicates, indices, repository, resourceType
 ) => ({
   type: ADD_VALUE_COLLECTION_TABLE,
   sheetId,
   tableId,
-  collectionAddress,
+  address,
   resourcePath,
   predicates,
   indices,
+  repository,
+  resourceType,
 });
 
 export const removeTable = (tableId) => ({
@@ -333,33 +339,46 @@ export default (
   action
 ) => {
   if (action.type === ADD_SEARCH_COLLECTION_TABLE) {
-    const { tableId, collectionAddress, search, predicates, indices, } = action;
+    const {
+      tableId, search, predicates, indices, repository, resourceType,
+    } = action;
     return {
       ...state,
       [tableId]: createSearchCollectionTable(
-        tableId, collectionAddress, search, predicates, indices
+        tableId, search, predicates, indices, repository, resourceType
       ),
     };
   } else if (action.type === ADD_VALUE_COLLECTION_TABLE) {
-    const { tableId, collectionAddress, resourcePath, predicates, indices, } = action;
+    const {
+      tableId, resourcePath, predicates, indices, repository, resourceType,
+    } = action;
     return {
       ...state,
       [tableId]: createValueCollectionTable(
-        tableId, collectionAddress, resourcePath, predicates, indices
+        tableId, resourcePath, predicates, indices, repository, resourceType
       ),
     };
   } else if (action.type === REMOVE_TABLE) {
     return omit([action.tableId], state);
   } else if (action.type === REPLACE_SEARCH_COLLECTION) {
+    if (state[action.tableId].collection.type !== 'search') {
+      console.warn(
+        'Tried to replace a non-search collection using a REPLACE_SEARCH_COLLECTION action'
+      );
+      return state;
+    }
+
     return {
       ...state,
       [action.tableId]: {
         ...state[action.tableId],
-        search: {
-          ...state[action.tableId].search,
-          repository: action.repository,
-          type: action.resourceType,
-          typeLabel: action.resourceTypeLabel,
+        collection: {
+          type: 'search',
+          search: createSearchDescriptor(
+            action.repository,
+            action.resourceType,
+            action.resourceTypeLabel
+          ),
         },
       },
     };
@@ -383,15 +402,16 @@ export default (
           indices: action.indices,
         },
       };
-  } else if (action.type === MOVE_TABLE) {
-    return {
-      ...state,
-      [action.tableId]: {
-        ...state[action.tableId],
-        collectionAddress: formatAddress(action.toSheetId, action.toColumn, action.toRow),
-      },
-    };
   }
+  // } else if (action.type === MOVE_TABLE) {
+  //   return {
+  //     ...state,
+  //     [action.tableId]: {
+  //       ...state[action.tableId],
+  //       collectionAddress: formatAddress(action.toSheetId, action.toColumn, action.toRow),
+  //     },
+  //   };
+  // }
 
   return state;
 };
@@ -402,8 +422,8 @@ export default (
  */
 const editValueCellEpic = (getState) => (action$) => (
   action$.pipe(
-    mergeMap(({ column, row, value, matrix, }) => {
-      const { type, tableId, } = matrix[row][column];
+    mergeMap(({ column, row, value, matrix }) => {
+      const { type, tableId } = matrix[row][column];
 
       if (type === 'object' && value === '') {
         // delete object
@@ -424,7 +444,7 @@ const editValueCellEpic = (getState) => (action$) => (
         return of(batchActions([replaceSearchCollection(tableId, value), clearCellInput()]));
       } else if (type === 'predicate' && value === '') {
         // delete column
-        const { collectionAddress, predicates, } = getTable(getState(), tableId);
+        const { collectionAddress, predicates } = getTable(getState(), tableId);
         const indexOfDeleteColumn = column - destructureAddress(collectionAddress).column - 1;
 
         return of(batchActions([
@@ -436,7 +456,7 @@ const editValueCellEpic = (getState) => (action$) => (
         ]));
       } else if (type === 'index' && value === '') {
         // delete row
-        const { collectionAddress, indices, } = getTable(getState(), tableId);
+        const { collectionAddress, indices } = getTable(getState(), tableId);
         const indexOfDeleteRow = row - destructureAddress(collectionAddress).row - 1;
         // TODO - collapse indicesKeySet
         const newIndices = expandIndicesKeySet(indices)
@@ -445,7 +465,7 @@ const editValueCellEpic = (getState) => (action$) => (
         return of(batchActions([replaceIndices(tableId, newIndices), clearCellInput()]));
       } else if (type === 'index') {
         // update row
-        const { collectionAddress, indices, } = getTable(getState(), tableId);
+        const { collectionAddress, indices } = getTable(getState(), tableId);
         const indexOfReplaceRow = row - destructureAddress(collectionAddress).row - 1;
         if (Number.isNaN(parseInt(value, 10))) {
           return of(clearCellInput());
@@ -475,8 +495,8 @@ const editValueCellEpic = (getState) => (action$) => (
 
 const editEmptyCellEpic = (getState) => (action$) => (
   action$.pipe(
-    filterStream(({ value, }) => value !== ''),
-    mergeMap(({ column, row, value, matrix, }) => {
+    filterStream(({ value }) => value !== ''),
+    mergeMap(({ column, row, value, matrix }) => {
       // create new row
       const upCell = getUpCell(matrix, column, row);
       if (
@@ -486,7 +506,7 @@ const editEmptyCellEpic = (getState) => (action$) => (
           upCell.type === 'index'
         )
       ) {
-        const { indices, } = getTable(getState(), upCell.tableId);
+        const { indices } = getTable(getState(), upCell.tableId);
         if (Number.isNaN(parseInt(value, 10))) {
           return of(clearCellInput());
         }
@@ -531,10 +551,12 @@ const editEmptyCellEpic = (getState) => (action$) => (
       //     sheetId,
       //     generateTableId(),
       //     formatAddress(sheetId, column, row),
-      //     { repository: 'yyy', resourceType: 'xxx', },
+      //     createSearchDescriptor('yyy', 'xxx', 'XXX'),
       //     // value,
       //     ['skos:prefLabel'],
-      //     [0]
+      //     [0],
+      //     'yyy',
+      //     'xxx'
       //   ),
       //   clearCellInput(),
       // ]));
@@ -554,7 +576,7 @@ export const editCellEpic = (getState) => (action$) => (
     filterStream(propEq('type', UPDATE_CELL_VALUE)),
     (editCellAction$) => {
       const [editEmptyCellAction$, editValueCellAction$] = partition(
-        ({ column, row, matrix, }) => matrix[row][column].type === 'empty'
+        ({ column, row, matrix }) => matrix[row][column].type === 'empty'
       )(editCellAction$);
 
       return merge(

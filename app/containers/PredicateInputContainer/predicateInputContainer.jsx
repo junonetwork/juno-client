@@ -52,13 +52,17 @@ const arrowKeyNavHandler = (direction, steps) => ({
 
 export default compose(
   connect(
-    (state, { tableId, }) => {
+    (state, { tableId }) => {
       // TODO - make work for valueCollection
-      const { collection: { search }, predicates, } = getTable(state, tableId);
+      const {
+        repository,
+        type: resourceType,
+        predicates: existingPredicates,
+      } = getTable(state, tableId);
 
-      return { search, existingPredicates: predicates, };
+      return { existingPredicates, repository, resourceType };
     },
-    (dispatch, { sheetId, tableId, column, row, }) => ({
+    (dispatch, { sheetId, tableId, column, row }) => ({
       submit: (predicates) => {
         dispatch(batchActions([
           replacePredicates(tableId, predicates),
@@ -75,11 +79,11 @@ export default compose(
   ),
   withHandlers({
     addPredicates: ({
-      existingPredicates, type, predicateIdx, submit, blur,
+      existingPredicates, cellType, predicateIdx, submit, blur,
     }) => (newPredicates) => {
       if (newPredicates.length === 0) {
         blur();
-      } else if (type === 'predicate') {
+      } else if (cellType === 'predicate') {
         const [firstPredicate, ...restPredicates] = newPredicates;
         // cell is predicate type - replace existing predicate w/ first new predicate
         // and append rest
@@ -93,29 +97,28 @@ export default compose(
       }
     },
   }),
-  mapPropsStream(connectFalcor(({ search, }) => ([
-    // TODO - mapping search to URIs should move to falcor router
-    ['ontology', search.repository, 'type', search.type],
+  mapPropsStream(connectFalcor(({ repository, resourceType }) => ([
+    ['ontology', repository, 'type', resourceType],
   ]))),
   withStateHandlers(
-    { selectionIdx: -1, selectedPredicates: [], },
+    { selectionIdx: -1, selectedPredicates: [] },
     {
-      setSelectionIdx: () => (selectionIdx) => ({ selectionIdx, }),
-      selectPredicate: ({ selectedPredicates, }) => ({ uri, }) => ({
+      setSelectionIdx: () => (selectionIdx) => ({ selectionIdx }),
+      selectPredicate: ({ selectedPredicates }) => ({ uri }) => ({
         selectedPredicates: [...selectedPredicates, uri],
       }),
-      unselectPredicate: ({ selectedPredicates, }) => ({ uri, }) => ({
+      unselectPredicate: ({ selectedPredicates }) => ({ uri }) => ({
         selectedPredicates: reject(equals(uri))(selectedPredicates),
       }),
     }
   ),
   withProps(({
-    graphFragment, search, existingPredicates, selectedPredicates, value,
+    graphFragment, repository, resourceType, existingPredicates, selectedPredicates, value,
   }) => ({
     predicateList: pipe(
-      pathOr([], ['json', 'ontology', search.repository, 'type', search.type, 'value']),
-      map(({ uri, label, }) => ({ uri, label, selected: contains(uri, selectedPredicates), })),
-      filter(({ uri, label, }) => (
+      pathOr([], ['json', 'ontology', repository, 'type', resourceType, 'value']),
+      map(({ uri, label }) => ({ uri, label, selected: contains(uri, selectedPredicates) })),
+      filter(({ uri, label }) => (
         label &&
         uri &&
         not(contains(uri, existingPredicates)) &&
@@ -124,7 +127,7 @@ export default compose(
     )(graphFragment),
   })),
   withHandlers({
-    forwardSelect: ({ predicateList, selectionIdx, setSelectionIdx, }) => () => {
+    forwardSelect: ({ predicateList, selectionIdx, setSelectionIdx }) => () => {
       if (predicateList.length === 0) {
         setSelectionIdx(-1);
       } else if (selectionIdx < predicateList.length - 1) {
@@ -187,10 +190,10 @@ export default compose(
         selectPredicate(predicateList[selectionIdx]);
       }
     },
-    esc: ({ exit, }) => () => {
+    esc: ({ exit }) => () => {
       exit();
     },
-    click: ({ selectedPredicates, addPredicates, }) => (uri) => {
+    click: ({ selectedPredicates, addPredicates }) => (uri) => {
       addPredicates(uniq([...selectedPredicates, uri]));
     },
   }),

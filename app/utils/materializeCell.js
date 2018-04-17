@@ -12,49 +12,45 @@ import {
 } from '../redux/modules/tables';
 
 
-// TODO - make multimethod
-export const cell2PathFragment = (cell, sheetMatrix) => {
-  if (cell.type === 'searchCollection') {
-    return ['collection', serializeSearch(cell.search)];
-  } else if (cell.type === 'valueCollection') {
-    return cell.resourcePath;
-  } else if (cell.type === 'predicate') {
-    return [cell.uri];
-  } else if (cell.type === 'index') {
-    return [cell.index];
-  } else if (cell.type === 'object') {
-    // recurse to caculate pathFragment for collection, index, and address
-    const {
-      column: collectionColumn,
-      row: collectionRow,
-    } = destructureAddress(cell.collectionAddress);
-    const {
-      column: indexColumn,
-      row: indexRow,
-    } = destructureAddress(cell.indexAddress);
-    const {
-      column: predicateColumn,
-      row: predicateRow,
-    } = destructureAddress(cell.predicateAddress);
+export const cell2PathFragment = multimethod(
+  prop('type'),
+  [
+    'searchCollection', ({ search }) => ['collection', serializeSearch(search)],
+    'valueCollection', ({ resourcePath }) => resourcePath,
+    'predicate', ({ uri }) => [uri],
+    'index', ({ index }) => [index],
+    'object', ({ collectionAddress, indexAddress, predicateAddress }, sheetMatrix) => {
+      // recurse to caculate pathFragment for collection, index, and address
+      const {
+        column: collectionColumn,
+        row: collectionRow,
+      } = destructureAddress(collectionAddress);
+      const {
+        column: indexColumn,
+        row: indexRow,
+      } = destructureAddress(indexAddress);
+      const {
+        column: predicateColumn,
+        row: predicateRow,
+      } = destructureAddress(predicateAddress);
 
-    return [
-      ...cell2PathFragment(
-        sheetMatrix[collectionRow][collectionColumn],
-        sheetMatrix
-      ),
-      ...cell2PathFragment(
-        sheetMatrix[indexRow][indexColumn],
-        sheetMatrix
-      ),
-      ...cell2PathFragment(
-        sheetMatrix[predicateRow][predicateColumn],
-        sheetMatrix
-      ),
-    ];
-  }
-
-  throw new Error('Tried to get path for unknown cell type', cell.type);
-};
+      return [
+        ...cell2PathFragment(
+          sheetMatrix[collectionRow][collectionColumn],
+          sheetMatrix
+        ),
+        ...cell2PathFragment(
+          sheetMatrix[indexRow][indexColumn],
+          sheetMatrix
+        ),
+        ...cell2PathFragment(
+          sheetMatrix[predicateRow][predicateColumn],
+          sheetMatrix
+        ),
+      ];
+    },
+  ]
+);
 
 
 export const getSearchCollectionPath = (type) => [

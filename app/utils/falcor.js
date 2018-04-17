@@ -15,3 +15,9 @@ export const isPaths = (paths) => {
 
   return true;
 };
+
+export const rangeLength = (rangeKey) => (
+  typeof rangeKey === 'object' ?
+    (rangeKey.to + 1) - (rangeKey.from || 0) :
+    1
+);

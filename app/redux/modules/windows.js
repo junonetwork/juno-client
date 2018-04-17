@@ -1,6 +1,7 @@
 import {
   pipe,
   reduce,
+  prop,
 }                                    from 'ramda';
 import {
   getFocus,
@@ -8,7 +9,7 @@ import {
 import {
   getSheetMatrix,
   withHints as sheetMatrixWithHints,
-  getSheetTableIds,
+  getSheetTableDescriptors,
 }                                    from './sheets';
 import {
   getGraphJGF,
@@ -36,9 +37,9 @@ export const getWindows = (state) => state.windows;
 export const getPathSets = arraySingleDepthEqualitySelector(
   (state) => (
     getWindows(state)
-      .reduce((tableIds, { id, type, }) => {
+      .reduce((tableIds, { id, type }) => {
         if (type === 'sheet') {
-          tableIds.push(...getSheetTableIds(state, id));
+          tableIds.push(...getSheetTableDescriptors(state, id).map(prop('id')));
           return tableIds;
         } else if (type === 'graph') {
           tableIds.push(...getGraphTableIds(state, id));
@@ -64,7 +65,7 @@ export const getPathSets = arraySingleDepthEqualitySelector(
 export const windowsWithData = (state, graphFragment, windows) => {
   const focus = getFocus(state);
 
-  return reduce((windowData, { id, type, }) => {
+  return reduce((windowData, { id, type }) => {
     // TODO - every window type should implement it's own get<WindowType>DataForWindow
     // that follows a single interface: (state, windowId, graphFragment) -> { windowWithData, hints }
     if (type === 'sheet') {
@@ -100,7 +101,7 @@ export const windowsWithData = (state, graphFragment, windows) => {
     }
 
     throw new Error(`Unknown window type ${type}`);
-  }, { windows: [], hints: {}, }, windows);
+  }, { windows: [], hints: {} }, windows);
 };
 
 
@@ -138,10 +139,10 @@ export const getMaterializedWindows = arraySingleDepthEqualitySelector(
       graphFragment,
       windows: getWindows(state),
     }),
-    ({ state, graphFragment, windows, }) => (
+    ({ state, graphFragment, windows }) => (
       windowsWithData(state, graphFragment, windows)
     ),
-    ({ windows, hints, }) => (
+    ({ windows, hints }) => (
       windowsWithHints(windows, hints)
     )
   ),
@@ -174,12 +175,12 @@ export const deleteWindow = () => ({
  */
 export default (
   state = [
-    { id: '0', type: 'sheet', },
+    { id: '0', type: 'sheet' },
   ],
   action
 ) => {
   if (action.type === CREATE_WINDOW) {
-    return [{ id: '1', type: 'graph', }, ...state];
+    return [{ id: '1', type: 'graph' }, ...state];
   } else if (action.type === DELETE_WINDOW) {
     return [state[1]];
   }

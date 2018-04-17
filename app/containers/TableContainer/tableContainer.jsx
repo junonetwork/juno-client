@@ -26,7 +26,7 @@ import {
 }                          from '../../redux/actionStream';
 import throttle            from '../../utils/throttleAnimationFrame';
 
-const { dispatch, } = store;
+const { dispatch } = store;
 
 
 const throttledTeaseCell = throttle((sheetId, column, row) => (
@@ -45,18 +45,18 @@ export default compose(
   withHandlers({
     teaseCell: () => throttledTeaseCell,
     navigate: () => throttledNavigate,
-    startDragTable: () => (sheetId, tableId, column, row) => (
-      dispatch(startDragTable(sheetId, tableId, column, row))
+    startDragTable: () => (sheetId, tableId, type, column, row, collection) => (
+      dispatch(startDragTable(sheetId, tableId, type, column, row, collection))
     ),
     dragTable: () => throttleDragTable,
-    endDragTable: ({ canDrop, }) => () => {
+    endDragTable: ({ canDrop }) => () => {
       if (canDrop) {
         dispatch(dropTable());
       } else {
         dispatch(cancelDragTable());
       }
     },
-    updateValue: ({ sheetMatrix, }) => (sheetId, column, row, value) => (
+    updateValue: ({ sheetMatrix }) => (sheetId, column, row, value) => (
       dispatch(streamAction(updateCellValue(sheetId, column, row, value, sheetMatrix)))
     ),
   }),

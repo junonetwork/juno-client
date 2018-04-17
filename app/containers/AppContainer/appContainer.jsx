@@ -5,6 +5,7 @@ import {
 import {
   compose,
   setDisplayName,
+  withHandlers,
 }                          from 'recompose';
 import {
   connect,
@@ -33,7 +34,7 @@ const AppContainer = compose(
   ),
   mapPropsStream(connectFalcor(prop('paths'))),
   connect(
-    (state, { graphFragment, }) => ({
+    (state, { graphFragment }) => ({
       windows: getMaterializedWindows(state, graphFragment),
     }),
     (dispatch) => ({
@@ -43,23 +44,33 @@ const AppContainer = compose(
       deleteWindowAction() {
         dispatch(deleteWindow());
       },
+      showVisualMode() {
+        console.log('showVisualMode');
+      },
+      hideVisualMode() {
+        console.log('hideVisualMode');
+      },
     })
   ),
   withHotKeys(
     appId(),
-    ({
-      'cmd+1': ({ windows, deleteWindowAction, }) => () => {
+    {
+      'cmd+1': ({ windows, deleteWindowAction }) => () => {
         if (windows.length !== 1) {
           deleteWindowAction();
         }
       },
-      'cmd+2': ({ windows, createWindowAction, }) => () => {
+      'cmd+2': ({ windows, createWindowAction }) => () => {
         if (windows.length !== 2) {
           createWindowAction();
         }
       },
-    }),
-  )
+      ctrl: ({ showVisualMode }) => () => showVisualMode(),
+    },
+  ),
+  withHandlers({
+    onKeyUp: ({ hideVisualMode }) => ({ which }) => which === 17 && hideVisualMode(),
+  })
 )(App);
 
 

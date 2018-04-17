@@ -14,6 +14,7 @@ import {
   increaseSheetMaxRow,
 }                             from '../../app/redux/modules/sheets';
 import {
+  createSearchDescriptor,
   addSearchCollectionTable,
 }                             from '../../app/redux/modules/tables';
 import {
@@ -57,9 +58,11 @@ const initStore = () => {
     sheetId,
     tableId,
     collectionAddress,
-    'Person',
+    createSearchDescriptor('memory', 'schema:Person', 'Person'),
     ['skos:prefLabel', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling', 'schema:sibling'],
-    [0, 1, 2, 3, 0, 1, 0, 10]
+    [0, 1, 2, 3, 0, 1, 0, 10],
+    'memory',
+    'schema:Person'
   ));
   store.dispatch(setFocus({ sheetId, column: 0, row: 0, }));
 

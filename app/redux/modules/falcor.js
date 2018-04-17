@@ -27,9 +27,9 @@ export const DELETE_GRAPH_VALUE_ERROR = 'DELETE_GRAPH_VALUE_ERROR';
  * action creators
  */
 export const updateGraphValue = (path, value) =>
-  ({ type: UPDATE_GRAPH_VALUE, path, value, });
+  ({ type: UPDATE_GRAPH_VALUE, path, value });
 export const deleteGraphValue = (path) =>
-  ({ type: DELETE_GRAPH_VALUE, path, });
+  ({ type: DELETE_GRAPH_VALUE, path });
 
 
 /**
@@ -45,7 +45,7 @@ export const updateGraphValueEpic = () => (action$) => (
     filter(propEq('type', UPDATE_GRAPH_VALUE)),
     mergeMap((action) => (
       from(model.setValue(action.path, action.value)).pipe(
-        mapTo({ type: UPDATE_GRAPH_VALUE_SUCCESS, }),
+        mapTo({ type: UPDATE_GRAPH_VALUE_SUCCESS }),
         catchError((error) => of({ type: UPDATE_GRAPH_VALUE_ERROR, error, }))
       )
     )),

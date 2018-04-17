@@ -55,7 +55,7 @@ const Cell = ({
         <PredicateInput
           value={cellInput}
           sheetId={sheetId}
-          type={type}
+          cellType={type}
           tableId={type === 'predicate' ? tableId : leftCellTableId}
           column={column}
           row={row}
