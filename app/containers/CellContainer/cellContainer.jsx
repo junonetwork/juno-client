@@ -42,9 +42,14 @@ export default compose(
     onMouseEnter: ({ sheetId, column, row, teaseCell }) => () => {
       teaseCell(sheetId, column, row);
     },
-    onDragStart: ({ sheetId, tableId, type, column, row, absolutePath, startDragTable }) => () => {
-      // TODO - come up w/ a better way to pass params to dragStart
-      startDragTable(sheetId, tableId, type, column, row, { resourcePath: absolutePath });
+    onDragStart: ({
+      sheetId, tableId, type, column, row, absolutePath, cellLength,
+      startDragTable,
+    }) => () => {
+      // TODO - pass cell valueType: literal or resource
+      startDragTable(
+        sheetId, tableId, type, column, row, { absolutePath, cellLength }
+      );
     },
     onDragEnter: ({ sheetId, column, row, dragTable }) => () => {
       dragTable(sheetId, column, row);

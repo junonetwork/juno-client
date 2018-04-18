@@ -25,6 +25,8 @@ import {
 } from '../../utils/cell';
 
 
+const MIN_TABLE_YLENGTH = 4;
+
 /**
  * utils
  */
@@ -49,20 +51,21 @@ export const isLegalDrop = (xLength, yLength, toTableXOrigin, toTableYOrigin, ta
  * selectors
  */
 export const getDragTableId = (state) => state.dragTable.tableId;
-export const getDragTableType = (state) => state.dragTable.cellType;
-export const getDragTableCollection = (state) => state.dragTable.collection;
+export const getDragTableCellType = (state) => state.dragTable.cellType;
+export const getDragTableCell = (state) => state.dragTable.cell;
 export const getDragTableFrom = (state) => state.dragTable.from;
 export const getDragTableTo = (state) => state.dragTable.to;
 // NOTE - xOffset/yOffset might not be necessary if only collection cells can move a table
 export const getDragTable = multimethod(
-  nthArg(0),
+  getDragTableCellType,
   [
     'object', (
-      _, state, fromSheetId, dragTableId, fromColumn, fromRow, toColumn, toRow
+      state, fromSheetId, dragTableId, fromColumn, fromRow, toColumn, toRow
     ) => {
+      const { cellLength } = getDragTableCell(state);
       return {
         xLength: 2,
-        yLength: 3,
+        yLength: Math.min(cellLength + 1, MIN_TABLE_YLENGTH),
         xOffset: 0,
         yOffset: 0,
         toTableXOrigin: toColumn,
@@ -71,7 +74,7 @@ export const getDragTable = multimethod(
     },
   ],
   (
-    _, state, fromSheetId, dragTableId, fromColumn, fromRow, toColumn, toRow
+    state, fromSheetId, dragTableId, fromColumn, fromRow, toColumn, toRow
   ) => {
     const {
       column: collectionColumn, row: collectionRow,
@@ -104,23 +107,24 @@ export const CANCEL_DRAG_TABLE = 'CANCEL_DRAG_TABLE';
 /**
  * action creators
  */
-export const startDragTable = (sheetId, tableId, cellType, column, row, collection) => ({
-  type: START_DRAG_TABLE, sheetId, tableId, cellType, column, row, collection,
+export const startDragTable = (sheetId, tableId, cellType, column, row, cell) => ({
+  type: START_DRAG_TABLE, sheetId, tableId, cellType, column, row, cell,
 });
 export const dragTable = (sheetId, column, row) => ({
   type: DRAG_TABLE, sheetId, column, row,
 });
 const getDropTableAction = multimethod(
-  nthArg(0),
+  // TODO - allow to dispatch on cellType and value type (resource or literal)
+  getDragTableCellType,
   [
     // dispatch is a little more complicated than just cellType
     // if cell is a singleton value, should probably create resourceCollection (?)
     // if cell is literal collection, should not add skos:prefLabel
-    'object', (_, state) => {
+    'object', (state) => {
       const dragTableId = getDragTableId(state);
-      const { resourcePath } = getDragTableCollection(state);
       const { sheetId: toSheetId, column: toColumn, row: toRow } = getDragTableTo(state);
       const { repository, type } = getTable(state, dragTableId);
+      const { absolutePath, cellLength } = getDragTableCell(state);
 
       return batchActions([
         { type: DROP_TABLE },
@@ -128,25 +132,25 @@ const getDropTableAction = multimethod(
           toSheetId,
           generateTableId(),
           formatAddress(toSheetId, toColumn, toRow),
-          resourcePath,
+          absolutePath,
+          // TODO - don't add prefLabel if value is literal
           ['skos:prefLabel'],
-          [{ to: 3 }],
+          [{ to: Math.min(cellLength - 1, MIN_TABLE_YLENGTH - 2) }],
           repository,
           type
         ),
         setFocus(cellId(toSheetId, toColumn, toRow)),
-      ]);
+      ], 'DROP_TABLE');
     },
   ],
-  (_, state) => {
+  (state) => {
     const dragTableId = getDragTableId(state);
     const {
       sheetId: fromSheetId, column: fromColumn, row: fromRow,
     } = getDragTableFrom(state);
     const { sheetId: toSheetId, column: toColumn, row: toRow } = getDragTableTo(state);
     const { toTableXOrigin, toTableYOrigin } = getDragTable(
-      getDragTableType(state), state, fromSheetId, dragTableId,
-      fromColumn, fromRow, toColumn, toRow,
+      state, fromSheetId, dragTableId, fromColumn, fromRow, toColumn, toRow,
     );
 
     return batchActions([
@@ -156,10 +160,14 @@ const getDropTableAction = multimethod(
     ], 'DROP_TABLE');
   }
 );
+
 export const dropTable = () => (dispatch, getState) => {
   const state = getState();
-  return dispatch(getDropTableAction(getDragTableType(state), state));
+  return dispatch(
+    getDropTableAction(state)
+  );
 };
+
 export const cancelDragTable = () => ({
   type: CANCEL_DRAG_TABLE,
 });
@@ -177,7 +185,7 @@ export default (
       table: action.table,
       cellType: action.cellType,
       tableId: action.tableId,
-      collection: action.collection,
+      cell: action.cell,
       from: {
         sheetId: action.sheetId,
         column: action.column,

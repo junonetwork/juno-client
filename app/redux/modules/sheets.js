@@ -34,7 +34,6 @@ import {
 import {
   isLegalDrop,
   getDragTableId,
-  getDragTableType,
   getDragTable,
   getDragTableFrom,
   getDragTableTo,
@@ -367,8 +366,7 @@ export const withDropTable = (state, sheetId, matrix) => {
   const {
     xLength, yLength, xOffset, yOffset, toTableXOrigin, toTableYOrigin,
   } = getDragTable(
-    getDragTableType(state), state, fromSheetId, dragTableId,
-    fromColumn, fromRow, toColumn, toRow,
+    state, fromSheetId, dragTableId, fromColumn, fromRow, toColumn, toRow,
   );
 
   const canDrop = isLegalDrop(
