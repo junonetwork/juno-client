@@ -56,8 +56,10 @@ export default compose(
         dispatch(cancelDragTable());
       }
     },
-    updateValue: ({ sheetMatrix }) => (sheetId, column, row, value) => (
-      dispatch(streamAction(updateCellValue(sheetId, column, row, value, sheetMatrix)))
+    updateValue: ({ sheetMatrix }) => (sheetId, tableId, type, column, row, value) => (
+      dispatch(streamAction(updateCellValue(
+        sheetId, tableId, type, column, row, value, sheetMatrix
+      )))
     ),
   }),
   mapProps(({ canDrop, ...rest }) => rest)

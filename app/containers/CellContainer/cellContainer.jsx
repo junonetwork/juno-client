@@ -85,20 +85,20 @@ export default compose(
       right: arrowKeyNavHandler('right', 1),
       'alt+right': arrowKeyNavHandler('right', FAST_STEP),
       delete: ({
-        sheetId, column, row, cellInput, updateValue,
+        sheetId, tableId, type, column, row, cellInput, updateValue,
       }) => () => {
         if (cellInput) {
           dispatch(setCellInput(sheetId, column, row, cellInput.slice(0, -1)));
         } else {
-          updateValue(sheetId, column, row, '');
+          updateValue(sheetId, tableId, type, column, row, '');
         }
       },
       enter: ({
-        sheetId, column, row, cellInput, type, leftCellType, upCellType,
+        sheetId, tableId, column, row, cellInput, type, leftCellType, upCellType,
         updateValue,
       }) => () => {
         if (cellInput) {
-          updateValue(sheetId, column, row, cellInput);
+          updateValue(sheetId, tableId, type, column, row, cellInput);
         } else if (
           type === 'predicate' ||
           leftCellType === 'predicate' ||

@@ -60,13 +60,6 @@ export const getDragTable = multimethod(
     'object', (
       _, state, fromSheetId, dragTableId, fromColumn, fromRow, toColumn, toRow
     ) => {
-      // const {
-      //   column: collectionColumn, row: collectionRow,
-      // } = destructureAddress(getTableAddress(state, fromSheetId, dragTableId));
-      // const { x: xLength, y: yLength } = getTableDimensions(state, dragTableId);
-      // const xOffset = fromColumn - collectionColumn;
-      // const yOffset = fromRow - collectionRow;
-
       return {
         xLength: 2,
         yLength: 3,

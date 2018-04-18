@@ -2,6 +2,7 @@ import {
   nthArg,
   equals,
   omit,
+  prop,
   propEq,
   last,
   path,
@@ -322,8 +323,10 @@ export const replaceIndices = (tableId, indices) => ({
   type: REPLACE_INDICES, tableId, indices,
 });
 
-export const updateCellValue = (sheetId, column, row, value, matrix) => ({
-  type: UPDATE_CELL_VALUE, sheetId, column, row, value, matrix,
+export const updateCellValue = (
+  sheetId, tableId, cellType, column, row, value, matrix
+) => ({
+  type: UPDATE_CELL_VALUE, sheetId, tableId, cellType, column, row, value, matrix,
 });
 
 export const moveTable = (tableId, fromSheetId, toSheetId, toColumn, toRow) => ({
@@ -420,169 +423,129 @@ export default (
 /**
  * epics
  */
-const editValueCellEpic = (getState) => (action$) => (
-  action$.pipe(
-    mergeMap(({ column, row, value, matrix }) => {
-      const { type, tableId } = matrix[row][column];
+const editCollectionCell = ({ value, tableId }) => {
+  if (value === '') {
+    // delete collection
+    return of(batchActions([
+      removeTable(tableId),
+      clearCellInput(),
+    ], 'DELETE_COLLECTION_CELL'));
+  }
 
-      if (type === 'object' && value === '') {
-        // delete object
-        // TODO - how should object collections of length > 1 behave?
-        // return of(deleteGraphValue(getObjectPath(...)));
-        console.log('DELETE OBJECT CELL');
-        return of(clearCellInput());
-      } else if (type === 'object') {
-        // update object
-        // return of(updateGraphValue(getObjectPath(...)));
-        console.log('UPDATE OBJECT CELL');
-        return of(clearCellInput());
-      } else if ((type === 'searchCollection' || type === 'valueCollection') && value === '') {
-        // delete collection
-        return of(batchActions([removeTable(tableId), clearCellInput()]));
-      } else if (type === 'searchCollection' || type === 'valueCollection') {
-        // update collection
-        return of(batchActions([replaceSearchCollection(tableId, value), clearCellInput()]));
-      } else if (type === 'predicate' && value === '') {
-        // delete column
-        const { collectionAddress, predicates } = getTable(getState(), tableId);
-        const indexOfDeleteColumn = column - destructureAddress(collectionAddress).column - 1;
-
-        return of(batchActions([
-          replacePredicates(
-            tableId,
-            predicates.filter((_, idx) => idx !== indexOfDeleteColumn)
-          ),
-          clearCellInput(),
-        ]));
-      } else if (type === 'index' && value === '') {
-        // delete row
-        const { collectionAddress, indices } = getTable(getState(), tableId);
-        const indexOfDeleteRow = row - destructureAddress(collectionAddress).row - 1;
-        // TODO - collapse indicesKeySet
-        const newIndices = expandIndicesKeySet(indices)
-          .filter((_, idx) => idx !== indexOfDeleteRow);
-
-        return of(batchActions([replaceIndices(tableId, newIndices), clearCellInput()]));
-      } else if (type === 'index') {
-        // update row
-        const { collectionAddress, indices } = getTable(getState(), tableId);
-        const indexOfReplaceRow = row - destructureAddress(collectionAddress).row - 1;
-        if (Number.isNaN(parseInt(value, 10))) {
-          return of(clearCellInput());
-        }
-
-        // TODO - collapse indicesKeySet
-        const newIndices = setInArray(
-          indexOfReplaceRow,
-          parseInt(value, 10),
-          expandIndicesKeySet(indices)
-        );
-
-        return of(batchActions([
-          replaceIndices(tableId, newIndices),
-          clearCellInput(),
-        ]));
-      }
-
-      throw new Error('Edited a cell with no editValueCellEpic handler');
-    }),
-    catchError((error, caught) => {
-      console.error('EditValueCellEpic Error', error);
-      return caught;
-    })
-  )
-);
-
-const editEmptyCellEpic = (getState) => (action$) => (
-  action$.pipe(
-    filterStream(({ value }) => value !== ''),
-    mergeMap(({ column, row, value, matrix }) => {
-      // create new row
-      const upCell = getUpCell(matrix, column, row);
-      if (
-        upCell && (
-          upCell.type === 'searchCollection' ||
-          upCell.type === 'valueCollection' ||
-          upCell.type === 'index'
-        )
-      ) {
-        const { indices } = getTable(getState(), upCell.tableId);
-        if (Number.isNaN(parseInt(value, 10))) {
-          return of(clearCellInput());
-        }
-
-        return of(batchActions([
-          replaceIndices(upCell.tableId, [...indices, parseInt(value, 10)]),
-          clearCellInput(),
-        ]));
-      }
-
-      // create new column
-      // const leftCell = getLeftCell(matrix, column, row);
-      // if (
-      //   leftCell && (
-      //     leftCell.type === 'searchCollection' ||
-      //     leftCell.type === 'valueCollection' ||
-      //     leftCell.type === 'predicate'
-      //   )
-      // ) {
-      //   return from(
-      //     model.getValue(['inverse', `"${value}"`, 'skos:prefLabel', 'uri'])
-      //   )
-      //     .pipe(
-      //       // TODO - handle case of adding non-existent uri
-      //       map((uri = {}) => {
-      //         // TODO - store label, for cases when predicate label doesn't resolve to anything
-      //         const { predicates, } = getTable(getState(), leftCell.tableId);
-      //         return [
-      //           replacePredicates(
-      //             leftCell.tableId,
-      //             [...predicates, uri.value || value]
-      //           ),
-      //           clearCellInput(),
-      //         ];
-      //       }),
-      //     );
-      // }
-
-      // create a new collection
-      // return of(batchActions([
-      //   addSearchCollectionTable(
-      //     sheetId,
-      //     generateTableId(),
-      //     formatAddress(sheetId, column, row),
-      //     createSearchDescriptor('yyy', 'xxx', 'XXX'),
-      //     // value,
-      //     ['skos:prefLabel'],
-      //     [0],
-      //     'yyy',
-      //     'xxx'
-      //   ),
-      //   clearCellInput(),
-      // ]));
-
-      return empty();
-    }),
-    catchError((error, caught) => {
-      console.error('EditEmptyCellEpic error', error);
-      return caught;
-    })
-  )
-);
+  // update collection
+  return of(batchActions([
+    replaceSearchCollection(tableId, value),
+    clearCellInput(),
+  ], 'UPDATE_COLLECTION_CELL'));
+};
 
 
 export const editCellEpic = (getState) => (action$) => (
   action$.pipe(
     filterStream(propEq('type', UPDATE_CELL_VALUE)),
-    (editCellAction$) => {
-      const [editEmptyCellAction$, editValueCellAction$] = partition(
-        ({ column, row, matrix }) => matrix[row][column].type === 'empty'
-      )(editCellAction$);
+    mergeMap(multimethod(
+      prop('cellType'),
+      [
+        'searchCollection', editCollectionCell,
+        'valueCollection', editCollectionCell,
+        'predicate', ({ value, sheetId, tableId, column }) => {
+          if (value === '') {
+            // delete column
+            const state = getState();
+            const { predicates } = getTable(state, tableId);
+            const collectionAddress = getTableAddress(state, sheetId, tableId);
+            const indexOfDeleteColumn = column - destructureAddress(collectionAddress).column - 1;
 
-      return merge(
-        editEmptyCellEpic(getState)(editEmptyCellAction$),
-        editValueCellEpic(getState)(editValueCellAction$)
-      );
-    }
+            return of(batchActions([
+              replacePredicates(
+                tableId,
+                predicates.filter((_, idx) => idx !== indexOfDeleteColumn)
+              ),
+              clearCellInput(),
+            ], 'DELETE_PREDICATE_CELL'));
+          }
+
+          console.warn('edit predicate cell handler not implemented');
+          return of(clearCellInput);
+        },
+        'index', ({ value, sheetId, tableId, row }) => {
+          if (value === '') {
+            // delete row
+            const state = getState();
+            const { indices } = getTable(state, tableId);
+            const collectionAddress = getTableAddress(state, sheetId, tableId);
+            const indexOfDeleteRow = row - destructureAddress(collectionAddress).row - 1;
+            // TODO - collapse indicesKeySet
+            const newIndices = expandIndicesKeySet(indices)
+              .filter((_, idx) => idx !== indexOfDeleteRow);
+
+            return of(batchActions([
+              replaceIndices(tableId, newIndices),
+              clearCellInput(),
+            ], 'DELETE_ROW_CELL'));
+          }
+
+          // update row
+          const state = getState();
+          const { indices } = getTable(state, tableId);
+          const collectionAddress = getTableAddress(state, sheetId, tableId);
+          const indexOfReplaceRow = row - destructureAddress(collectionAddress).row - 1;
+          if (Number.isNaN(parseInt(value, 10))) {
+            return of(clearCellInput());
+          }
+
+          // TODO - collapse indicesKeySet
+          const newIndices = setInArray(
+            indexOfReplaceRow,
+            parseInt(value, 10),
+            expandIndicesKeySet(indices)
+          );
+
+          return of(batchActions([
+            replaceIndices(tableId, newIndices),
+            clearCellInput(),
+          ], 'UPDATE_ROW_CELL'));
+        },
+        'object', ({ value }) => {
+          if (value === '') {
+            // delete object
+            console.log('DELETE_OBJECT_CELL');
+            return of(clearCellInput());
+          }
+
+          // update object
+          console.log('UPDATE_OBJECT_CELL');
+          return of(clearCellInput());
+        },
+        'empty', ({ value, column, row, matrix }) => {
+          const upCell = getUpCell(matrix, column, row);
+          if (
+            upCell && (
+              upCell.type === 'searchCollection' ||
+                upCell.type === 'valueCollection' ||
+                upCell.type === 'index'
+            ) &&
+              value !== ''
+          ) {
+            // create new row
+            const { indices } = getTable(getState(), upCell.tableId);
+            if (Number.isNaN(parseInt(value, 10))) {
+              return of(clearCellInput());
+            }
+
+            return of(batchActions([
+              replaceIndices(upCell.tableId, [...indices, parseInt(value, 10)]),
+              clearCellInput(),
+            ]));
+          }
+
+          return empty();
+        },
+      ]
+    )),
+    catchError((error, caught) => {
+      console.error('EditCellEpic Error', error);
+      return caught;
+    })
   )
 );
