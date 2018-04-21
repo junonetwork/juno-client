@@ -2,8 +2,8 @@ import React            from 'react';
 import                        './style.scss';
 
 
-const CellValue = ({ $type, value, cellLength, }) => {
-  if ($type === 'error') {
+const CellValue = ({ value, valueType, cellLength, }) => {
+  if (valueType === 'error') {
     return (
       <span className="cell-value error" title={value.message}>ERR</span>
     );

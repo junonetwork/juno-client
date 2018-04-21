@@ -1,7 +1,9 @@
 import {
   path,
+  pathOr,
   prop,
   last,
+  identity,
 } from 'ramda';
 import multimethod from './multimethod';
 import {
@@ -144,6 +146,20 @@ const materializeValueCollection = (cell, graphJSON) => {
 };
 
 
+// const materializeIndex = (cell, graphJSON, sheetMatrix) => {
+//   const relativePath = getIndexPath(cell.collectionAddress, cell.index, sheetMatrix);
+
+//   // TODO - perhaps this should be recorded on write?
+//   const { column, row } = destructureAddress(cell.collectionAddress);
+//   const collectionType = sheetMatrix[row][column].type;
+//   return {
+//     ...cell,
+//     value: collectionType === 'valueCollection' ?
+//       `${cell.index} ${pathOr('', [...relativePath, 'value'], graphJSON)}` :
+//       cell.index,
+//     absolutePath: path([...relativePath, '$__path'], graphJSON),
+//   };
+// };
 const materializeIndex = (cell, graphJSON, sheetMatrix) => {
   const relativePath = getIndexPath(cell.collectionAddress, cell.index, sheetMatrix);
 
@@ -155,22 +171,33 @@ const materializeIndex = (cell, graphJSON, sheetMatrix) => {
 };
 
 
-const materializePredicate = (cell, graphJSON) => {
-  const relativePath = getPredicatePath(cell.uri);
+const materializePredicate = (cell, graphJSON) => ({
+  ...cell,
+  value: path([...getPredicatePath(cell.uri), 'value'], graphJSON),
+});
+
+
+const getBoxedValue = (relativePath, graphJSON) => {
+  const boxValue = path([...relativePath, 0], graphJSON);
+  if (!boxValue) {
+    return {};
+  }
+
+  // if boxValue points to an object, get its skos:prefLabel
+  if (boxValue['skos:prefLabel']) {
+    return {
+      value: boxValue['skos:prefLabel'][0].value,
+      valueType: boxValue['skos:prefLabel'][0].$type === 'error' ? 'error' : 'ref',
+    };
+  }
 
   return {
-    ...cell,
-    value: path([...relativePath, 'value'], graphJSON),
+    value: boxValue.value,
+    valueType: boxValue.$type,
   };
 };
 
-
-const materializeObject = (cell, graphJSON, sheetMatrix) => {
-  const relativePath = getObjectPath(
-    cell.collectionAddress, cell.indexAddress, cell.predicateAddress, sheetMatrix
-  );
-  const cellLength = path([...relativePath, 'length', 'value'], graphJSON);
-
+const getAbsolutePath = (cellLength, relativePath, graphJSON) => {
   let absolutePath;
 
   if (cellLength === 1 && path([...relativePath, 0, '$__path'], graphJSON)) {
@@ -181,23 +208,23 @@ const materializeObject = (cell, graphJSON, sheetMatrix) => {
     absolutePath = null;
   }
 
-  let boxValue = path(relativePath, graphJSON);
+  return absolutePath;
+};
 
-  // if boxValue is multivalue (not singleton), get first value
-  if (boxValue && boxValue['0']) {
-    boxValue = boxValue['0'];
-  }
+const materializeObject = (cell, graphJSON, sheetMatrix) => {
+  const relativePath = getObjectPath(
+    cell.collectionAddress, cell.indexAddress, cell.predicateAddress, sheetMatrix
+  );
+  const cellLength = pathOr(1, [...relativePath, 'length', 'value'], graphJSON);
 
-  // if boxValue points to an object, get its skos:prefLabel
-  if (boxValue && boxValue['skos:prefLabel'] && boxValue['skos:prefLabel'][0]) {
-    boxValue = boxValue['skos:prefLabel'][0];
-  }
+  const { value, valueType } = getBoxedValue(relativePath, graphJSON);
 
   return {
     ...cell,
-    cellLength: cellLength === undefined ? 1 : cellLength,
-    absolutePath,
-    ...(boxValue || {}),
+    absolutePath: getAbsolutePath(cellLength, relativePath, graphJSON),
+    cellLength,
+    value,
+    valueType,
   };
 };
 
@@ -209,6 +236,6 @@ export const materializeCell = multimethod(
     'index', materializeIndex,
     'predicate', materializePredicate,
     'object', materializeObject,
-    'empty', (cell) => cell,
+    'empty', identity,
   ]
 );

@@ -29,10 +29,11 @@ import {
 const { dispatch } = store;
 
 
-const arrowKeyNavHandler = (direction, steps) =>
-  ({ sheetId, column, row, navigate }) => () => {
-    navigate(sheetId, column, row, direction, steps);
-  };
+const arrowKeyNavHandler = (direction, steps) => ({
+  sheetId, column, row, navigate
+}) => () => {
+  navigate(sheetId, column, row, direction, steps);
+};
 
 
 export default compose(
@@ -43,14 +44,11 @@ export default compose(
       teaseCell(sheetId, column, row);
     },
     onDragStart: ({
-      sheetId, tableId, type, column, row, absolutePath, cellLength,
+      sheetId, tableId, type, column, row, absolutePath, cellLength, valueType,
       startDragTable,
-    }) => () => {
-      // TODO - pass cell valueType: literal or resource
-      startDragTable(
-        sheetId, tableId, type, column, row, { absolutePath, cellLength }
-      );
-    },
+    }) => () => startDragTable(
+      sheetId, tableId, type, column, row, absolutePath, cellLength, valueType,
+    ),
     onDragEnter: ({ sheetId, column, row, dragTable }) => () => {
       dragTable(sheetId, column, row);
     },

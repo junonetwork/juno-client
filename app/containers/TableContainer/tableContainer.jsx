@@ -45,8 +45,12 @@ export default compose(
   withHandlers({
     teaseCell: () => throttledTeaseCell,
     navigate: () => throttledNavigate,
-    startDragTable: () => (sheetId, tableId, type, column, row, cell) => (
-      dispatch(startDragTable(sheetId, tableId, type, column, row, cell))
+    startDragTable: () => (
+      sheetId, tableId, type, column, row, absolutePath, cellLength, valueType
+    ) => (
+      dispatch(startDragTable(
+        sheetId, tableId, type, column, row, absolutePath, cellLength, valueType
+      ))
     ),
     dragTable: () => throttleDragTable,
     endDragTable: ({ canDrop }) => () => {

@@ -18,7 +18,7 @@ const camel2Kebab = (str) => str.replace(/([A-Z])/g, (g) => `-${g[0].toLowerCase
 
 
 const Cell = ({
-  type, search, sheetId, tableId, column, row, value, $type, cellLength, cellInput, focus,
+  type, search, sheetId, tableId, column, row, value, valueType, cellLength, cellInput, focus,
   leftCellTableId, upCellTableId, predicateIdx,
   hotKeys, activeView, dropTableView, illegalDropTableView,
   dragTableView, illegalDragTableView, activeHint, teaserHint,
@@ -75,7 +75,7 @@ const Cell = ({
         </div> :
         <div className="cell-body">
           <CellValue
-            $type={$type}
+            valueType={valueType}
             value={value}
             cellLength={cellLength}
           />
