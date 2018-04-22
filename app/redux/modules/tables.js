@@ -170,6 +170,10 @@ export const getTablePathSets = createCachedSelector(
           paths.push(
             ['resource', predicates, 'skos:prefLabel', 0], // predicates
           );
+        } else if (indices.length > 0) {
+          paths.push(
+            [...resourcePath, indices], // value literals
+          );
         }
 
         return paths;
@@ -423,6 +427,7 @@ export default (
 /**
  * epics
  */
+// TODO - these are sheet operations, not table
 const editCollectionCell = ({ value, tableId }) => {
   if (value === '') {
     // delete collection

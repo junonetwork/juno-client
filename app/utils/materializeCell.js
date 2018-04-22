@@ -146,29 +146,34 @@ const materializeValueCollection = (cell, graphJSON) => {
 };
 
 
-// const materializeIndex = (cell, graphJSON, sheetMatrix) => {
-//   const relativePath = getIndexPath(cell.collectionAddress, cell.index, sheetMatrix);
-
-//   // TODO - perhaps this should be recorded on write?
-//   const { column, row } = destructureAddress(cell.collectionAddress);
-//   const collectionType = sheetMatrix[row][column].type;
-//   return {
-//     ...cell,
-//     value: collectionType === 'valueCollection' ?
-//       `${cell.index} ${pathOr('', [...relativePath, 'value'], graphJSON)}` :
-//       cell.index,
-//     absolutePath: path([...relativePath, '$__path'], graphJSON),
-//   };
-// };
 const materializeIndex = (cell, graphJSON, sheetMatrix) => {
   const relativePath = getIndexPath(cell.collectionAddress, cell.index, sheetMatrix);
 
+  // TODO - perhaps this should be recorded on write?
+  const { column, row } = destructureAddress(cell.collectionAddress);
+  const collectionType = sheetMatrix[row][column].type;
+  const value = (
+    collectionType === 'valueCollection' &&
+    path([...relativePath, '$type'], graphJSON) === 'atom'
+  ) ?
+    `${cell.index} ${pathOr('', [...relativePath, 'value'], graphJSON)}` :
+    cell.index;
+
   return {
     ...cell,
-    value: cell.index,
+    value,
     absolutePath: path([...relativePath, '$__path'], graphJSON),
   };
 };
+// const materializeIndex = (cell, graphJSON, sheetMatrix) => {
+//   const relativePath = getIndexPath(cell.collectionAddress, cell.index, sheetMatrix);
+
+//   return {
+//     ...cell,
+//     value: cell.index,
+//     absolutePath: path([...relativePath, '$__path'], graphJSON),
+//   };
+// };
 
 
 const materializePredicate = (cell, graphJSON) => ({
@@ -211,11 +216,23 @@ const getAbsolutePath = (cellLength, relativePath, graphJSON) => {
   return absolutePath;
 };
 
+const getCellLength = (relativePath, graphJSON) => {
+  const boxedCellLength = path([...relativePath, 'length'], graphJSON);
+  if (
+    !boxedCellLength ||
+    boxedCellLength.$type === 'error' ||
+    boxedCellLength.value === undefined
+  ) {
+    return 1;
+  }
+  return boxedCellLength.value;
+};
+
 const materializeObject = (cell, graphJSON, sheetMatrix) => {
   const relativePath = getObjectPath(
     cell.collectionAddress, cell.indexAddress, cell.predicateAddress, sheetMatrix
   );
-  const cellLength = pathOr(1, [...relativePath, 'length', 'value'], graphJSON);
+  const cellLength = getCellLength(relativePath, graphJSON);
 
   const { value, valueType } = getBoxedValue(relativePath, graphJSON);
 

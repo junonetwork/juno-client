@@ -49,18 +49,18 @@ store.dispatch(
       generateTableId(),
       formatAddress(sheetId, 0, 0),
       createSearchDescriptor('memory', 'schema:Person', 'Person'),
-      ['skos:prefLabel', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling'],
-      [{ from: 1, to: 3 }, 1, 3, 10],
+      ['schema:name', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling'],
+      [{ from: 0, to: 2 }],
       'memory',
       'schema:Person'
     ),
-    addSearchCollectionTable(
+    addValueCollectionTable(
       sheetId,
       generateTableId(),
       formatAddress(sheetId, 1, 10),
-      createSearchDescriptor('memory', 'schema:Person', 'Person'),
-      ['skos:prefLabel', 'schema:birthPlace'],
-      [{ from: 0, to: 2 }],
+      ['resource', 'data:james', 'schema:name'],
+      [],
+      [{ from: 0, to: 3 }],
       'memory',
       'schema:Person'
     ),
