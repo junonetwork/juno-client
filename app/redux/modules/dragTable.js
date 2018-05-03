@@ -3,11 +3,13 @@ import {
 } from 'redux-batched-actions';
 import {
   getTable,
-  getTableAddress,
   getTableDimensions,
   addValueCollectionTable,
   moveTable,
 } from './tables';
+import {
+  getTableAddress,
+} from './sheets';
 import {
   setFocus,
   cellId,

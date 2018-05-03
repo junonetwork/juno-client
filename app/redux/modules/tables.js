@@ -40,6 +40,9 @@ import {
 import {
   clearCellInput,
 }                                    from './cellInput';
+import {
+  getTableAddress,
+}                                    from './sheets';
 
 
 /**
@@ -90,12 +93,7 @@ const createValueCollectionTable = (
 export const getTable = (state, tableId) =>
   state.tables[tableId];
 
-// Arguably this belongs in the sheets directory, but b/c webpack doesn't handle circular deps correctly,
-// must be included here: https://github.com/reactjs/reselect/issues/169#issuecomment-381686600
-export const getTableAddress = (state, sheetId, tableId) => state.sheets[sheetId].tables
-  .find(propEq('id', tableId))
-  .address;
-
+// TODO - should this go in dropTable module, rather than in the (soon-to-be) collections module?
 export const getTableDimensions = (state, tableId) => {
   const table = getTable(state, tableId);
   return {
@@ -192,7 +190,7 @@ export const getTablePathSets = createCachedSelector(
  */
 export const getTableCells = createCachedSelector(
   nthArg(1),
-  getTableAddress,
+  (state, sheetId, tableId) => getTableAddress(state, sheetId, tableId),
   (state, _, tableId) => getTable(state, tableId),
   (sheetId, collectionAddress, { collection,  tableId, predicates, indices }) => {
     // console.log('getTableCells');

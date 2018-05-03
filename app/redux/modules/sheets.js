@@ -90,6 +90,9 @@ export const getSheet = (state, sheetId) => state.sheets[sheetId];
 export const getSheetMaxColumn = (state, sheetId) => state.sheets[sheetId].maxColumn;
 export const getSheetMaxRow = (state, sheetId) => state.sheets[sheetId].maxRow;
 export function getSheetTableDescriptors(state, sheetId) { return state.sheets[sheetId].tables; }
+export const getTableAddress = (state, sheetId, tableId) => state.sheets[sheetId].tables
+  .find(propEq('id', tableId))
+  .address;
 
 
 /**
