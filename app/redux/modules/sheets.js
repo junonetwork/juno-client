@@ -12,49 +12,55 @@ import {
   prop,
   propEq,
   ifElse,
+  mergeWith,
+  concat,
   identity,
-}                                    from 'ramda';
-import createCachedSelector          from 're-reselect';
+} from 'ramda';
+import createCachedSelector from 're-reselect';
 import {
-  getTableCells,
+  getTable,
   ADD_SEARCH_COLLECTION_TABLE,
   ADD_VALUE_COLLECTION_TABLE,
   REMOVE_TABLE,
   MOVE_TABLE,
-}                                    from './tables';
+} from './tables';
 import {
   getFocus,
-}                                    from './focus';
+} from './focus';
 import {
   getCellTeaserDescriptor,
-}                                    from './teaser';
+} from './teaser';
 import {
   getCellInput,
-}                                    from './cellInput';
+} from './cellInput';
 import {
   isLegalDrop,
   getDragTableId,
   getDragTable,
   getDragTableFrom,
   getDragTableTo,
-}                                    from './dragTable';
+} from './dragTable';
 import {
-  materializeCell,
-}                                    from '../../utils/materializeCell';
+  expandIndicesKeySet,
+} from '../../utils/sheet';
 import {
+  destructureAddress,
   formatAddress,
-  createEmpty,
-}                                    from '../../utils/cell';
+} from '../../utils/cell';
+import {
+  createSearchCollectionCell,
+  createIndexCell,
+  createPredicateCell,
+  createObjectCell,
+  createEmptyCell,
+} from '../../utils/materializeCell';
 import {
   setRowInMatrix,
   updateInMatrix,
-}                                    from '../../utils/table';
+} from '../../utils/table';
 import {
   arraySingleDepthEqualitySelector,
-}                                    from '../../utils/selectors';
-import {
-  getEnhancedCells,
-}                                    from './enhanced';
+} from '../../utils/selectors';
 
 
 /**
@@ -63,7 +69,7 @@ import {
 const createSheet = (maxColumn, maxRow) => ({
   maxColumn, maxRow, tables: [],
 });
-// TODO - what is a safe way to serialize path?  keys can have any url safe character, including '/' and curie special character ':'
+// TODO - serialize as querystring keys can have any url safe character, including '/' and curie special character ':'
 // https://perishablepress.com/stop-using-unsafe-characters-in-urls/
 export const path2Key = (path) => path.join('|');
 
@@ -89,7 +95,7 @@ const addPathToPathMap = (absolutePath, column, row, graphPathMap) => {
 export const getSheet = (state, sheetId) => state.sheets[sheetId];
 export const getSheetMaxColumn = (state, sheetId) => state.sheets[sheetId].maxColumn;
 export const getSheetMaxRow = (state, sheetId) => state.sheets[sheetId].maxRow;
-export function getSheetTableDescriptors(state, sheetId) { return state.sheets[sheetId].tables; }
+export const getSheetCollections = (state, sheetId) => state.sheets[sheetId].tables;
 export const getTableAddress = (state, sheetId, tableId) => state.sheets[sheetId].tables
   .find(propEq('id', tableId))
   .address;
@@ -109,7 +115,7 @@ export const createEmptySheet = createCachedSelector(
       .map((row) =>
         range(0, maxColumn + 1)
           .map((column) =>
-            createEmpty(sheetId, column, row)
+            createEmptyCell(sheetId, column, row)
           )
       )
   )
@@ -121,16 +127,122 @@ export const createEmptySheet = createCachedSelector(
 /**
  * @param {Object} state
  * @param {String} sheetId
+ * @param {String} tableId
+ * @param {String} address
+ * @param {Object} graphFragment
  */
-export const getSheetTables = createCachedSelector(
-  (state, sheetId) => (
-    getSheetTableDescriptors(state, sheetId)
-      .map(({ id }) => getTableCells(state, sheetId, id))
-  ),
-  (tables) => {
-    // console.log('getSheetTables');
+const collection2Table = createCachedSelector(
+  // TODO - rename to getCollection,
+  (state, _, tableId) => getTable(state, tableId),
+  nthArg(1),
+  nthArg(2),
+  nthArg(3),
+  nthArg(4),
+  (
+    { collection,  predicates, indices, type },
+    sheetId, tableId, collectionAddress, graphFragment
+  ) => {
+    // TODO - collection is an overloaded term - reorganize collection type and manage collection subclasses
+    // TODO - create collection via safe mutations if it gives a reliable perf boost
+    const {
+      column: collectionColumn,
+      row: collectionRow,
+    } = destructureAddress(collectionAddress);
+    let graphPathMap = {};
 
-    return tables;
+    const table = [
+      [
+        createSearchCollectionCell(
+          collection, sheetId, tableId, collectionColumn, collectionRow, type, graphFragment
+        ),
+        ...predicates.map((predicateURI, columnIdx) => createPredicateCell(
+          sheetId,
+          tableId,
+          collectionColumn + columnIdx + 1,
+          collectionRow,
+          collectionAddress,
+          predicateURI,
+          graphFragment
+        )),
+      ],
+      ...expandIndicesKeySet(indices).map((index, rowIdx) => {
+        const indexCell = createIndexCell(
+          collection,
+          sheetId,
+          tableId,
+          collectionColumn,
+          collectionRow + rowIdx + 1,
+          index,
+          graphFragment
+        );
+
+        graphPathMap = addPathToPathMap(
+          indexCell.absolutePath,
+          indexCell.column,
+          indexCell.row,
+          graphPathMap
+        );
+
+        return [
+          indexCell,
+          ...predicates.map((predicate, columnIdx) => {
+            const objectCell = createObjectCell(
+              collection,
+              sheetId,
+              tableId,
+              collectionColumn + columnIdx + 1,
+              collectionRow + rowIdx + 1,
+              index,
+              predicate,
+              graphFragment
+            );
+
+            graphPathMap = addPathToPathMap(
+              objectCell.absolutePath,
+              objectCell.column,
+              objectCell.row,
+              graphPathMap
+            );
+
+            return objectCell;
+          }),
+        ];
+      }),
+    ];
+
+    return {
+      table,
+      graphPathMap,
+    };
+  }
+)(
+  nthArg(1)
+);
+
+
+/**
+ * @param {Object} state
+ * @param {String} sheetId
+ * @param {Object} graphFragment
+ */
+export const getSheetTablesWithGraphPathMap = createCachedSelector(
+  (state, sheetId, graphFragment) => (
+    getSheetCollections(state, sheetId).map(({ id, address }) => (
+      collection2Table(state, sheetId, id, address, graphFragment)
+    ))
+  ),
+  (tablesWithGraphPathMap) => {
+    // console.log('getSheetTablesWithGraphPathMap');
+    return tablesWithGraphPathMap.reduce((tablesWithGraphPathMap, { table, graphPathMap }) => {
+      tablesWithGraphPathMap.tables.push(table);
+      // TODO - this can safely mutate graphPathMap, as long as it concats pathMap addresses
+      tablesWithGraphPathMap.graphPathMap = mergeWith( // eslint-disable-line no-param-reassign
+        concat,
+        tablesWithGraphPathMap.graphPathMap,
+        graphPathMap
+      );
+      return tablesWithGraphPathMap;
+    }, { tables: [], graphPathMap: {} });
   }
 )(
   nthArg(1),
@@ -140,75 +252,45 @@ export const getSheetTables = createCachedSelector(
 );
 
 
-/**
- * @param {Object} state
- * @param {String} sheetId
- * @param {Object} tables
- */
-export const tables2SheetMatrix = createCachedSelector(
-  nthArg(1),
-  nthArg(2),
-  createEmptySheet,
-  (sheetId, tables, emptySheetMatrix) => {
-    // console.log('tables2SheetMatrix');
-
-    return tables
-      .reduce(
-        (sheetMatrix, { column, row, table, }) => (
-          table
-            .slice(0, Math.max(sheetMatrix.length - row, 0))
-            .reduce((_sheetMatrix, tableRow, idx) => (
-              setRowInMatrix(column, row + idx, tableRow, _sheetMatrix)
-            ), sheetMatrix)
-        ),
-        emptySheetMatrix
-      );
-  }
-)(
-  nthArg(1)
+export const getSheetTables = (state, sheetId, graphFragment) => (
+  getSheetTablesWithGraphPathMap(state, sheetId, graphFragment).tables
 );
 
 
 /**
+ * @param {Object} state
  * @param {String} sheetId
  * @param {Object} graphFragment
- * @param {Object} sheetMatrix
  */
-export const materializeSheetMatrix = createCachedSelector(
+export const tables2SheetMatrix = createCachedSelector(
   nthArg(1),
-  nthArg(2),
-  ({ json: graphJSON, }, sheetMatrix) => {
-    // console.log('materializeSheetMatrix');
+  createEmptySheet,
+  getSheetTablesWithGraphPathMap,
+  (sheetId, emptySheetMatrix, { tables, graphPathMap }) => {
+    // console.log('tables2SheetMatrix');
 
-    let graphPathMap = {};
-    const materializedSheetMatrix = sheetMatrix
-      .map((row) => (
-        row.map((cell) => {
-          const materializedCell = materializeCell(cell, graphJSON, sheetMatrix);
-          if (cell.type === 'index') {
-            graphPathMap = addPathToPathMap(
-              materializedCell.absolutePath,
-              materializedCell.column,
-              materializedCell.row,
-              graphPathMap
-            );
-          } else if (cell.type === 'object') {
-            graphPathMap = addPathToPathMap(
-              materializedCell.absolutePath,
-              materializedCell.column,
-              materializedCell.row,
-              graphPathMap
-            );
-          }
-
-          return materializedCell;
-        })
-      ));
-
-    return { graphPathMap, matrix: materializedSheetMatrix, hints: {} };
+    return {
+      matrix: tables.reduce(
+        (sheetMatrix, table) => (
+          table
+            .slice(0, Math.max(sheetMatrix.length - table[0][0].row, 0))
+            .reduce(
+              (_sheetMatrix, tableRow, idx) => setRowInMatrix(
+                table[0][0].column,
+                table[0][0].row + idx,
+                tableRow,
+                _sheetMatrix
+              ),
+              sheetMatrix
+            )
+        ),
+        emptySheetMatrix
+      ),
+      graphPathMap,
+    };
   }
 )(
-  nthArg(0)
+  nthArg(1)
 );
 
 
@@ -224,7 +306,7 @@ export const withCellInput = createCachedSelector(
   (
     sheetId,
     matrix,
-    { sheetId: inputSheetId, column, row, value, },
+    { sheetId: inputSheetId, column, row, value },
   ) => {
     if (value === undefined || sheetId !== inputSheetId) {
       return matrix;
@@ -263,10 +345,10 @@ export const withActive = createCachedSelector(
       !focus ||
       focus.sheetId !== sheetId
     ) {
-      return { matrix, hints, };
+      return { matrix, hints };
     }
 
-    const { column: activeColumn, row: activeRow, } = focus;
+    const { column: activeColumn, row: activeRow } = focus;
 
     return {
       matrix: updateInMatrix(activeColumn, activeRow, assoc('activeView', true), matrix),
@@ -302,10 +384,10 @@ export const withTeaser = createCachedSelector(
       !cellTeaserDescriptor ||
       cellTeaserDescriptor.sheetId !== sheetId
     ) {
-      return { matrix, hints, };
+      return { matrix, hints };
     }
 
-    const { column: teaserColumn, row: teaserRow, } = cellTeaserDescriptor;
+    const { column: teaserColumn, row: teaserRow } = cellTeaserDescriptor;
 
     return {
       matrix: updateInMatrix(teaserColumn, teaserRow, assoc('teaserView', true), matrix),
@@ -325,34 +407,7 @@ export const withTeaser = createCachedSelector(
  * @param {String} sheetId
  * @param {Object} sheetMatrix
  */
-export const withEnhanced = createCachedSelector(
-  nthArg(1),
-  nthArg(2),
-  getEnhancedCells,
-  (
-    sheetId,
-    matrix,
-    enhancedCells,
-  ) => {
-    // TODO - if sheetId doesn't match, just skip
-    return enhancedCells
-      .reduce((matrixWithEnhancedCells, { sheetId: enhancedSheetId, column, row, }) => (
-        enhancedSheetId === sheetId ?
-          updateInMatrix(column, row, assoc('enhanceView', true), matrixWithEnhancedCells) :
-          matrixWithEnhancedCells
-      ), matrix);
-  }
-)(
-  nthArg(1)
-);
-
-
-/**
- * @param {Object} state
- * @param {String} sheetId
- * @param {Object} sheetMatrix
- */
-export const withDropTable = (state, sheetId, matrix) => {
+export const withDropTable = (state, sheetId, matrix, graphFragment) => {
   const dragTableId = getDragTableId(state);
   const dragFrom = getDragTableFrom(state);
   const dragTo = getDragTableTo(state);
@@ -372,12 +427,13 @@ export const withDropTable = (state, sheetId, matrix) => {
     state, fromSheetId, dragTableId, fromColumn, fromRow, toColumn, toRow,
   );
 
+  // TODO - possible to do this w/o graphFragment?
   const canDrop = isLegalDrop(
     xLength,
     yLength,
     toTableXOrigin,
     toTableYOrigin,
-    reject(propEq('id', dragTableId), getSheetTables(state, toSheetId))
+    reject(propEq('id', dragTableId), getSheetTables(state, toSheetId, graphFragment))
   );
 
   return pipe(
@@ -386,16 +442,8 @@ export const withDropTable = (state, sheetId, matrix) => {
         _matrix :
         // table xLength truncated to fit on sheet
         range(0, Math.min(yLength, _matrix.length - toTableYOrigin))
-        // range(0, yLength)
-          // truncate dragTable y length to fit sheet
-          // TODO - possible to do this w/i range?
-          // .filter((_, rowIdx) => )
-          // TODO - row === rowIdx?
           .reduce((matrixWithDropTable, rowIdx) => (
-            // range(0, toTableXOrigin + columnIdx < _matrix[0].length)
             range(0, Math.min(xLength, _matrix[0].length - toTableXOrigin))
-              // truncate dragTable x length to fit sheet
-              // .filter((_, columnIdx) => toTableXOrigin + columnIdx < _matrix[0].length)
               .reduce((_matrixWithDropTable, columnIdx) => (
                 updateInMatrix(
                   toTableXOrigin + columnIdx,
@@ -444,53 +492,37 @@ export const withDropTable = (state, sheetId, matrix) => {
  * @param {Object} state
  * @param {String} sheetId
  * @param {Object} graphFragment
- * TODO - use a closure rather than pipe all args through
  */
 export const getSheetMatrix = pipe(
   (state, sheetId, graphFragment) => ({
     state,
     sheetId,
     graphFragment,
-    tables: getSheetTables(state, sheetId),
+    hints: {},
+    ...tables2SheetMatrix(state, sheetId, graphFragment),
   }),
-  ({ state, sheetId, graphFragment, tables, }) => ({
-    state,
-    sheetId,
-    graphFragment,
-    matrix: tables2SheetMatrix(state, sheetId, tables),
-  }),
-  ({ state, sheetId, graphFragment, matrix, }) => ({
-    state,
-    sheetId,
-    ...materializeSheetMatrix(sheetId, graphFragment, matrix),
-  }),
-  ({ state, sheetId, graphPathMap, hints, matrix, }) => ({
+  ({ state, sheetId, graphPathMap, hints, matrix, graphFragment }) => ({
     state,
     sheetId,
     graphPathMap,
+    graphFragment,
     ...withActive(state, sheetId, hints, matrix),
   }),
-  ({ state, sheetId, graphPathMap, hints, matrix, }) => ({
+  ({ state, sheetId, graphPathMap, hints, matrix, graphFragment }) => ({
     state,
     sheetId,
     graphPathMap,
+    graphFragment,
     ...withTeaser(state, sheetId, hints, matrix),
   }),
-  // ({ state, sheetId, graphPathMap, hints, matrix, }) => ({
-  //   state,
-  //   sheetId,
-  //   graphPathMap,
-  //   hints,
-  //   matrix: withEnhanced(state, sheetId, matrix),
-  // }),
-  ({ state, sheetId, graphPathMap, hints, matrix, }) => ({
+  ({ state, sheetId, graphPathMap, hints, matrix, graphFragment }) => ({
     state,
     sheetId,
     graphPathMap,
     hints,
-    ...withDropTable(state, sheetId, matrix),
+    ...withDropTable(state, sheetId, matrix, graphFragment),
   }),
-  ({ state, sheetId, graphPathMap, hints, canDrop, matrix, }) => ({
+  ({ state, sheetId, graphPathMap, hints, canDrop, matrix }) => ({
     graphPathMap,
     hints,
     canDrop,
@@ -560,7 +592,7 @@ export const withTeaserHint = createCachedSelector(
 export const withHints = (
   sheetId,
   graphPathMap,
-  { activeAbsolutePath, teaserAbsolutePath, },
+  { activeAbsolutePath, teaserAbsolutePath },
   matrix
 ) => pipe(
   (_matrix) => withActiveHint(sheetId, activeAbsolutePath, graphPathMap, _matrix),
@@ -581,13 +613,13 @@ export const INCREASE_SHEET_MAX_ROW = 'INCREASE_SHEET_MAX_ROW';
  * action creators
  */
 export const addSheet = (sheetId, maxColumn, maxRow) =>
-  ({ type: ADD_SHEET, sheetId, maxColumn, maxRow, });
+  ({ type: ADD_SHEET, sheetId, maxColumn, maxRow });
 export const removeSheet = (sheetId) =>
-  ({ type: REMOVE_SHEET, sheetId, });
+  ({ type: REMOVE_SHEET, sheetId });
 export const increaseSheetMaxColumn = (sheetId) =>
-  ({ type: INCREASE_SHEET_MAX_COLUMN, sheetId, });
+  ({ type: INCREASE_SHEET_MAX_COLUMN, sheetId });
 export const increaseSheetMaxRow = (sheetId) =>
-  ({ type: INCREASE_SHEET_MAX_ROW, sheetId, });
+  ({ type: INCREASE_SHEET_MAX_ROW, sheetId });
 
 
 /**
@@ -599,7 +631,7 @@ export default (
   action
 ) => {
   if (action.type === ADD_SHEET) {
-    const { maxColumn, maxRow, } = action;
+    const { maxColumn, maxRow } = action;
 
     return {
       ...state,

@@ -1,12 +1,13 @@
 import {
   path,
-  pathOr,
+  pathEq,
   prop,
+  pathOr,
   last,
-  identity,
 } from 'ramda';
 import multimethod from './multimethod';
 import {
+  formatAddress,
   destructureAddress,
 } from './cell';
 import {
@@ -14,176 +15,131 @@ import {
 } from '../redux/modules/tables';
 
 
-export const cell2PathFragment = multimethod(
-  prop('type'),
-  [
-    'searchCollection', ({ search }) => ['collection', serializeSearch(search)],
-    'valueCollection', ({ resourcePath }) => resourcePath,
-    'predicate', ({ uri }) => [uri],
-    'index', ({ index }) => [index],
-    'object', ({ collectionAddress, indexAddress, predicateAddress }, sheetMatrix) => {
-      // recurse to caculate pathFragment for collection, index, and address
-      const {
-        column: collectionColumn,
-        row: collectionRow,
-      } = destructureAddress(collectionAddress);
-      const {
-        column: indexColumn,
-        row: indexRow,
-      } = destructureAddress(indexAddress);
-      const {
-        column: predicateColumn,
-        row: predicateRow,
-      } = destructureAddress(predicateAddress);
+// TODO - delete once not needed
+export const getSearchCollectionPath = (type) => [
+  'resource', type, 'skos:prefLabel', 0,
+];
 
-      return [
-        ...cell2PathFragment(
-          sheetMatrix[collectionRow][collectionColumn],
-          sheetMatrix
-        ),
-        ...cell2PathFragment(
-          sheetMatrix[indexRow][indexColumn],
-          sheetMatrix
-        ),
-        ...cell2PathFragment(
-          sheetMatrix[predicateRow][predicateColumn],
-          sheetMatrix
-        ),
-      ];
+const getCollectionType = prop('type');
+
+// TODO - consider creating simple types to make function dispatch easier
+export const createSearchCollectionCell = multimethod(
+  getCollectionType,
+  [
+    'search', (
+      { search }, sheetId, tableId, column, row, type, graphFragment
+    ) => ({
+      type: 'searchCollection',
+      sheetId,
+      tableId,
+      address: formatAddress(sheetId, column, row),
+      column,
+      row,
+      search,
+      cellInput: '',
+      cellLength: path(
+        ['json', 'collection', serializeSearch(search), 'length', 'value'],
+        graphFragment
+      ),
+      value: path(['json', 'resource', type, 'skos:prefLabel', 0, 'value'], graphFragment),
+    }),
+    'value', (
+      { resourcePath }, sheetId, tableId, column, row, type, graphFragment
+    ) => ({
+      type: 'valueCollection',
+      sheetId,
+      tableId,
+      address: formatAddress(sheetId, column, row),
+      column,
+      row,
+      resourcePath,
+      cellInput: '',
+      cellLength: path(['json', ...resourcePath, 'length', 'value'], graphFragment),
+      value: path(
+        ['json', 'resource', last(resourcePath), 'skos:prefLabel', 0, 'value'],
+        graphFragment
+      ),
+    }),
+  ]
+);
+
+
+export const createIndexCell = multimethod(
+  getCollectionType,
+  [
+    'search', (
+      { search }, sheetId, tableId, column, row, index, graphFragment
+    ) => ({
+      type: 'index',
+      sheetId,
+      tableId,
+      address: formatAddress(sheetId, column, row),
+      column,
+      row,
+      index,
+      cellInput: '',
+      value: index,
+      absolutePath: path(
+        ['json', 'collection', serializeSearch(search), index, '$__path'],
+        graphFragment
+      ),
+    }),
+    'value', (
+      { resourcePath }, sheetId, tableId, column, row, index, graphFragment
+    ) => {
+      const valueLiteral = pathEq(['json', ...resourcePath, index, '$type'], 'atom', graphFragment);
+      return {
+        type: 'index',
+        sheetId,
+        tableId,
+        address: formatAddress(sheetId, column, row),
+        column,
+        row,
+        index,
+        cellInput: '',
+        value: valueLiteral ?
+          `${pathOr('', ['json', ...resourcePath, index, 'value'], graphFragment)} ${index}` :
+          index,
+        absolutePath: valueLiteral ?
+          [...resourcePath, index] :
+          path(['json', ...resourcePath, index, '$__path'], graphFragment),
+      };
     },
   ]
 );
 
 
-export const getSearchCollectionPath = (type) => [
-  'resource', type, 'skos:prefLabel', 0,
-];
-
-export const getPredicatePath = (uri) => ['resource', uri, 'skos:prefLabel', 0];
-
-export const getIndexPath = (collectionAddress, index, sheetMatrix) => {
-  const {
-    column: collectionColumn,
-    row: collectionRow,
-  } = destructureAddress(collectionAddress);
-
-  return [
-    ...cell2PathFragment(
-      sheetMatrix[collectionRow][collectionColumn],
-      sheetMatrix
-    ),
-    index,
-  ];
-};
-
-
-export const getObjectPath = (collectionAddress, indexAddress, predicateAddress, sheetMatrix) => {
-  const {
-    column: collectionColumn,
-    row: collectionRow,
-  } = destructureAddress(collectionAddress);
-  const {
-    column: indexColumn,
-    row: indexRow,
-  } = destructureAddress(indexAddress);
-  const {
-    column: predicateColumn,
-    row: predicateRow,
-  } = destructureAddress(predicateAddress);
-
-  return [
-    ...cell2PathFragment(
-      sheetMatrix[collectionRow][collectionColumn],
-      sheetMatrix
-    ),
-    ...cell2PathFragment(
-      sheetMatrix[indexRow][indexColumn],
-      sheetMatrix
-    ),
-    ...cell2PathFragment(
-      sheetMatrix[predicateRow][predicateColumn],
-      sheetMatrix
-    ),
-  ];
-};
-
-
-const materializeSearchCollection = (cell, graphJSON) => {
-  const relativePath = getSearchCollectionPath(cell.search.type);
-
-  return {
-    ...cell,
-    cellLength: path(
-      [
-        'collection',
-        serializeSearch(cell.search),
-        'length',
-        'value',
-      ],
-      graphJSON
-    ),
-    value: path([...relativePath, 'value'], graphJSON),
-  };
-};
-
-
-const materializeValueCollection = (cell, graphJSON) => {
-  return {
-    ...cell,
-    cellLength: path(
-      [
-        ...cell.resourcePath,
-        'length',
-        'value',
-      ],
-      graphJSON
-    ),
-    value: path(
-      ['resource', last(cell.resourcePath), 'skos:prefLabel', 0, 'value'],
-      graphJSON
-    ),
-  };
-};
-
-
-const materializeIndex = (cell, graphJSON, sheetMatrix) => {
-  const relativePath = getIndexPath(cell.collectionAddress, cell.index, sheetMatrix);
-
-  // TODO - perhaps this should be recorded on write?
-  const { column, row } = destructureAddress(cell.collectionAddress);
-  const collectionType = sheetMatrix[row][column].type;
-  const value = (
-    collectionType === 'valueCollection' &&
-    path([...relativePath, '$type'], graphJSON) === 'atom'
-  ) ?
-    `${cell.index} ${pathOr('', [...relativePath, 'value'], graphJSON)}` :
-    cell.index;
-
-  return {
-    ...cell,
-    value,
-    absolutePath: path([...relativePath, '$__path'], graphJSON),
-  };
-};
-// const materializeIndex = (cell, graphJSON, sheetMatrix) => {
-//   const relativePath = getIndexPath(cell.collectionAddress, cell.index, sheetMatrix);
-
-//   return {
-//     ...cell,
-//     value: cell.index,
-//     absolutePath: path([...relativePath, '$__path'], graphJSON),
-//   };
-// };
-
-
-const materializePredicate = (cell, graphJSON) => ({
-  ...cell,
-  value: path([...getPredicatePath(cell.uri), 'value'], graphJSON),
+export const createPredicateCell = (
+  sheetId, tableId, column, row, collectionAddress, uri, graphFragment
+) => ({
+  type: 'predicate',
+  sheetId,
+  tableId,
+  address: formatAddress(sheetId, column, row),
+  column,
+  row,
+  uri,
+  // TODO - this is wonky - just store collectionAddress and derive predicateIdx when needed
+  predicateIdx: column - destructureAddress(collectionAddress).column - 1,
+  cellInput: '',
+  value: path(['json', 'resource', uri, 'skos:prefLabel', 0, 'value'], graphFragment),
 });
 
 
-const getBoxedValue = (relativePath, graphJSON) => {
-  const boxValue = path([...relativePath, 0], graphJSON);
+const getCellLength = (relativePath, graphFragment) => {
+  const boxedCellLength = path([...relativePath, 'length'], graphFragment);
+  if (
+    !boxedCellLength ||
+    boxedCellLength.$type === 'error' ||
+    boxedCellLength.value === undefined
+  ) {
+    return 1;
+  }
+  return boxedCellLength.value;
+};
+
+const getBoxedValue = (relativePath, graphFragment) => {
+  const boxValue = path([...relativePath, 0], graphFragment);
   if (!boxValue) {
     return {};
   }
@@ -202,13 +158,13 @@ const getBoxedValue = (relativePath, graphJSON) => {
   };
 };
 
-const getAbsolutePath = (cellLength, relativePath, graphJSON) => {
+const getAbsolutePath = (cellLength, relativePath, graphFragment) => {
   let absolutePath;
 
-  if (cellLength === 1 && path([...relativePath, 0, '$__path'], graphJSON)) {
-    absolutePath = path([...relativePath, 0, '$__path'], graphJSON);
-  } else if (path([...relativePath, '$__path'], graphJSON)) {
-    absolutePath = path([...relativePath, '$__path'], graphJSON);
+  if (cellLength === 1 && path([...relativePath, 0, '$__path'], graphFragment)) {
+    absolutePath = path([...relativePath, 0, '$__path'], graphFragment);
+  } else if (path([...relativePath, '$__path'], graphFragment)) {
+    absolutePath = path([...relativePath, '$__path'], graphFragment);
   } else {
     absolutePath = null;
   }
@@ -216,43 +172,69 @@ const getAbsolutePath = (cellLength, relativePath, graphJSON) => {
   return absolutePath;
 };
 
-const getCellLength = (relativePath, graphJSON) => {
-  const boxedCellLength = path([...relativePath, 'length'], graphJSON);
-  if (
-    !boxedCellLength ||
-    boxedCellLength.$type === 'error' ||
-    boxedCellLength.value === undefined
-  ) {
-    return 1;
-  }
-  return boxedCellLength.value;
-};
-
-const materializeObject = (cell, graphJSON, sheetMatrix) => {
-  const relativePath = getObjectPath(
-    cell.collectionAddress, cell.indexAddress, cell.predicateAddress, sheetMatrix
-  );
-  const cellLength = getCellLength(relativePath, graphJSON);
-
-  const { value, valueType } = getBoxedValue(relativePath, graphJSON);
-
-  return {
-    ...cell,
-    absolutePath: getAbsolutePath(cellLength, relativePath, graphJSON),
-    cellLength,
-    value,
-    valueType,
-  };
-};
-
-export const materializeCell = multimethod(
-  prop('type'),
+export const createObjectCell = multimethod(
+  getCollectionType,
   [
-    'searchCollection', materializeSearchCollection,
-    'valueCollection', materializeValueCollection,
-    'index', materializeIndex,
-    'predicate', materializePredicate,
-    'object', materializeObject,
-    'empty', identity,
+    'search', (
+      { search }, sheetId, tableId, column, row, index, predicate, graphFragment
+    ) => {
+      const relativePath = ['json', 'collection', serializeSearch(search), index, predicate];
+      const cellLength = getCellLength(relativePath, graphFragment);
+
+      const { value, valueType } = getBoxedValue(relativePath, graphFragment);
+
+      return {
+        type: 'object',
+        sheetId,
+        tableId,
+        address: formatAddress(sheetId, column, row),
+        column,
+        row,
+        cellInput: '',
+        absolutePath: getAbsolutePath(cellLength, relativePath, graphFragment),
+        cellLength,
+        value,
+        valueType,
+      };
+    },
+    'value', (
+      { resourcePath }, sheetId, tableId, column, row, index, predicate, graphFragment
+    ) => {
+      const relativePath = ['json', ...resourcePath, index, predicate];
+      const cellLength = getCellLength(relativePath, graphFragment);
+
+      const { value, valueType } = getBoxedValue(relativePath, graphFragment);
+
+      return {
+        type: 'object',
+        sheetId,
+        tableId,
+        address: formatAddress(sheetId, column, row),
+        column,
+        row,
+        cellInput: '',
+        absolutePath: getAbsolutePath(cellLength, relativePath, graphFragment),
+        cellLength,
+        value,
+        valueType,
+      };
+    },
   ]
 );
+
+
+/**
+ * @param {String} sheetId
+ * @param {Number} column
+ * @param {Number} row
+ */
+export const createEmptyCell = (
+  sheetId, column, row
+) => ({
+  type: 'empty',
+  sheetId,
+  address: formatAddress(sheetId, column, row),
+  column,
+  row,
+  cellInput: '',
+});

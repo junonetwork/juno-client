@@ -9,7 +9,7 @@ import {
 import {
   getSheetMatrix,
   withHints as sheetMatrixWithHints,
-  getSheetTableDescriptors,
+  getSheetCollections,
 }                                    from './sheets';
 import {
   getGraphJGF,
@@ -39,7 +39,7 @@ export const getPathSets = arraySingleDepthEqualitySelector(
     getWindows(state)
       .reduce((tableIds, { id, type }) => {
         if (type === 'sheet') {
-          tableIds.push(...getSheetTableDescriptors(state, id).map(prop('id')));
+          tableIds.push(...getSheetCollections(state, id).map(prop('id')));
           return tableIds;
         } else if (type === 'graph') {
           tableIds.push(...getGraphTableIds(state, id));

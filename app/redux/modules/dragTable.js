@@ -31,7 +31,7 @@ const MIN_TABLE_YLENGTH = 4;
  * utils
  */
 export const isLegalDrop = (xLength, yLength, toTableXOrigin, toTableYOrigin, tables) => {
-  return tables.reduce((isLegal, { table }) => {
+  return tables.reduce((isLegal, table) => {
     const tableXMin = table[0][0].column;
     const tableXMax = table[0][0].column + (table[0].length - 1);
     const tableYMin = table[0][0].row;

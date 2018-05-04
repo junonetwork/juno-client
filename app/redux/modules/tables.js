@@ -11,11 +11,9 @@ import {
   filter as filterStream,
   mergeMap,
   catchError,
-  partition,
 }                                    from 'rxjs/operators';
 import { of }                        from 'rxjs/observable/of';
 import { empty }                     from 'rxjs/observable/empty';
-import { merge }                     from 'rxjs/observable/merge';
 import { batchActions }              from 'redux-batched-actions';
 import createCachedSelector          from 're-reselect';
 import {
@@ -23,11 +21,6 @@ import {
 }                                    from '../../utils/sheet';
 import multimethod                   from '../../utils/multimethod';
 import {
-  formatAddress,
-  createCollection,
-  createObject,
-  createIndex,
-  createPredicate,
   destructureAddress,
   getUpCell,
 }                                    from '../../utils/cell';
@@ -56,6 +49,13 @@ export const createSearchDescriptor = (repository, type, typeLabel) => ({
   repository, type, typeLabel,
 });
 
+/*
+ * table types:
+ * - search    ['collection', 'type=Person', '0..10']
+ * - value     ['resource', ':james', '0', 'siblings']
+ * - resource  ['resource', ':james']
+ * - predicate ['collection', 'type=Person', '0..10', 'siblings']
+ */
 const createSearchCollectionTable = (
   tableId, search,
   predicates, indices, repository, type,
@@ -93,7 +93,7 @@ const createValueCollectionTable = (
 export const getTable = (state, tableId) =>
   state.tables[tableId];
 
-// TODO - should this go in dropTable module, rather than in the (soon-to-be) collections module?
+// TODO - this should go in dropTable module, rather than in the (soon-to-be) collections module
 export const getTableDimensions = (state, tableId) => {
   const table = getTable(state, tableId);
   return {
@@ -102,24 +102,6 @@ export const getTableDimensions = (state, tableId) => {
   };
 };
 
-
-/**
- * what if we had some form of dynamic dispatch for table->pathSets?
- * also, table->materialized table should concentrate deserialization at the table level
- * allowing for easier definition of new table contexts: sheet, graph, cards, etc
- *
- * or, make table serialization (toPathSets) and deserialization (toMaterializedCells, toJGF, toCards)
- *   - dispatch on the collectionCell type: searchCollection, resourceCollection, resource, predicateCollection (though maybe predicateCollection is the same as searchCollection).
- *   - table gets a collection field: a map of type and type-specific stuff: search, collectionPath, resourcePath,
- *   - there is only one table type
- *   - there are many collectionCell types
- *   - searchCollection vs. predicateCollection vs valueCollection vs. resourceCollection :
- *     ['collection', 'type=Person', '0..10']
- *     ['collection', 'type=Person', '0..10', ':siblings']
- *     ['resource', ':james', ':siblings']
- *     ['resource', ':james']
- *   - table.collectionAddress moves to sheets
- */
 
 /**
  * @param {Object} state
@@ -180,80 +162,6 @@ export const getTablePathSets = createCachedSelector(
   )
 )(
   nthArg(1)
-);
-
-
-/**
- * @param {Object} state
- * @param {String} sheetId
- * @param {String} tableId
- */
-export const getTableCells = createCachedSelector(
-  nthArg(1),
-  (state, sheetId, tableId) => getTableAddress(state, sheetId, tableId),
-  (state, _, tableId) => getTable(state, tableId),
-  (sheetId, collectionAddress, { collection,  tableId, predicates, indices }) => {
-    // console.log('getTableCells');
-
-    const {
-      column: collectionColumn,
-      row: collectionRow,
-    } = destructureAddress(collectionAddress);
-    const collectionCell = createCollection(
-      collection,
-      sheetId,
-      tableId,
-      collectionColumn,
-      collectionRow
-    );
-
-    return {
-      column: collectionColumn,
-      row: collectionRow,
-      id: tableId,
-      table: expandIndicesKeySet(indices).reduce((matrix, index, rowIdx) => {
-        // remaining rows [[index, object, object, ...], ...]
-        matrix.push(predicates.reduce((matrixRow, _, columnIdx) => {
-          matrixRow.push(createObject(
-            sheetId,
-            tableId,
-            collectionColumn + columnIdx + 1,
-            collectionRow + rowIdx + 1,
-            collectionAddress,
-            formatAddress(sheetId, collectionColumn, collectionRow + rowIdx + 1),
-            formatAddress(sheetId, collectionColumn + columnIdx + 1, collectionRow)
-          ));
-
-          return matrixRow;
-        }, [
-          createIndex(sheetId,
-            tableId,
-            collectionColumn,
-            collectionRow + rowIdx + 1,
-            collectionAddress,
-            index
-          ),
-        ]));
-
-        return matrix;
-      }, [
-        // top row [[collection, predicate, predicate, ...]]
-        predicates.reduce((matrixRow, predicateURI, columnIdx) => {
-          matrixRow.push(createPredicate(
-            sheetId,
-            tableId,
-            collectionColumn + columnIdx + 1,
-            collectionRow,
-            collectionAddress,
-            predicateURI
-          ));
-          return matrixRow;
-        }, [collectionCell]),
-      ]),
-    };
-  }
-)(
-  nthArg(2)
 );
 
 
@@ -408,15 +316,6 @@ export default (
         },
       };
   }
-  // } else if (action.type === MOVE_TABLE) {
-  //   return {
-  //     ...state,
-  //     [action.tableId]: {
-  //       ...state[action.tableId],
-  //       collectionAddress: formatAddress(action.toSheetId, action.toColumn, action.toRow),
-  //     },
-  //   };
-  // }
 
   return state;
 };
