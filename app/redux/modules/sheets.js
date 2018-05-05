@@ -9,6 +9,7 @@ import {
   any,
   reject,
   pathOr,
+  pathEq,
   prop,
   propEq,
   ifElse,
@@ -433,7 +434,10 @@ export const withDropTable = (state, sheetId, matrix, graphFragment) => {
     yLength,
     toTableXOrigin,
     toTableYOrigin,
-    reject(propEq('id', dragTableId), getSheetTables(state, toSheetId, graphFragment))
+    reject(
+      pathEq([0, 0, 'tableId'], dragTableId),
+      getSheetTables(state, toSheetId, graphFragment)
+    )
   );
 
   return pipe(
