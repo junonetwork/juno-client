@@ -110,16 +110,15 @@ export const createEmptySheet = createCachedSelector(
   nthArg(1),
   getSheetMaxColumn,
   getSheetMaxRow,
-  (sheetId, maxColumn = 0, maxRow = 0) => (
+  (sheetId, maxColumn = 0, maxRow = 0) => {
+    // console.log('createEmptySheet');
     // TODO - b/c is 0-indexed, should be maxRow, not maxRow + 1
-    range(0, maxRow + 1)
-      .map((row) =>
+    return range(0, maxRow + 1)
+      .map((row) => (
         range(0, maxColumn + 1)
-          .map((column) =>
-            createEmptyCell(sheetId, column, row)
-          )
-      )
-  )
+          .map((column) => createEmptyCell(sheetId, column, row))
+      ));
+  }
 )(
   nthArg(1)
 );
@@ -140,11 +139,12 @@ const collection2Table = createCachedSelector(
   nthArg(3),
   nthArg(4),
   (
-    { collection,  predicates, indices, type },
-    sheetId, tableId, collectionAddress, graphFragment
+    _collection, sheetId, tableId, collectionAddress, graphFragment
   ) => {
+    // console.log('collection2Table');
     // TODO - collection is an overloaded term - reorganize collection type and manage collection subclasses
     // TODO - create collection via safe mutations if it gives a reliable perf boost
+    const { collection, predicates, indices, type } = _collection;
     const {
       column: collectionColumn,
       row: collectionRow,
@@ -217,7 +217,7 @@ const collection2Table = createCachedSelector(
     };
   }
 )(
-  nthArg(1)
+  (_, sheetId, tableId) => `${sheetId}::${tableId}`
 );
 
 
@@ -429,6 +429,7 @@ export const withDropTable = (state, sheetId, matrix, graphFragment) => {
   );
 
   // TODO - calculate w/o graphFragment via sheet collections (not materialized)
+  // TODO - only reject current table if moving entire searchCollection (not if creating resourceCollection)
   const canDrop = isLegalDrop(
     xLength,
     yLength,
@@ -497,6 +498,8 @@ export const withDropTable = (state, sheetId, matrix, graphFragment) => {
  * @param {String} sheetId
  * @param {Object} graphFragment
  */
+// NOTE - aggressive selector memoizing improves selection time by ~50%, but a less aggressive strategy
+// would be less memory intensive and prone to memory leaks and _might_ not be noticably slower
 export const getSheetMatrix = pipe(
   (state, sheetId, graphFragment) => ({
     state,

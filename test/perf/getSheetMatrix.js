@@ -6,6 +6,7 @@ import {
 import thunk                  from 'redux-thunk';
 import {
   enableBatching,
+  batchActions,
 }                             from 'redux-batched-actions';
 import reducer                from '../../app/redux/reducer';
 import {
@@ -16,6 +17,7 @@ import {
 import {
   createSearchDescriptor,
   addSearchCollectionTable,
+  addValueCollectionTable,
 }                             from '../../app/redux/modules/tables';
 import {
   setFocus,
@@ -53,18 +55,40 @@ const initStore = () => {
   const tableId = generateTableId();
   const collectionAddress = formatAddress(sheetId, 0, 0);
 
-  store.dispatch(addSheet(0, 50, 500));
-  store.dispatch(addSearchCollectionTable(
-    sheetId,
-    tableId,
-    collectionAddress,
-    createSearchDescriptor('memory', 'schema:Person', 'Person'),
-    ['skos:prefLabel', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling', 'schema:sibling'],
-    [0, 1, 2, 3, 0, 1, 0, 10],
-    'memory',
-    'schema:Person'
-  ));
-  store.dispatch(setFocus({ sheetId, column: 0, row: 0, }));
+  store.dispatch(batchActions([
+    addSheet(0, 50, 500),
+    addSearchCollectionTable(
+      sheetId,
+      tableId,
+      collectionAddress,
+      createSearchDescriptor('memory', 'schema:Person', 'Person'),
+      ['skos:prefLabel', 'schema:birthPlace', 'schema:birthDate', 'schema:sibling', 'schema:sibling'],
+      [0, { to: 100 }],
+      'memory',
+      'schema:Person'
+    ),
+    addValueCollectionTable(
+      sheetId,
+      generateTableId(),
+      formatAddress(sheetId, 8, 1),
+      ['resource', 'data:james', 'schema:name'],
+      [],
+      [{ from: 0, to: 50 }],
+      'memory',
+      'schema:Person'
+    ),
+    addValueCollectionTable(
+      sheetId,
+      generateTableId(),
+      formatAddress(sheetId, 14, 10),
+      ['resource', 'data:micah', 'schema:sibling'],
+      ['skos:prefLabel', 'schema:birthPlace'],
+      [{ from: 0, to: 50 }],
+      'memory',
+      'schema:Person'
+    ),
+    setFocus({ sheetId, column: 0, row: 0 }),
+  ]));
 
   return store;
 };
@@ -76,9 +100,9 @@ runPerfTests([
     init: () => {
       const store = initStore();
       delete require.cache[require.resolve('../../app/redux/modules/sheets')];
-      const { getSheetMatrix, } = require('../../app/redux/modules/sheets');
+      const { getSheetMatrix } = require('../../app/redux/modules/sheets');
 
-      return { state: store.getState(), getSheetMatrix, };
+      return { state: store.getState(), getSheetMatrix };
     },
     run: ({ state, getSheetMatrix, }) => {
       getSheetMatrix(state, '0', graphFragment.json);
