@@ -28,9 +28,6 @@ import {
   setInArray,
 }                                    from '../../utils/table';
 import {
-  rangeLength,
-}                                    from '../../utils/falcor';
-import {
   clearCellInput,
 }                                    from './cellInput';
 import {
@@ -92,15 +89,6 @@ const createValueCollectionTable = (
  */
 export const getTable = (state, tableId) =>
   state.tables[tableId];
-
-// TODO - this should go in dropTable module, rather than in the (soon-to-be) collections module
-export const getTableDimensions = (state, tableId) => {
-  const table = getTable(state, tableId);
-  return {
-    x: table.predicates.length + 1,
-    y: table.indices.reduce((length, rangeKey) => length + rangeLength(rangeKey), 1),
-  };
-};
 
 
 /**

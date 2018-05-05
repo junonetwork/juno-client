@@ -3,7 +3,6 @@ import {
 } from 'redux-batched-actions';
 import {
   getTable,
-  getTableDimensions,
   addValueCollectionTable,
   moveTable,
 } from './tables';
@@ -19,6 +18,9 @@ import {
   generateTableId,
 } from '../../utils/table';
 import {
+  rangeLength,
+} from '../../utils/falcor';
+import {
   formatAddress,
   destructureAddress,
 } from '../../utils/cell';
@@ -30,8 +32,10 @@ const MIN_TABLE_YLENGTH = 4;
 /**
  * utils
  */
-export const isLegalDrop = (xLength, yLength, toTableXOrigin, toTableYOrigin, tables) => {
-  return tables.reduce((isLegal, table) => {
+export const isLegalDrop = (
+  xLength, yLength, toTableXOrigin, toTableYOrigin, tables
+) => (
+  tables.reduce((isLegal, table) => {
     const tableXMin = table[0][0].column;
     const tableXMax = table[0][0].column + (table[0].length - 1);
     const tableYMin = table[0][0].row;
@@ -43,8 +47,8 @@ export const isLegalDrop = (xLength, yLength, toTableXOrigin, toTableYOrigin, ta
       ((toTableYOrigin + yLength) - 1) < tableYMin ||
       toTableYOrigin > tableYMax
     );
-  }, true);
-};
+  }, true)
+);
 
 
 /**
@@ -91,6 +95,13 @@ export const getDragTable = multimethod(
   }
 );
 
+export const getTableDimensions = (state, tableId) => {
+  const table = getTable(state, tableId);
+  return {
+    x: table.predicates.length + 1,
+    y: table.indices.reduce((length, rangeKey) => length + rangeLength(rangeKey), 1),
+  };
+};
 
 /**
  * constants

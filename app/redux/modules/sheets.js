@@ -428,7 +428,7 @@ export const withDropTable = (state, sheetId, matrix, graphFragment) => {
     state, fromSheetId, dragTableId, fromColumn, fromRow, toColumn, toRow,
   );
 
-  // TODO - possible to do this w/o graphFragment?
+  // TODO - calculate w/o graphFragment via sheet collections (not materialized)
   const canDrop = isLegalDrop(
     xLength,
     yLength,
