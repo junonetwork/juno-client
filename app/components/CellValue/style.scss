@@ -16,4 +16,13 @@
     color: lighten($white, 10);
     padding-left: 6px;
   }
+
+  .literal-value-collection {
+    text-align: left;
+
+    .value {
+      color: $b_white;
+      padding-left: 10px;
+    }
+  }
 }

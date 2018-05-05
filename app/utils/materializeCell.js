@@ -1,3 +1,4 @@
+import { createElement } from 'react';
 import {
   path,
   pathEq,
@@ -98,7 +99,17 @@ export const createIndexCell = multimethod(
         index,
         cellInput: '',
         value: valueLiteral ?
-          `${pathOr('', ['json', ...resourcePath, index, 'value'], graphFragment)} ${index}` :
+          // TODO - this can be a fragment element
+          createElement(
+            'div',
+            { className: 'literal-value-collection' },
+            createElement('span', null, index),
+            createElement(
+              'span',
+              { className: 'value' },
+              pathOr('', ['json', ...resourcePath, index, 'value'], graphFragment)
+            )
+          ) :
           index,
         absolutePath: valueLiteral ?
           [...resourcePath, index] :

@@ -13,8 +13,6 @@ $cell-height: 26px;
   // type
   &.search-collection,
   &.value-collection {
-    font-weight: 600;
-    text-align: right;
     background-color: lighten($bg, 12);
   }
   &.index {
