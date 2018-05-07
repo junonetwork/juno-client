@@ -43,3 +43,6 @@ docker inspect airplane-glue
 # run docker compose
 docker-compose up -d
 ```
+
+## License
+[ISC](https://opensource.org/licenses/ISC)
