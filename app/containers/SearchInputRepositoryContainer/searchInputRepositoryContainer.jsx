@@ -25,8 +25,6 @@ import {
 import NavigableAutocomplete from '../../components/NavigableAutocomplete';
 import store                 from '../../redux/store';
 
-const { dispatch, } = store;
-
 
 export default compose(
   mapPropsStream(connectFalcor(({ focus, sheetId, column, row, }) => (
@@ -50,29 +48,29 @@ export default compose(
     }) => (repository, idx) => {
       if (idx !== -1) {
         setInput(repository);
-        dispatch(setFocus(searchTypeInputId(sheetId, column, row)));
+        store.dispatch(setFocus(searchTypeInputId(sheetId, column, row)));
       }
     },
     exitInput: ({
       sheetId, column, row, setInput,
     }) => () => {
       setInput('');
-      dispatch(setFocus(searchRepositoryInputId(sheetId, column, row)));
+      store.dispatch(setFocus(searchRepositoryInputId(sheetId, column, row)));
     },
   }),
   withHotKeys(
     ({ sheetId, column, row, }) => searchRepositoryInputId(sheetId, column, row),
     {
       down: ({ sheetId, column, row, }) => () => {
-        dispatch(setFocus(searchTypeInputId(sheetId, column, row)));
+        store.dispatch(setFocus(searchTypeInputId(sheetId, column, row)));
       },
       up: () => () => {},
       enter: ({ sheetId, column, row, setInput, }) => () => {
         setInput('');
-        dispatch(setFocus(searchRepositoryInputAutocompleteId(sheetId, column, row)));
+        store.dispatch(setFocus(searchRepositoryInputAutocompleteId(sheetId, column, row)));
       },
       esc: ({ sheetId, column, row, }) => () => {
-        dispatch(setFocus(cellId(sheetId, column, row)));
+        store.dispatch(setFocus(cellId(sheetId, column, row)));
       },
     },
   ),

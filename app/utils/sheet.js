@@ -1,9 +1,36 @@
+import { createElement } from 'react';
 import {
   range,
   partition,
   contains,
   subtract,
 } from 'ramda';
+import {
+  getFocus,
+} from '../redux/modules/focus';
+import {
+  getSheetMatrix,
+  withHints as sheetMatrixWithHints,
+} from '../redux/modules/sheets';
+import Table from '../containers/TableContainer';
+
+
+export const createSheetComponent = (state, sheetId, graphFragment) => {
+  const focus = getFocus(state);
+  const { graphPathMap, hints, matrix, canDrop } = getSheetMatrix(state, sheetId, graphFragment);
+
+  return {
+    hints,
+    component: (hints) => (
+      createElement(Table, {
+        sheetId,
+        sheetMatrix: sheetMatrixWithHints(sheetId, graphPathMap, hints, matrix),
+        canDrop,
+        focus,
+      })
+    ),
+  };
+};
 
 
 // TODO - move to utils/falcor

@@ -16,6 +16,7 @@ import {
   reject,
   equals,
   omit,
+  unnest,
 }                                    from 'ramda';
 import createCachedSelector          from 're-reselect';
 import {
@@ -28,6 +29,7 @@ import {
   REMOVE_TABLE,
   getTable,
   serializeSearch,
+  getTablePathSets,
 }                                    from './tables';
 import {
   expandIndicesKeySet,
@@ -40,8 +42,8 @@ import {
 /**
  * utils
  */
-const makeNode = (id, metadata) => ({ id, metadata, });
-const makeEdge = (source, target, metadata) => ({ source, target, metadata, });
+const makeNode = (id, metadata) => ({ id, metadata });
+const makeEdge = (source, target, metadata) => ({ source, target, metadata });
 const createGraph = () => ({ tables: [0], });
 
 
@@ -50,6 +52,23 @@ const createGraph = () => ({ tables: [0], });
  */
 export const getGraph = (state, graphId) => state.graphs[graphId];
 export const getGraphTableIds = (state, graphId) => state.graphs[graphId].tables;
+
+
+/**
+ * @param {Object} state
+ * @param {String} sheetId
+ */
+export const getGraphPathSets = createCachedSelector(
+  (state, sheetId) => (
+    getGraphTableIds(state, sheetId).map((id) => getTablePathSets(state, id))
+  ),
+  unnest
+)(
+  nthArg(1),
+  {
+    selectorCreator: arraySingleDepthEqualitySelector,
+  }
+);
 
 
 export const getGraphTeaserHint = (state, graphId) => {

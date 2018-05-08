@@ -25,8 +25,6 @@ import {
 import NavigableAutocomplete from '../../components/NavigableAutocomplete';
 import store                 from '../../redux/store';
 
-const { dispatch, } = store;
-
 
 // TODO - prevent type input when repository is not specified
 export default compose(
@@ -61,7 +59,7 @@ export default compose(
       sheetId, column, row, setInput,
     }) => () => {
       setInput('');
-      dispatch(setFocus(searchTypeInputId(sheetId, column, row)));
+      store.dispatch(setFocus(searchTypeInputId(sheetId, column, row)));
     },
   }),
   withHotKeys(
@@ -69,14 +67,14 @@ export default compose(
     {
       down: () => () => {},
       up: ({ sheetId, column, row, }) => () => {
-        dispatch(setFocus(searchRepositoryInputId(sheetId, column, row)));
+        store.dispatch(setFocus(searchRepositoryInputId(sheetId, column, row)));
       },
       enter: ({ sheetId, column, row, setInput, }) => () => {
         setInput('');
-        dispatch(setFocus(searchTypeInputAutocompleteId(sheetId, column, row)));
+        store.dispatch(setFocus(searchTypeInputAutocompleteId(sheetId, column, row)));
       },
       esc: ({ sheetId, column, row, }) => () => {
-        dispatch(setFocus(cellId(sheetId, column, row)));
+        store.dispatch(setFocus(cellId(sheetId, column, row)));
       },
     },
   ),

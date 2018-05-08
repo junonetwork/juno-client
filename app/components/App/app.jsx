@@ -1,53 +1,29 @@
 import { hot }              from 'react-hot-loader';
 import React                from 'react';
 import SplitPane            from 'react-split-pane';
-import Table                from '../../containers/TableContainer';
-import Graph                from '../../containers/GraphContainer';
 import                           './style.scss';
 
 
-const renderWindow = ({ id, type, data, canDrop, focus, }) => {
-  if (type === 'sheet') {
-    return (
-      <Table
-        key={id}
-        sheetId={id}
-        sheetMatrix={data}
-        canDrop={canDrop}
-        focus={focus}
-      />
-    );
-  } else if (type === 'graph') {
-    return (
-      <Graph
-        key={id}
-        graphId={id}
-        graph={data}
-      />
-    );
-  }
-
-  throw new Error(`Unknown window type ${type}`);
-};
-
-
-const App = ({ windows, hotKeys, onKeyUp }) => (
+const App = ({ elements, hotKeys, onKeyUp }) => (
   <div
     className="app-window"
     onKeyUp={onKeyUp}
     {...hotKeys}
   >
     <div className="pane-window">
-      {windows.length === 2 ?
+      {elements.length === 2 ?
         <SplitPane
           split="horizontal"
           size={260}
         >
-          {
-            windows.map(renderWindow)
-          }
+          {elements.map(({ element, id }) => (
+            // TODO validate that all window elements have an id prop
+            <div key={id}>
+              {element}
+            </div>
+          ))}
         </SplitPane> :
-        renderWindow(windows[0])
+        elements[0].element
       }
     </div>
   </div>

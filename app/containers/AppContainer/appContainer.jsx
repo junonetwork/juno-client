@@ -1,41 +1,95 @@
 /* import { hot }             from 'react-hot-loader';*/
 import {
+  isValidElement,
+} from 'react';
+import {
+  pipe,
   prop,
-}                          from 'ramda';
+  unnest,
+} from 'ramda';
 import {
   compose,
   setDisplayName,
   withHandlers,
-}                          from 'recompose';
+} from 'recompose';
 import {
   connect,
-}                          from 'react-redux';
-import App                 from '../../components/App';
+} from 'react-redux';
+import mapPropsStream from '../../falcor/mapPropsStream';
+import connectFalcor from '../../falcor/connect';
 import {
-  getPathSets,
-  getMaterializedWindows,
+  getWindows,
   createWindow,
   deleteWindow,
-}                          from '../../redux/modules/windows';
+} from '../../redux/modules/windows';
 import {
   appId,
-}                          from '../../redux/modules/focus';
-import mapPropsStream      from '../../falcor/mapPropsStream';
-import connectFalcor       from '../../falcor/connect';
-import withHotKeys         from '../../hoc/withHotKeys';
+} from '../../redux/modules/focus';
+import withHotKeys from '../../hoc/withHotKeys';
+import {
+  arraySingleDepthEqualitySelector,
+} from '../../utils/selectors';
+import App from '../../components/App';
 
 
+/**
+ * @param {Object} state
+ * @param {Object} windowTypes
+ */
+const getPathSets = arraySingleDepthEqualitySelector(
+  (state, windowTypes) => (
+    getWindows(state).reduce((windowPathSets, { type, id }) => {
+      windowPathSets.push(windowTypes[type].getPathSets(state, id));
+      return windowPathSets;
+    }, [])
+  ),
+  unnest
+);
+
+const getWindowElements = arraySingleDepthEqualitySelector(
+  pipe(
+    (state, windowTypes, graphFragment) => (
+      getWindows(state).reduce((windowElements, { type, id }) => {
+        const windowElement = windowTypes[type].createElement(state, id, graphFragment);
+
+        if (isValidElement(windowElement)) {
+          windowElements.elements.push({ element: windowElement, id });
+          return windowElements;
+        }
+
+        windowElements.partialElements.push({ component: windowElement.component, id });
+        Object.assign(windowElements.hints, windowElement.hints);
+        return windowElements;
+      }, { elements: [], partialElements: [], hints: {} })
+    ),
+    ({ elements, partialElements, hints }) => elements.concat(
+      partialElements.map(({ component, id }) => ({ element: component(hints), id }))
+    )
+  ),
+  (elements) => elements
+);
+
+/*
+ * <App>
+ *   {{
+ *     sheet: {
+ *       getPathSets: (state, id) => pathSets,
+ *       createElement: (state, id, graphFragment) => Element | { hints, component: (hints) => Element }
+ *     }
+ *   }}
+ * </App>
+ */
 const AppContainer = compose(
   setDisplayName('AppContainer'),
   connect(
-    (state) => ({
-      paths: getPathSets(state),
+    (state, { children: windowTypes }) => ({
+      paths: getPathSets(state, windowTypes),
     }),
   ),
   mapPropsStream(connectFalcor(prop('paths'))),
   connect(
-    (state, { graphFragment }) => ({
-      windows: getMaterializedWindows(state, graphFragment),
+    (state, { children: windowTypes, graphFragment }) => ({
+      elements: getWindowElements(state, windowTypes, graphFragment),
     }),
     (dispatch) => ({
       createWindowAction() {
@@ -55,13 +109,13 @@ const AppContainer = compose(
   withHotKeys(
     appId(),
     {
-      'cmd+1': ({ windows, deleteWindowAction }) => () => {
-        if (windows.length !== 1) {
+      'cmd+1': ({ elements, deleteWindowAction }) => () => {
+        if (elements.length !== 1) {
           deleteWindowAction();
         }
       },
-      'cmd+2': ({ windows, createWindowAction }) => () => {
-        if (windows.length !== 2) {
+      'cmd+2': ({ elements, createWindowAction }) => () => {
+        if (elements.length !== 2) {
           createWindowAction();
         }
       },

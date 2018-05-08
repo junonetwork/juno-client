@@ -1,5 +1,33 @@
 /* eslint-disable no-use-before-define, no-restricted-syntax */
-import R             from 'ramda';
+import { createElement } from 'react';
+import R from 'ramda';
+import {
+  getFocus,
+} from '../redux/modules/focus';
+import {
+  getGraphJGF,
+  getGraphTeaserHint,
+  graphWithHints,
+} from '../redux/modules/graphs';
+import Graph from '../containers/GraphContainer';
+
+
+export const createGraphComponent = (state, graphId, graphFragment) => {
+  const focus = getFocus(state);
+  const graphJGF = getGraphJGF(state, graphId, graphFragment);
+  const hints = getGraphTeaserHint(state, graphId);
+
+  return {
+    hints,
+    component: (hints) => (
+      createElement(Graph, {
+        graphId,
+        graph: graphWithHints(graphId, hints, graphJGF),
+        focus,
+      })
+    ),
+  };
+};
 
 
 export const createLiteral = (predicate, value, node) => {
@@ -18,7 +46,7 @@ export const createRelationship = (subjectId, targetPath, jsonGraph, jgf) => {
   // TODO - mutate
   let newJGF = {
     nodes: jgf.nodes,
-    edges: [...jgf.edges, { source: subjectId, target: targetId, }],
+    edges: [...jgf.edges, { source: subjectId, target: targetId }],
   };
 
   if (!newJGF.nodes.find((node) => node.id === targetId)) {
@@ -29,7 +57,7 @@ export const createRelationship = (subjectId, targetPath, jsonGraph, jgf) => {
 };
 
 
-export const jsonGraphObject2JGF = (path, jsonGraph, jgf = { nodes: [], edges: [], }) => {
+export const jsonGraphObject2JGF = (path, jsonGraph, jgf = { nodes: [], edges: [] }) => {
   const jsonGraphObject = R.path(path, jsonGraph);
   const subjectId = path.join('/');
 
@@ -82,7 +110,7 @@ export const jsonGraphObject2JGF = (path, jsonGraph, jgf = { nodes: [], edges: [
 export const jsonGraphCollection2JGF = (
   jsonGraphCollection,
   jsonGraph,
-  jgf = { nodes: [], edges: [], }
+  jgf = { nodes: [], edges: [] }
 ) => {
   let newJGF = jgf;
 

@@ -26,8 +26,6 @@ import {
   FAST_STEP,
 }                          from '../../preferences';
 
-const { dispatch } = store;
-
 
 const arrowKeyNavHandler = (direction, steps) => ({
   sheetId, column, row, navigate
@@ -65,14 +63,14 @@ export default compose(
         leftCellType === 'searchCollection' ||
         leftCellType === 'valueCollection'
       ) {
-        dispatch(batchActions([
+        store.dispatch(batchActions([
           setFocus(predicateInputId(sheetId, column, row)),
           setCellInput(sheetId, column, row, cellInput + String.fromCharCode(e.which)),
         ], 'SET_CELL_INPUT'));
       } else if (type === 'searchCollection') {
         // input for searchCollection is handled in SearchInputContainer
       } else {
-        dispatch(setCellInput(sheetId, column, row, cellInput + String.fromCharCode(e.which)));
+        store.dispatch(setCellInput(sheetId, column, row, cellInput + String.fromCharCode(e.which)));
       }
     },
   }),
@@ -91,7 +89,7 @@ export default compose(
         sheetId, tableId, type, column, row, cellInput, updateValue,
       }) => () => {
         if (cellInput) {
-          dispatch(setCellInput(sheetId, column, row, cellInput.slice(0, -1)));
+          store.dispatch(setCellInput(sheetId, column, row, cellInput.slice(0, -1)));
         } else {
           updateValue(sheetId, tableId, type, column, row, '');
         }
@@ -108,20 +106,20 @@ export default compose(
           leftCellType === 'searchCollection' ||
           leftCellType === 'valueCollection'
         ) {
-          dispatch(setFocus(predicateInputId(sheetId, column, row)));
+          store.dispatch(setFocus(predicateInputId(sheetId, column, row)));
         } else if (
           type === 'index' ||
           upCellType === 'index' ||
           upCellType === 'searchCollection' ||
           upCellType === 'valueCollection'
         ) {
-          dispatch(setFocus(indexInputId(sheetId, column, row)));
+          store.dispatch(setFocus(indexInputId(sheetId, column, row)));
         } else if (
           type === 'searchCollection' ||
           type === 'valueCollection' ||
           type === 'empty'
         ) {
-          dispatch(setFocus(searchRepositoryInputId(sheetId, column, row)));
+          store.dispatch(setFocus(searchRepositoryInputId(sheetId, column, row)));
         }
       },
     },
@@ -134,7 +132,7 @@ export default compose(
      *     if (cellInput) {
      *       updateValue(sheetId, column, row, cellInput);
      *     } else {
-     *       dispatch({ type: 'NO_OP' });
+     *       store.dispatch({ type: 'NO_OP' });
      *     }
      *   },
      * },

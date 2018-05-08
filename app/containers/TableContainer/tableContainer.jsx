@@ -26,17 +26,15 @@ import {
 }                          from '../../redux/actionStream';
 import throttle            from '../../utils/throttleAnimationFrame';
 
-const { dispatch } = store;
-
 
 const throttledTeaseCell = throttle((sheetId, column, row) => (
-  dispatch(teaseCell(sheetId, column, row))
+  store.dispatch(teaseCell(sheetId, column, row))
 ));
 const throttledNavigate = throttle((sheetId, column, row, direction, steps) => (
-  dispatch(navigate(sheetId, column, row, direction, steps))
+  store.dispatch(navigate(sheetId, column, row, direction, steps))
 ));
 const throttleDragTable = throttle((sheetId, column, row) => (
-  dispatch(dragTable(sheetId, column, row))
+  store.dispatch(dragTable(sheetId, column, row))
 ));
 
 
@@ -48,20 +46,20 @@ export default compose(
     startDragTable: () => (
       sheetId, tableId, type, column, row, absolutePath, cellLength, valueType
     ) => (
-      dispatch(startDragTable(
+      store.dispatch(startDragTable(
         sheetId, tableId, type, column, row, absolutePath, cellLength, valueType
       ))
     ),
     dragTable: () => throttleDragTable,
     endDragTable: ({ canDrop }) => () => {
       if (canDrop) {
-        dispatch(dropTable());
+        store.dispatch(dropTable());
       } else {
-        dispatch(cancelDragTable());
+        store.dispatch(cancelDragTable());
       }
     },
     updateValue: ({ sheetMatrix }) => (sheetId, tableId, type, column, row, value) => (
-      dispatch(streamAction(updateCellValue(
+      store.dispatch(streamAction(updateCellValue(
         sheetId, tableId, type, column, row, value, sheetMatrix
       )))
     ),

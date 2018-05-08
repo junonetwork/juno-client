@@ -10,9 +10,11 @@ import store                  from './redux/store';
 import App                    from './containers/AppContainer';
 import {
   addSheet,
+  getSheetPathSets,
 }                             from './redux/modules/sheets';
 import {
   addGraph,
+  getGraphPathSets,
 }                             from './redux/modules/graphs';
 import {
   addSearchCollectionTable,
@@ -23,6 +25,12 @@ import {
   setFocus,
   cellId,
 }                             from './redux/modules/focus';
+import {
+  createSheetComponent,
+}                             from './utils/sheet';
+import {
+  createGraphComponent,
+}                             from './utils/graph';
 import {
   formatAddress,
 }                             from './utils/cell';
@@ -92,8 +100,20 @@ store.dispatch(
   ], 'INIT_SHEET')
 );
 
+
 render((
   <Provider store={store}>
-    <App />
+    <App>
+      {{
+         sheet: {
+           getPathSets: getSheetPathSets,
+           createElement: createSheetComponent,
+         },
+         graph: {
+           getPathSets: getGraphPathSets,
+           createElement: createGraphComponent,
+         },
+      }}
+    </App>
   </Provider>
 ), document.getElementById('app'));

@@ -27,7 +27,6 @@ import withHotKeys           from '../../hoc/withHotKeys';
 import SearchInput           from '../../components/SearchInput';
 import store                 from '../../redux/store';
 
-const { dispatch } = store;
 const searchIsValid = (repository, type, typeLabel) =>
   repository && type && typeLabel;
 
@@ -60,7 +59,7 @@ export default compose(
         return;
       }
 
-      dispatch(batchActions([
+      store.dispatch(batchActions([
         addSearchCollectionTable(
           sheetId,
           generateTableId(),
@@ -81,13 +80,13 @@ export default compose(
         return;
       }
 
-      dispatch(batchActions([
+      store.dispatch(batchActions([
         replaceSearchCollection(tableId, repository, type, typeLabel),
         setFocus(cellId(sheetId, column, row)),
       ]));
     },
     exit: ({ sheetId, column, row, }) => () => (
-      dispatch(setFocus(cellId(sheetId, column, row)))
+      store.dispatch(setFocus(cellId(sheetId, column, row)))
     ),
   }),
   // TODO - replace w/ blank focus HOC

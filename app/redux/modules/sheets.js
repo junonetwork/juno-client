@@ -16,10 +16,12 @@ import {
   mergeWith,
   concat,
   identity,
+  unnest,
 } from 'ramda';
 import createCachedSelector from 're-reselect';
 import {
   getTable,
+  getTablePathSets,
   ADD_SEARCH_COLLECTION_TABLE,
   ADD_VALUE_COLLECTION_TABLE,
   REMOVE_TABLE,
@@ -62,6 +64,7 @@ import {
 import {
   arraySingleDepthEqualitySelector,
 } from '../../utils/selectors';
+import Table from '../../containers/TableContainer';
 
 
 /**
@@ -70,6 +73,8 @@ import {
 const createSheet = (maxColumn, maxRow) => ({
   maxColumn, maxRow, tables: [],
 });
+
+
 // TODO - serialize as querystring keys can have any url safe character, including '/' and curie special character ':'
 // https://perishablepress.com/stop-using-unsafe-characters-in-urls/
 export const path2Key = (path) => path.join('|');
@@ -100,6 +105,23 @@ export const getSheetCollections = (state, sheetId) => state.sheets[sheetId].tab
 export const getTableAddress = (state, sheetId, tableId) => state.sheets[sheetId].tables
   .find(propEq('id', tableId))
   .address;
+
+
+/**
+ * @param {Object} state
+ * @param {String} sheetId
+ */
+export const getSheetPathSets = createCachedSelector(
+  (state, sheetId) => (
+    getSheetCollections(state, sheetId).map(({ id }) => getTablePathSets(state, id))
+  ),
+  unnest
+)(
+  nthArg(1),
+  {
+    selectorCreator: arraySingleDepthEqualitySelector,
+  }
+);
 
 
 /**

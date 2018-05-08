@@ -95,6 +95,7 @@ export const getTable = (state, tableId) =>
  * @param {Object} state
  * @param {String} tableId
  */
+// TODO - this is sheet-specific.  b/c sheets modules is so large maybe there should be three modules: sheets, tables, collections
 export const getTablePathSets = createCachedSelector(
   getTable,
   multimethod(
