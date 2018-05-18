@@ -28,7 +28,7 @@ import {
 
 
 const arrowKeyNavHandler = (direction, steps) => ({
-  sheetId, column, row, navigate
+  sheetId, column, row, navigate,
 }) => () => {
   navigate(sheetId, column, row, direction, steps);
 };

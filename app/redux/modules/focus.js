@@ -52,8 +52,8 @@ export const getFocus = (state) => state.focus;
 /*
  * action creator
  */
-export const setFocus = (id) => ({ type: SET_FOCUS, id, });
-export const clearFocus = () => ({ type: CLEAR_FOCUS, });
+export const setFocus = (id) => ({ type: SET_FOCUS, id });
+export const clearFocus = () => ({ type: CLEAR_FOCUS });
 
 
 /*

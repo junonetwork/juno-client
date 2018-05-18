@@ -93,10 +93,10 @@ const AppContainer = compose(
     }),
     (dispatch) => ({
       createWindowAction() {
-        dispatch(createWindow());
+        dispatch(createWindow('1', 'graph'));
       },
       deleteWindowAction() {
-        dispatch(deleteWindow());
+        dispatch(deleteWindow('1'));
       },
       showVisualMode() {
         console.log('showVisualMode');
