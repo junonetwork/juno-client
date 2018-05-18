@@ -17,6 +17,8 @@ import {
   equals,
   omit,
   unnest,
+  over,
+  lensPath,
 }                                    from 'ramda';
 import createCachedSelector          from 're-reselect';
 import {
@@ -37,6 +39,9 @@ import {
 import {
   getGraphTeaserDescriptor,
 }                                    from './teaser';
+import {
+  getDragTableId,
+} from './dragTable';
 
 
 /**
@@ -44,7 +49,7 @@ import {
  */
 const makeNode = (id, metadata) => ({ id, metadata });
 const makeEdge = (source, target, metadata) => ({ source, target, metadata });
-const createGraph = () => ({ tables: [0], });
+const createGraph = () => ({ tables: [] });
 
 
 /**
@@ -337,6 +342,7 @@ export const graphWithHints = (
  */
 export const ADD_GRAPH = 'ADD_GRAPH';
 export const REMOVE_GRAPH = 'REMOVE_GRAPH';
+export const ADD_COLLECTION_TO_GRAPH = 'ADD_COLLECTION_TO_GRAPH';
 
 
 /**
@@ -347,6 +353,10 @@ export const addGraph = (graphId) => ({
 });
 export const removeGraph = (graphId) => ({
   type: REMOVE_GRAPH, graphId,
+});
+// TODO - standardize semantics for adding collection to window
+export const addCollection2Graph = (graphId) => (dispatch, getState) => dispatch({
+  type: ADD_COLLECTION_TO_GRAPH, graphId, tableId: getDragTableId(getState()),
 });
 
 
@@ -372,6 +382,9 @@ export default (
         reject(equals(action.tableId), graph.tables) :
         graph.tables,
     }), state);
+  } else if (action.type === ADD_COLLECTION_TO_GRAPH) {
+    // TODO - prevent table from being added multiple times
+    return over(lensPath([action.graphId, 'tables']), concat([action.tableId]), state);
   }
 
   // TODO - add/remove/move tables

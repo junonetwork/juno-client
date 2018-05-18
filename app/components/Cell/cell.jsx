@@ -22,7 +22,8 @@ const Cell = ({
   leftCellTableId, upCellTableId, predicateIdx,
   hotKeys, activeView, dropTableView, illegalDropTableView,
   dragTableView, illegalDragTableView, activeHint, teaserHint,
-  onMouseEnter, onKeyPress, onDragStart, onDragEnd, onDragEnter, updateValue,
+  onMouseEnter, onKeyPress, updateValue,
+  onDragStart, onDragEnter, onDragOver, onDragEnd, onDrop,
 }) => (
   /* console.log('render', sheetId, row, column) || */
   <td
@@ -32,8 +33,10 @@ const Cell = ({
     onMouseEnter={onMouseEnter}
     onKeyPress={onKeyPress}
     onDragStart={onDragStart}
-    onDragEnd={onDragEnd}
     onDragEnter={onDragEnter}
+    onDragOver={onDragOver}
+    onDragEnd={onDragEnd}
+    onDrop={onDrop}
     {...hotKeys}
   >
     {

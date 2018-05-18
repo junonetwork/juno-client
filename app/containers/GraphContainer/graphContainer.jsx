@@ -14,17 +14,19 @@ import {
 import store                      from '../../redux/store';
 import throttle                   from '../../utils/throttleAnimationFrame';
 import {
+  addCollection2Graph,
+} from '../../redux/modules/graphs';
+import {
   teaseGraphNode,
   clearTeaser,
 }                                 from '../../redux/modules/teaser';
 import                                 './style.scss';
 
-const { dispatch, } = store;
 const throttledTeaseGraphNode = throttle((graphId, absolutePath) => (
-  dispatch(teaseGraphNode(graphId, absolutePath))
+  store.dispatch(teaseGraphNode(graphId, absolutePath))
 ));
 const throttledClearTeaser = throttle(() => (
-  dispatch(clearTeaser())
+  store.dispatch(clearTeaser())
 ));
 
 
@@ -37,7 +39,7 @@ export default compose(
     >
       <ContainerDimensions>
         {
-          ({ top, right, bottom, left, width, height, }) => (
+          ({ top, right, bottom, left, width, height }) => (
             <BaseComponent
               {...props}
               top={top}
@@ -55,6 +57,9 @@ export default compose(
   withHandlers({
     onNodeMouseEnter: () => throttledTeaseGraphNode,
     onNodeMouseLeave: () => throttledClearTeaser,
+    onGraphDrop: ({ graphId }) => () => {
+      store.dispatch(addCollection2Graph(graphId));
+    },
   }),
   mapPropsStream(withGraphLayoutStream)
 )(Graph);

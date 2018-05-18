@@ -25,6 +25,9 @@ import store               from '../../redux/store';
 import {
   FAST_STEP,
 }                          from '../../preferences';
+import {
+  cancelDragTable,
+} from '../../redux/modules/dragTable';
 
 
 const arrowKeyNavHandler = (direction, steps) => ({
@@ -50,8 +53,13 @@ export default compose(
     onDragEnter: ({ sheetId, column, row, dragTable }) => () => {
       dragTable(sheetId, column, row);
     },
-    onDragEnd: ({ endDragTable }) => () => {
-      endDragTable();
+    onDragOver: () => (e) => e.preventDefault(),
+    onDrop: ({ onDropTable }) => () => {
+      onDropTable();
+    },
+    onDragEnd: () => () => {
+      // TODO - only dispatch on drag cancel (not drop)
+      store.dispatch(cancelDragTable());
     },
     onKeyPress: ({ sheetId, column, row, type, leftCellType, cellInput }) => (e) => {
       e.preventDefault();

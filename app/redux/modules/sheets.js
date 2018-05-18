@@ -684,6 +684,8 @@ export default (
         maxRow: state[action.sheetId].maxRow + 1,
       },
     };
+    // TODO - ADD_SEARCH/VALUE_COLLECTION_TABLE should be defined in sheets module as ADD_COLLECTION_TO_SHEET
+    // similar to how graph handles it
   } else if (
     action.type === ADD_SEARCH_COLLECTION_TABLE ||
     action.type === ADD_VALUE_COLLECTION_TABLE

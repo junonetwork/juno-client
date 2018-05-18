@@ -51,7 +51,7 @@ export default compose(
       ))
     ),
     dragTable: () => throttleDragTable,
-    endDragTable: ({ canDrop }) => () => {
+    onDropTable: ({ canDrop }) => () => {
       if (canDrop) {
         store.dispatch(dropTable());
       } else {

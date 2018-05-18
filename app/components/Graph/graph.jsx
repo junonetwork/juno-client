@@ -89,13 +89,9 @@ class Graph extends Component {
     super(props);
 
     this.draggedNode = null;
-
-    this.onMouseMove = this.onMouseMove.bind(this);
-    this.onDragStart = this.onDragStart.bind(this);
-    this.onDragEnd = this.onDragEnd.bind(this);
   }
 
-  onMouseMove(e) {
+  onMouseMove = (e) => {
     // NOTE - it's possible this should track mouseMove on the body rather than svg,
     // if we want it to pick up things like track outside of element and pan on mouse out
     if (this.draggedNode !== null) {
@@ -103,26 +99,30 @@ class Graph extends Component {
     }
   }
 
-  onDragStart(id) {
+  onNodeDragStart = (id) => {
     this.draggedNode = id;
   }
 
-  onDragEnd(id, e) {
+  onNodeDragEnd = (id, e) => {
     this.draggedNode = null;
 
-    const { top, left, onDragEnd, } = this.props;
+    const { top, left, onDragEnd } = this.props;
     onDragEnd(id, e.clientX - left, e.clientY - top);
   }
 
+  onDragOver = (e) => e.preventDefault()
+
   render() {
     const {
-      graphId, width, height, graph, onNodeMouseEnter, onNodeMouseLeave,
+      graphId, width, height, graph, onNodeMouseEnter, onNodeMouseLeave, onGraphDrop,
     } = this.props;
 
     return (
       <svg
-        style={{ width, height, }}
+        style={{ width, height }}
         onMouseMove={this.onMouseMove}
+        onDragOver={this.onDragOver}
+        onDrop={onGraphDrop}
       >
         <g className="edges">
           {graph.edges.map((edge) => (
@@ -149,8 +149,8 @@ class Graph extends Component {
               y={node.y}
               teaserHint={node.teaserHint}
               activeHint={node.activeHint}
-              onDragStart={this.onDragStart}
-              onDragEnd={this.onDragEnd}
+              onDragStart={this.onNodeDragStart}
+              onDragEnd={this.onNodeDragEnd}
               onMouseEnter={onNodeMouseEnter}
               onMouseLeave={onNodeMouseLeave}
             />
