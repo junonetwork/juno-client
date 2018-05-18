@@ -11,6 +11,7 @@ const App = ({ elements, hotKeys, onKeyUp }) => (
     {...hotKeys}
   >
     <div className="pane-window">
+      {/* TODO - adding/removing panes unmounts all elements */}
       {elements.length === 2 ?
         <SplitPane
           split="horizontal"

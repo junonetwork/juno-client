@@ -7,6 +7,7 @@ import {
   prop,
   unnest,
 } from 'ramda';
+import { batchActions } from 'redux-batched-actions';
 import {
   compose,
   setDisplayName,
@@ -24,6 +25,7 @@ import {
 } from '../../redux/modules/windows';
 import {
   appId,
+  setFocus,
 } from '../../redux/modules/focus';
 import withHotKeys from '../../hoc/withHotKeys';
 import {
@@ -93,10 +95,16 @@ const AppContainer = compose(
     }),
     (dispatch) => ({
       createWindowAction() {
-        dispatch(createWindow('1', 'graph'));
+        dispatch(batchActions([
+          createWindow('1', 'graph'),
+          setFocus(appId()),
+        ]));
       },
       deleteWindowAction() {
-        dispatch(deleteWindow('1'));
+        dispatch(batchActions([
+          deleteWindow('1'),
+          setFocus(appId()),
+        ]));
       },
       showVisualMode() {
         console.log('showVisualMode');
