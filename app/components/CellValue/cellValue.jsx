@@ -5,7 +5,7 @@ import                        './style.scss';
 const CellValue = ({ value, valueType, cellLength, }) => {
   if (valueType === 'error') {
     return (
-      <span className="cell-value error" title={value.message}>ERR</span>
+      <span className="cell-value error" title={value && value.message}>ERR</span>
     );
   } else if (typeof value === 'undefined' || value === null) {
     return (

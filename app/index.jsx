@@ -62,28 +62,28 @@ store.dispatch(
       'memory',
       'schema:Person'
     ),
-    addValueCollectionTable(
-      sheetId,
-      generateTableId(),
-      formatAddress(sheetId, 1, 10),
-      ['resource', 'data:james', 'schema:name'],
-      [],
-      [{ from: 0, to: 3 }],
-      'memory',
-      'schema:Person'
-    ),
-    addValueCollectionTable(
-      sheetId,
-      generateTableId(),
-      formatAddress(sheetId, 5, 10),
-      ['resource', 'data:micah', 'schema:sibling'],
-      ['skos:prefLabel', 'schema:birthPlace'],
-      [{ from: 0, to: 3 }],
-      'memory',
-      'schema:Person'
-    ),
+    /* addValueCollectionTable(
+     *   sheetId,
+     *   generateTableId(),
+     *   formatAddress(sheetId, 1, 10),
+     *   ['resource', 'data:james', 'schema:name'],
+     *   [],
+     *   [{ from: 0, to: 3 }],
+     *   'memory',
+     *   'schema:Person'
+     * ), */
+    /* addValueCollectionTable(
+     *   sheetId,
+     *   generateTableId(),
+     *   formatAddress(sheetId, 5, 10),
+     *   ['resource', 'data:micah', 'schema:sibling'],
+     *   ['skos:prefLabel', 'schema:birthPlace'],
+     *   [{ from: 0, to: 3 }],
+     *   'memory',
+     *   'schema:Person'
+     * ), */
     // second window
-    addGraph('1'),
+    /* addGraph('1'), */
     /* addSheet('1', 40, 30),
      * addSearchCollectionTable(
      *   '1',

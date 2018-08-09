@@ -43,6 +43,7 @@ export const createSearchCollectionCell = multimethod(
         graphFragment
       ),
       value: path(['json', 'resource', type, 'skos:prefLabel', 0, 'value'], graphFragment),
+      valueType: path(['json', 'resource', type, 'skos:prefLabel', 0, '$type'], graphFragment),
     }),
     'value', (
       { resourcePath }, sheetId, tableId, column, row, type, graphFragment
@@ -58,6 +59,10 @@ export const createSearchCollectionCell = multimethod(
       cellLength: path(['json', ...resourcePath, 'length', 'value'], graphFragment),
       value: path(
         ['json', 'resource', last(resourcePath), 'skos:prefLabel', 0, 'value'],
+        graphFragment
+      ),
+      valueType: path(
+        ['json', 'resource', last(resourcePath), 'skos:prefLabel', 0, '$type'],
         graphFragment
       ),
     }),
@@ -80,6 +85,10 @@ export const createIndexCell = multimethod(
       index,
       cellInput: '',
       value: index,
+      valueType: path(
+        ['json', 'collection', serializeSearch(search), index, '$type'],
+        graphFragment
+      ),
       absolutePath: path(
         ['json', 'collection', serializeSearch(search), index, '$__path'],
         graphFragment
@@ -111,6 +120,7 @@ export const createIndexCell = multimethod(
             )
           ) :
           index,
+        // valueType: TODO
         absolutePath: valueLiteral ?
           [...resourcePath, index] :
           path(['json', ...resourcePath, index, '$__path'], graphFragment),
@@ -134,6 +144,7 @@ export const createPredicateCell = (
   predicateIdx: column - destructureAddress(collectionAddress).column - 1,
   cellInput: '',
   value: path(['json', 'resource', uri, 'skos:prefLabel', 0, 'value'], graphFragment),
+  valueType: path(['json', 'resource', uri, 'skos:prefLabel', 0, '$type'], graphFragment),
 });
 
 
@@ -152,6 +163,7 @@ const getCellLength = (relativePath, graphFragment) => {
 const getBoxedValue = (relativePath, graphFragment) => {
   const boxValue = path([...relativePath, 0], graphFragment);
   if (!boxValue) {
+    // TODO - shore up types: value + valueType should always be returned.
     return {};
   }
 
