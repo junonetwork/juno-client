@@ -14,10 +14,10 @@ const SearchInput = ({
 }) => (
   <div
     className={`search-input ${searchIsValid ? '' : 'invalid'}`}
-    style={{
-      lineHeight,
-      gridTemplateRows: lineHeight,
-    }}
+    // style={{
+    //   lineHeight,
+    //   gridTemplateRows: `${lineHeight} ${lineHeight}`,
+    // }}
     {...hotKeys}
   >
     <span className="search-label">Search</span>

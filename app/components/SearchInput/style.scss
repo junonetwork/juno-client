@@ -3,6 +3,8 @@
 .search-input {
   display: grid;
   grid-template-columns: 42px 1fr;
+  height: 100%;
+  line-height: 22px;
   background-color: lighten($bg, 12);
   border: 1px solid $b_blue;
   padding: 6px 8px;
