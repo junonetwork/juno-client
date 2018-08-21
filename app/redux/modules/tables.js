@@ -270,6 +270,7 @@ export default (
       return state;
     }
 
+    // TODO - searchTable.collection.search.type and searchTable.type are duplicates and can become inconsistent
     return {
       ...state,
       [action.tableId]: {
@@ -282,6 +283,7 @@ export default (
             action.resourceTypeLabel
           ),
         },
+        type: action.resourceType,
       },
     };
   } else if (action.type === REPLACE_PREDICATES) {
