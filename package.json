@@ -11,8 +11,8 @@
     "dev": "webpack-dev-server --mode development --progress --hot --inline --config webpack.config.dev.js",
     "lint": "eslint --ext .js --ext .jsx app/",
     "test": "node test/",
-    "build": "NODE_ENV=production webpack --config webpack.config.prod.js --progress",
-    "validate": "npm run lint && npm run test && npm run build"
+    "validate": "npm run lint && npm run test",
+    "build": "NODE_ENV=production webpack --config webpack.config.prod.js --progress"
   },
   "author": "James Conkling <james.lane.conkling@gmail.com> jameslaneconkling.github.io",
   "license": "ISC",

@@ -16,13 +16,14 @@ npm run dev
 ### Build
 
 ```bash
-npm run validate
+npm run validate && npm run build
 ```
 
 ### Dockerize
 ```bash
 # build
 npm run validate && \
+  npm run build && \
   docker build -t airplane-glue:latest .
 
 # run
